@@ -5,6 +5,7 @@ from hashids import Hashids
 import json
 from datetime import date
 import argparse
+from typing import List, Tuple
 
 today = date.today()
 
@@ -46,10 +47,14 @@ def createBase(slug: str, keywords: str):
 def createName(base, index: int, width: int, height: int):
     return "{}-{}.{}x{}.png".format(base['baseName'], index, width, height)
 
+def createBucket(name: str):
+    return name[0:3] + name.split('.')[0][-1] + "/"
+
 def createMediaItem(base, index: int, width: int, height: int, title: str, description: str, keywords: str ):
+    name = createName(base, index, width, height)
     return {
-            "contentUrl": baseURL + createName(base, index, width, height),
-            "name": createName(base, index, width, height),
+            "contentUrl": baseURL + createBucket(name) + name,
+            "name": name,
             "@type": base["@type"],
             "headline": title,
             "description": description,
@@ -80,44 +85,16 @@ def saveMediaAsJson(baseName: str, jsonContent):
 def loadMediaAsJson(baseName: str):
     with open('creations/{}/media.json'.format(baseName), 'r') as jsonfile:
         return json.load(jsonfile)
-    
 
-parser = argparse.ArgumentParser(description = 'Create or update a new visual experiment')
-parser.add_argument("-S", "--slug", help="A slug for the folder name")
-parser.add_argument("-B", "--baseName", help="The base name for the experiment")
-parser.add_argument("-I", "--index", help="The index for the experiment", type=int)
-parser.add_argument("-K", "--keywords", help="A list of keywords separated by coma", default="")
-parser.add_argument("-T", "--title", help="A title for the image", default="")
-parser.add_argument("-D", "--description", help="A description for the image", default="")
-parser.add_argument("-W", "--width", help="The width of the image", type=int, default = 128)
-parser.add_argument("-H", "--height", help="The height of the image", type=int, default = 128)
-args= parser.parse_args()
-
-if args.slug:
-    base = createBase(slug=args.slug, keywords = args.keywords)
-    item = createMediaItem(base, index=1, width = args.width, height = args.height, title = args.title, description = args.description, keywords= args.keywords )
-    initJson = {
-        "count": 1,
-        "base": base,
-        "items": [item]
-    }
-    os.mkdir("creations/" + base['baseName'])
-    print("Creating "+ base['baseName'])
-    saveMediaAsJson(base['baseName'], initJson)
-
-elif args.baseName:
-    old = loadMediaAsJson(args.baseName)
+def addMediaItem(baseName: str, dimensions: List[Tuple[int,int]], title: str, description: str, keywords: str ):
+    old = loadMediaAsJson(baseName)
     base = old['base']
-    index = args.index if args.index else old['count'] + 1
-    print("Creating {} with index {}".format(base['baseName'], index))
-    item = createMediaItem(base, index=index, width = args.width, height = args.height, title = args.title, description = args.description, keywords= args.keywords)
+    index = old['count'] + 1
+    items = map(lambda d: createMediaItem(base, index=index, width = d[0], height = d[1], title =title, description = description, keywords= keywords), dimensions)
     newJson = {
-        "count": old['count'] if args.index else old['count'] + 1,
+        "count": old['count'] + 1,
         "base": base,
-        "items": old['items'] + [item]
+        "items": old['items'] + items
     }
     saveMediaAsJson(base['baseName'], newJson)
-else:
-    print("You need to specify either slug or baseName")
-
-
+    return index
