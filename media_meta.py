@@ -41,17 +41,24 @@ def createBase(slug: str, keywords: str):
         "creativeWorkStatus": "Draft",
         "colors": "#000000 #ffffff",
         "@type": "ImageObject",
-        "encodingFormat": "image/png"
     }
 
-def createName(base, index: int, width: int, height: int):
-    return "{}-{}.{}x{}.png".format(base['baseName'], index, width, height)
+def getEncodingFormat(extension):
+    if extension == "png":
+        return "image/png"
+    elif extension == "svg":
+        return "image/svg+xml"
+    else:
+        return "image"
+
+def createName(base, index: int, width: int, height: int, extension: str):
+    return "{}-{}.{}x{}.{}".format(base['baseName'], index, width, height, extension)
 
 def createBucket(name: str):
     return name[0:3] + name.split('.')[0][-1] + "/"
 
-def createMediaItem(base, index: int, width: int, height: int, title: str, description: str, keywords: str ):
-    name = createName(base, index, width, height)
+def createMediaItem(base, index: int, width: int, height: int, title: str, description: str, keywords: str, extension: str ):
+    name = createName(base, index, width, height, extension)
     return {
             "contentUrl": baseURL + createBucket(name) + name,
             "name": name,
@@ -60,7 +67,7 @@ def createMediaItem(base, index: int, width: int, height: int, title: str, descr
             "description": description,
             "abstract": "",
             "keywords": mergeKeywords(base['keywords'], keywords),
-            "encodingFormat": base['encodingFormat'],
+            "encodingFormat": getEncodingFormat(extension),
             "width": "{} px".format(width),
             "height": "{} px".format(height),
             "colors": base['colors'],
@@ -90,11 +97,12 @@ def addMediaItem(baseName: str, dimensions: List[Tuple[int,int]], title: str, de
     old = loadMediaAsJson(baseName)
     base = old['base']
     index = old['count'] + 1
-    items = map(lambda d: createMediaItem(base, index=index, width = d[0], height = d[1], title =title, description = description, keywords= keywords), dimensions)
+    itemsPng = map(lambda d: createMediaItem(base, index=index, width = d[0], height = d[1], title =title, description = description, keywords= keywords, extension='png'), dimensions)
+    itemsSvg = map(lambda d: createMediaItem(base, index=index, width = d[0], height = d[1], title =title, description = description, keywords= keywords, extension='svg'), dimensions)
     newJson = {
         "count": old['count'] + 1,
         "base": base,
-        "items": old['items'] + items
+        "items": old['items'] + itemsPng + itemsSvg
     }
     saveMediaAsJson(base['baseName'], newJson)
     return index
