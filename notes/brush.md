@@ -38,6 +38,9 @@ Brushes:
 * for scaling, it would be possible to have 20 mm thickness on A3.
 * we could almost assume the thickness is between 1 and 154.
 * brush thickness should vary when part of a stroke.
-* brush strokes are often curvy.
+* brush strokes are often curvy in organic drawing.
 * very long brush strokes are difficult to reuse, 2-3 cm may be a maximum.
+* could be contained in a 600 x 600 square.
+* could be contained in a circle of diameter 600.
+* should preferably be asymmetric as symmetry is easy to construct later.
 
