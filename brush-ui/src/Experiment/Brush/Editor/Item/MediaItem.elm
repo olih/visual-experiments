@@ -1,4 +1,4 @@
-module Experiment.Brush.Editor.Schema exposing(MediaItem, parser, toString)
+module Experiment.Brush.Editor.Item.MediaItem exposing(MediaItem, parser, toString)
 
 import Parser exposing ((|.), (|=), Parser, chompWhile, getChompedString, int, map, run, spaces, succeed, symbol, keyword, oneOf)
 
@@ -23,7 +23,7 @@ trashParser =
     [ succeed True
         |. keyword "T"
     , succeed False
-        |. keyword "t"
+        |. keyword "_"
     ]
 preserveParser : Parser Bool
 preserveParser =
@@ -31,17 +31,17 @@ preserveParser =
     [ succeed True
         |. keyword "P"
     , succeed False
-        |. keyword "p"
+        |. keyword "_"
     ]
 parser : Parser MediaItem
 parser =
     succeed MediaItem
         |. keyword "ID"
-        |. symbol "="
+        |. spaces
         |= int
         |. spaces
         |. keyword "G"
-        |. symbol "="
+        |. spaces
         |= int
         |. spaces
         |= trashParser
@@ -50,9 +50,9 @@ parser =
 toString: MediaItem -> String
 toString value =
     [
-    "ID=",String.fromInt value.id
-    ,"G=", String.fromInt value.generation
-    , if value.trash then "T" else "t"
-    , if value.preserve then "P" else "p"
+    "ID", String.fromInt value.id
+    ,"G", String.fromInt value.generation
+    , if value.trash then "T" else "_"
+    , if value.preserve then "P" else "_"
     ]
     |> String.join " "

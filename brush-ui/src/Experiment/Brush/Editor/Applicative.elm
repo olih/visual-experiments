@@ -1,6 +1,6 @@
 module Experiment.Brush.Editor.Applicative exposing(reset)
 
-import Experiment.Brush.Editor.Schema exposing(MediaItem)
+import Experiment.Brush.Editor.MultiContent exposing(MultiContent)
 
 type alias Model =
     {   count: Int
@@ -8,7 +8,7 @@ type alias Model =
         , idx: Int
         , generation: Int
         , showTrash: Bool
-        , items : List MediaItem
+        , multiContent : MultiContent
         , generationIndexes: List (Int, Int)
     }
 
