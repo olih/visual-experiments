@@ -45,6 +45,7 @@ parser =
         |= int
         |. spaces
         |= trashParser
+        |. spaces
         |= preserveParser
 
 toString: MediaItem -> String
