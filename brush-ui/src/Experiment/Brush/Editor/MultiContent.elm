@@ -7,7 +7,6 @@ import Experiment.Brush.Editor.Settings.Failing exposing (Failure)
 type alias MultiContent = {
     lines: List String
     , mediaItems : List MediaItem
-    , mediaItemsIndexes: List (Int, Int)
     , rangeSettings: List RangeParam
     , failures: List Failure
     }
@@ -16,7 +15,6 @@ reset: MultiContent
 reset = {
     lines =[]
     , mediaItems = []
-    , mediaItemsIndexes = []
     , rangeSettings = []
     , failures = []
     }
@@ -24,9 +22,21 @@ reset = {
 createMediaItems: List String -> List MediaItem
 createMediaItems lines =
     []
---TODO MediaItem or Failure vs List (Maybe MediaItem, Maybe Failure)
+
+createRangeSettings: List String -> List RangeParam
+createRangeSettings lines =
+    []
+
+createFailures: List String -> List Failure
+createFailures lines =
+    []
 
 updateLines: List String -> MultiContent -> MultiContent
 updateLines lines multiContent =
-    { multiContent | lines = lines, mediaItems = createMediaItems lines}
+    { multiContent 
+    | lines = lines
+    , mediaItems = createMediaItems lines
+    , rangeSettings = createRangeSettings lines
+    , failures = createFailures lines
+    }
 

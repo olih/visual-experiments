@@ -1,4 +1,4 @@
-module Experiment.Brush.Editor.Settings.RangeParamId exposing(RangeParamId, parser, toString)
+module Experiment.Brush.Editor.Settings.RangeParamId exposing(RangeParamId(..), parser, toString)
 
 import Parser exposing ((|.), (|=), Parser, chompWhile, getChompedString, int, map, run, spaces, succeed, symbol, keyword, oneOf)
 type RangeParamId = CrossoverRangeId | MutationRangeId | PopulationRangeId
