@@ -4497,41 +4497,134 @@ var author$project$MediaItemUnitTests$suite = A2(
 						}))
 				]))
 		]));
-var author$project$Experiment$Brush$Editor$MultiContent$createFailures = function (lines) {
-	return _List_Nil;
+var author$project$Experiment$Brush$Editor$Settings$Failing$Failure = F3(
+	function (kind, source, message) {
+		return {kind: kind, message: message, source: source};
+	});
+var author$project$Experiment$Brush$Editor$Settings$Failing$InvalidFormatFailure = {$: 'InvalidFormatFailure'};
+var author$project$Experiment$Brush$Editor$Settings$Failing$InvalidLengthFailure = {$: 'InvalidLengthFailure'};
+var author$project$Experiment$Brush$Editor$Settings$Failing$failureKindParser = elm$parser$Parser$oneOf(
+	_List_fromArray(
+		[
+			A2(
+			elm$parser$Parser$ignorer,
+			elm$parser$Parser$succeed(author$project$Experiment$Brush$Editor$Settings$Failing$InvalidFormatFailure),
+			elm$parser$Parser$keyword('(753c7eba)')),
+			A2(
+			elm$parser$Parser$ignorer,
+			elm$parser$Parser$succeed(author$project$Experiment$Brush$Editor$Settings$Failing$InvalidLengthFailure),
+			elm$parser$Parser$keyword('(a799245c)'))
+		]));
+var author$project$Experiment$Brush$Editor$Settings$Failing$parseFailureKind = function (str) {
+	var _n0 = A2(elm$parser$Parser$run, author$project$Experiment$Brush$Editor$Settings$Failing$failureKindParser, str);
+	if (_n0.$ === 'Ok') {
+		var failureKind = _n0.a;
+		return failureKind;
+	} else {
+		var msg = _n0.a;
+		return author$project$Experiment$Brush$Editor$Settings$Failing$InvalidFormatFailure;
+	}
 };
-var elm$core$Result$toMaybe = function (result) {
-	if (result.$ === 'Ok') {
-		var v = result.a;
-		return elm$core$Maybe$Just(v);
+var author$project$Experiment$Brush$Editor$Settings$Failing$deadEndToFailureKind = function (deadEnd) {
+	var _n0 = deadEnd.problem;
+	if (_n0.$ === 'Problem') {
+		var str = _n0.a;
+		return author$project$Experiment$Brush$Editor$Settings$Failing$parseFailureKind(str);
+	} else {
+		var otherwise = _n0;
+		return author$project$Experiment$Brush$Editor$Settings$Failing$InvalidFormatFailure;
+	}
+};
+var author$project$Experiment$Brush$Editor$Settings$Failing$deadEndToString = function (deadEnd) {
+	var _n0 = deadEnd.problem;
+	switch (_n0.$) {
+		case 'Problem':
+			var str = _n0.a;
+			return str;
+		case 'Expecting':
+			var str = _n0.a;
+			return 'Expecting ' + str;
+		case 'ExpectingSymbol':
+			var str = _n0.a;
+			return 'Expecting symbol ' + str;
+		case 'ExpectingKeyword':
+			var str = _n0.a;
+			return 'Expecting keyword ' + str;
+		case 'UnexpectedChar':
+			return 'Unexpected character';
+		case 'ExpectingInt':
+			return 'Expecting Int';
+		case 'ExpectingHex':
+			return 'Expecting Hex';
+		case 'ExpectingOctal':
+			return 'Expecting Octal';
+		case 'ExpectingBinary':
+			return 'Expecting Binary';
+		case 'ExpectingFloat':
+			return 'Expecting Float';
+		case 'ExpectingNumber':
+			return 'Expecting Number';
+		case 'ExpectingVariable':
+			return 'Expecting Variable';
+		case 'ExpectingEnd':
+			return 'Expecting End';
+		default:
+			return 'Bad Repeat';
+	}
+};
+var elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return elm$core$Maybe$Just(x);
 	} else {
 		return elm$core$Maybe$Nothing;
 	}
 };
-var author$project$Experiment$Brush$Editor$MultiContent$parseMediaItem = function (line) {
-	return elm$core$Result$toMaybe(
-		A2(elm$parser$Parser$run, author$project$Experiment$Brush$Editor$Item$MediaItem$parser, line));
-};
-var elm$core$List$maybeCons = F3(
-	function (f, mx, xs) {
-		var _n0 = f(mx);
-		if (_n0.$ === 'Just') {
-			var x = _n0.a;
-			return A2(elm$core$List$cons, x, xs);
+var elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return elm$core$Maybe$Just(
+				f(value));
 		} else {
-			return xs;
+			return elm$core$Maybe$Nothing;
 		}
 	});
-var elm$core$List$filterMap = F2(
-	function (f, xs) {
-		return A3(
-			elm$core$List$foldr,
-			elm$core$List$maybeCons(f),
-			_List_Nil,
-			xs);
+var elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
 	});
-var author$project$Experiment$Brush$Editor$MultiContent$createMediaItems = function (lines) {
-	return A2(elm$core$List$filterMap, author$project$Experiment$Brush$Editor$MultiContent$parseMediaItem, lines);
+var author$project$Experiment$Brush$Editor$Settings$Failing$fromDeadEndList = F2(
+	function (deadEnds, source) {
+		var message = A2(
+			elm$core$String$join,
+			'; ',
+			A2(elm$core$List$map, author$project$Experiment$Brush$Editor$Settings$Failing$deadEndToString, deadEnds));
+		var failureKind = A2(
+			elm$core$Maybe$withDefault,
+			author$project$Experiment$Brush$Editor$Settings$Failing$InvalidFormatFailure,
+			A2(
+				elm$core$Maybe$map,
+				author$project$Experiment$Brush$Editor$Settings$Failing$deadEndToFailureKind,
+				elm$core$List$head(deadEnds)));
+		return A3(author$project$Experiment$Brush$Editor$Settings$Failing$Failure, failureKind, source, message);
+	});
+var elm$core$String$startsWith = _String_startsWith;
+var author$project$Experiment$Brush$Editor$MultiContent$parseInvalidMediaItem = function (line) {
+	var _n0 = A2(elm$parser$Parser$run, author$project$Experiment$Brush$Editor$Item$MediaItem$parser, line);
+	if (_n0.$ === 'Ok') {
+		return elm$core$Maybe$Nothing;
+	} else {
+		var msg = _n0.a;
+		return A2(elm$core$String$startsWith, 'ID ', line) ? elm$core$Maybe$Just(
+			A2(author$project$Experiment$Brush$Editor$Settings$Failing$fromDeadEndList, msg, line)) : elm$core$Maybe$Nothing;
+	}
 };
 var author$project$Experiment$Brush$Editor$Settings$RangeParam$RangeParam = F2(
 	function (id, value) {
@@ -4575,6 +4668,54 @@ var author$project$Experiment$Brush$Editor$Settings$RangeParam$parser = A2(
 			elm$parser$Parser$spaces),
 		A2(elm$parser$Parser$ignorer, author$project$Experiment$Brush$Editor$Settings$RangeParamId$parser, elm$parser$Parser$spaces)),
 	elm$parser$Parser$int);
+var author$project$Experiment$Brush$Editor$MultiContent$parseInvalidRangeParam = function (line) {
+	var _n0 = A2(elm$parser$Parser$run, author$project$Experiment$Brush$Editor$Settings$RangeParam$parser, line);
+	if (_n0.$ === 'Ok') {
+		return elm$core$Maybe$Nothing;
+	} else {
+		var msg = _n0.a;
+		return A2(elm$core$String$startsWith, 'SETTINGS RANGE ', line) ? elm$core$Maybe$Just(
+			A2(author$project$Experiment$Brush$Editor$Settings$Failing$fromDeadEndList, msg, line)) : elm$core$Maybe$Nothing;
+	}
+};
+var elm$core$List$maybeCons = F3(
+	function (f, mx, xs) {
+		var _n0 = f(mx);
+		if (_n0.$ === 'Just') {
+			var x = _n0.a;
+			return A2(elm$core$List$cons, x, xs);
+		} else {
+			return xs;
+		}
+	});
+var elm$core$List$filterMap = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$foldr,
+			elm$core$List$maybeCons(f),
+			_List_Nil,
+			xs);
+	});
+var author$project$Experiment$Brush$Editor$MultiContent$createFailures = function (lines) {
+	return _Utils_ap(
+		A2(elm$core$List$filterMap, author$project$Experiment$Brush$Editor$MultiContent$parseInvalidMediaItem, lines),
+		A2(elm$core$List$filterMap, author$project$Experiment$Brush$Editor$MultiContent$parseInvalidRangeParam, lines));
+};
+var elm$core$Result$toMaybe = function (result) {
+	if (result.$ === 'Ok') {
+		var v = result.a;
+		return elm$core$Maybe$Just(v);
+	} else {
+		return elm$core$Maybe$Nothing;
+	}
+};
+var author$project$Experiment$Brush$Editor$MultiContent$parseMediaItem = function (line) {
+	return elm$core$Result$toMaybe(
+		A2(elm$parser$Parser$run, author$project$Experiment$Brush$Editor$Item$MediaItem$parser, line));
+};
+var author$project$Experiment$Brush$Editor$MultiContent$createMediaItems = function (lines) {
+	return A2(elm$core$List$filterMap, author$project$Experiment$Brush$Editor$MultiContent$parseMediaItem, lines);
+};
 var author$project$Experiment$Brush$Editor$MultiContent$parseRangeParam = function (line) {
 	return elm$core$Result$toMaybe(
 		A2(elm$parser$Parser$run, author$project$Experiment$Brush$Editor$Settings$RangeParam$parser, line));
@@ -4653,6 +4794,129 @@ var elm_explorations$test$Fuzz$Internal$map = F2(
 			fuzzer);
 	});
 var elm_explorations$test$Fuzz$map = elm_explorations$test$Fuzz$Internal$map;
+var author$project$Fuzzing$invalidMediaItemString = A2(
+	elm_explorations$test$Fuzz$map,
+	function (n) {
+		return elm$core$String$concat(
+			_List_fromArray(
+				[
+					'ID ',
+					elm$core$String$fromInt(n),
+					' wrong'
+				]));
+	},
+	author$project$Fuzzing$positiveNumber);
+var elm_explorations$test$RoseTree$singleton = function (a) {
+	return A2(elm_explorations$test$RoseTree$Rose, a, elm_explorations$test$Lazy$List$empty);
+};
+var elm_explorations$test$Fuzz$constant = function (x) {
+	return elm$core$Result$Ok(
+		elm$random$Random$constant(
+			elm_explorations$test$RoseTree$singleton(x)));
+};
+var elm$core$List$any = F2(
+	function (isOkay, list) {
+		any:
+		while (true) {
+			if (!list.b) {
+				return false;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				if (isOkay(x)) {
+					return true;
+				} else {
+					var $temp$isOkay = isOkay,
+						$temp$list = xs;
+					isOkay = $temp$isOkay;
+					list = $temp$list;
+					continue any;
+				}
+			}
+		}
+	});
+var elm_explorations$test$Fuzz$extractValid = function (_n0) {
+	var a = _n0.a;
+	var valid = _n0.b;
+	return A2(
+		elm$core$Result$map,
+		function (b) {
+			return _Utils_Tuple2(a, b);
+		},
+		valid);
+};
+var elm_explorations$test$Fuzz$invalid = function (reason) {
+	return elm$core$Result$Err(reason);
+};
+var elm_explorations$test$Fuzz$Internal$combineValid = function (valids) {
+	if (!valids.b) {
+		return elm$core$Result$Ok(_List_Nil);
+	} else {
+		if (valids.a.$ === 'Ok') {
+			var x = valids.a.a;
+			var rest = valids.b;
+			return A2(
+				elm$core$Result$map,
+				elm$core$List$cons(x),
+				elm_explorations$test$Fuzz$Internal$combineValid(rest));
+		} else {
+			var reason = valids.a.a;
+			return elm$core$Result$Err(reason);
+		}
+	}
+};
+var elm_explorations$test$Fuzz$frequency = function (aList) {
+	if (elm$core$List$isEmpty(aList)) {
+		return elm_explorations$test$Fuzz$invalid('You must provide at least one frequency pair.');
+	} else {
+		if (A2(
+			elm$core$List$any,
+			function (_n0) {
+				var weight = _n0.a;
+				return weight < 0;
+			},
+			aList)) {
+			return elm_explorations$test$Fuzz$invalid('No frequency weights can be less than 0.');
+		} else {
+			if (elm$core$List$sum(
+				A2(elm$core$List$map, elm$core$Tuple$first, aList)) <= 0) {
+				return elm_explorations$test$Fuzz$invalid('Frequency weights must sum to more than 0.');
+			} else {
+				var toRandom = function (validList) {
+					if (!validList.b) {
+						return elm_explorations$test$Fuzz$invalid('You must provide at least one frequency pair.');
+					} else {
+						var first = validList.a;
+						var rest = validList.b;
+						return elm$core$Result$Ok(
+							A2(elm_explorations$test$MicroRandomExtra$frequency, first, rest));
+					}
+				};
+				return A2(
+					elm$core$Result$andThen,
+					toRandom,
+					elm_explorations$test$Fuzz$Internal$combineValid(
+						A2(elm$core$List$map, elm_explorations$test$Fuzz$extractValid, aList)));
+			}
+		}
+	}
+};
+var elm_explorations$test$Fuzz$oneOf = function (aList) {
+	return elm$core$List$isEmpty(aList) ? elm_explorations$test$Fuzz$invalid('You must pass at least one Fuzzer to Fuzz.oneOf.') : elm_explorations$test$Fuzz$frequency(
+		A2(
+			elm$core$List$map,
+			function (fuzzer) {
+				return _Utils_Tuple2(1, fuzzer);
+			},
+			aList));
+};
+var author$project$Fuzzing$oneOfList = function (list) {
+	return elm_explorations$test$Fuzz$oneOf(
+		A2(elm$core$List$map, elm_explorations$test$Fuzz$constant, list));
+};
+var author$project$Fuzzing$invalidRangeParamString = author$project$Fuzzing$oneOfList(
+	_List_fromArray(
+		['SETTINGS RANGE MUTATION', 'SETTINGS RANGE WRONG']));
 var author$project$Fuzzing$mediaItemString = A2(
 	elm_explorations$test$Fuzz$map,
 	function (n) {
@@ -5051,9 +5315,6 @@ var elm_explorations$test$Fuzz$mapChildren = F2(
 			root,
 			fn(children));
 	});
-var elm_explorations$test$RoseTree$singleton = function (a) {
-	return A2(elm_explorations$test$RoseTree$Rose, a, elm_explorations$test$Lazy$List$empty);
-};
 var elm_explorations$test$Fuzz$listShrinkHelp = function (listOfTrees) {
 	return A2(
 		elm_explorations$test$Fuzz$mapChildren,
@@ -5125,7 +5386,21 @@ var author$project$MultiContentUnitTests$suite = A2(
 					elm_explorations$test$Test$fuzz2,
 					elm_explorations$test$Fuzz$list(author$project$Fuzzing$mediaItemString),
 					elm_explorations$test$Fuzz$list(author$project$Fuzzing$rangeParamString),
-					'should convert valid value',
+					'should convert valid values',
+					F2(
+						function (mediaItems, rangeParams) {
+							return A2(
+								elm_explorations$test$Expect$equal,
+								_Utils_ap(mediaItems, rangeParams),
+								author$project$Experiment$Brush$Editor$MultiContent$toStringList(
+									author$project$Experiment$Brush$Editor$MultiContent$fromStringList(
+										_Utils_ap(mediaItems, rangeParams))));
+						})),
+					A4(
+					elm_explorations$test$Test$fuzz2,
+					elm_explorations$test$Fuzz$list(author$project$Fuzzing$invalidMediaItemString),
+					elm_explorations$test$Fuzz$list(author$project$Fuzzing$invalidRangeParamString),
+					'should not convert invalid values',
 					F2(
 						function (mediaItems, rangeParams) {
 							return A2(
@@ -5137,111 +5412,6 @@ var author$project$MultiContentUnitTests$suite = A2(
 						}))
 				]))
 		]));
-var elm_explorations$test$Fuzz$constant = function (x) {
-	return elm$core$Result$Ok(
-		elm$random$Random$constant(
-			elm_explorations$test$RoseTree$singleton(x)));
-};
-var elm$core$List$any = F2(
-	function (isOkay, list) {
-		any:
-		while (true) {
-			if (!list.b) {
-				return false;
-			} else {
-				var x = list.a;
-				var xs = list.b;
-				if (isOkay(x)) {
-					return true;
-				} else {
-					var $temp$isOkay = isOkay,
-						$temp$list = xs;
-					isOkay = $temp$isOkay;
-					list = $temp$list;
-					continue any;
-				}
-			}
-		}
-	});
-var elm_explorations$test$Fuzz$extractValid = function (_n0) {
-	var a = _n0.a;
-	var valid = _n0.b;
-	return A2(
-		elm$core$Result$map,
-		function (b) {
-			return _Utils_Tuple2(a, b);
-		},
-		valid);
-};
-var elm_explorations$test$Fuzz$invalid = function (reason) {
-	return elm$core$Result$Err(reason);
-};
-var elm_explorations$test$Fuzz$Internal$combineValid = function (valids) {
-	if (!valids.b) {
-		return elm$core$Result$Ok(_List_Nil);
-	} else {
-		if (valids.a.$ === 'Ok') {
-			var x = valids.a.a;
-			var rest = valids.b;
-			return A2(
-				elm$core$Result$map,
-				elm$core$List$cons(x),
-				elm_explorations$test$Fuzz$Internal$combineValid(rest));
-		} else {
-			var reason = valids.a.a;
-			return elm$core$Result$Err(reason);
-		}
-	}
-};
-var elm_explorations$test$Fuzz$frequency = function (aList) {
-	if (elm$core$List$isEmpty(aList)) {
-		return elm_explorations$test$Fuzz$invalid('You must provide at least one frequency pair.');
-	} else {
-		if (A2(
-			elm$core$List$any,
-			function (_n0) {
-				var weight = _n0.a;
-				return weight < 0;
-			},
-			aList)) {
-			return elm_explorations$test$Fuzz$invalid('No frequency weights can be less than 0.');
-		} else {
-			if (elm$core$List$sum(
-				A2(elm$core$List$map, elm$core$Tuple$first, aList)) <= 0) {
-				return elm_explorations$test$Fuzz$invalid('Frequency weights must sum to more than 0.');
-			} else {
-				var toRandom = function (validList) {
-					if (!validList.b) {
-						return elm_explorations$test$Fuzz$invalid('You must provide at least one frequency pair.');
-					} else {
-						var first = validList.a;
-						var rest = validList.b;
-						return elm$core$Result$Ok(
-							A2(elm_explorations$test$MicroRandomExtra$frequency, first, rest));
-					}
-				};
-				return A2(
-					elm$core$Result$andThen,
-					toRandom,
-					elm_explorations$test$Fuzz$Internal$combineValid(
-						A2(elm$core$List$map, elm_explorations$test$Fuzz$extractValid, aList)));
-			}
-		}
-	}
-};
-var elm_explorations$test$Fuzz$oneOf = function (aList) {
-	return elm$core$List$isEmpty(aList) ? elm_explorations$test$Fuzz$invalid('You must pass at least one Fuzzer to Fuzz.oneOf.') : elm_explorations$test$Fuzz$frequency(
-		A2(
-			elm$core$List$map,
-			function (fuzzer) {
-				return _Utils_Tuple2(1, fuzzer);
-			},
-			aList));
-};
-var author$project$Fuzzing$oneOfList = function (list) {
-	return elm_explorations$test$Fuzz$oneOf(
-		A2(elm$core$List$map, elm_explorations$test$Fuzz$constant, list));
-};
 var author$project$Fuzzing$oneRangeParamId = author$project$Fuzzing$oneOfList(
 	_List_fromArray(
 		[author$project$Experiment$Brush$Editor$Settings$RangeParamId$CrossoverRangeId, author$project$Experiment$Brush$Editor$Settings$RangeParamId$MutationRangeId, author$project$Experiment$Brush$Editor$Settings$RangeParamId$PopulationRangeId]));
@@ -6156,15 +6326,6 @@ var elm$core$Array$set = F3(
 			startShift,
 			A4(elm$core$Array$setHelp, startShift, index, value, tree),
 			tail));
-	});
-var elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
 	});
 var author$project$Test$Runner$Node$Vendor$Diff$step = F4(
 	function (snake_, offset, k, v) {
@@ -7338,16 +7499,6 @@ var author$project$Test$Reporter$Json$encodeReason = F2(
 							])));
 		}
 	});
-var elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return elm$core$Maybe$Nothing;
-		}
-	});
 var author$project$Test$Reporter$Json$encodeFailure = function (_n0) {
 	var given = _n0.given;
 	var description = _n0.description;
@@ -8360,7 +8511,7 @@ var elm_explorations$test$Test$concat = function (tests) {
 		}
 	}
 };
-var author$project$Test$Generated$Main2624288454$main = A2(
+var author$project$Test$Generated$Main1791660962$main = A2(
 	author$project$Test$Runner$Node$run,
 	{
 		paths: _List_fromArray(
@@ -8368,7 +8519,7 @@ var author$project$Test$Generated$Main2624288454$main = A2(
 		processes: 4,
 		report: author$project$Test$Reporter$Reporter$ConsoleReport(author$project$Console$Text$UseColor),
 		runs: elm$core$Maybe$Nothing,
-		seed: 90941896832578
+		seed: 264831844615231
 	},
 	elm_explorations$test$Test$concat(
 		_List_fromArray(
@@ -8389,10 +8540,10 @@ var author$project$Test$Generated$Main2624288454$main = A2(
 				_List_fromArray(
 					[author$project$RangeParamsUnitTests$suite]))
 			])));
-_Platform_export({'Test':{'Generated':{'Main2624288454':{'init':author$project$Test$Generated$Main2624288454$main(elm$json$Json$Decode$int)(0)}}}});}(this));
+_Platform_export({'Test':{'Generated':{'Main1791660962':{'init':author$project$Test$Generated$Main1791660962$main(elm$json$Json$Decode$int)(0)}}}});}(this));
 return this.Elm;
 })({});
-var pipeFilename = "/tmp/elm_test-58727.sock";
+var pipeFilename = "/tmp/elm_test-60345.sock";
 // Make sure necessary things are defined.
 if (typeof Elm === "undefined") {
   throw "test runner config error: Elm is not defined. Make sure you provide a file compiled by Elm!";
