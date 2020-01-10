@@ -4497,6 +4497,42 @@ var author$project$MediaItemUnitTests$suite = A2(
 						}))
 				]))
 		]));
+var author$project$Experiment$Brush$Editor$MultiContent$createFailures = function (lines) {
+	return _List_Nil;
+};
+var elm$core$Result$toMaybe = function (result) {
+	if (result.$ === 'Ok') {
+		var v = result.a;
+		return elm$core$Maybe$Just(v);
+	} else {
+		return elm$core$Maybe$Nothing;
+	}
+};
+var author$project$Experiment$Brush$Editor$MultiContent$parseMediaItem = function (line) {
+	return elm$core$Result$toMaybe(
+		A2(elm$parser$Parser$run, author$project$Experiment$Brush$Editor$Item$MediaItem$parser, line));
+};
+var elm$core$List$maybeCons = F3(
+	function (f, mx, xs) {
+		var _n0 = f(mx);
+		if (_n0.$ === 'Just') {
+			var x = _n0.a;
+			return A2(elm$core$List$cons, x, xs);
+		} else {
+			return xs;
+		}
+	});
+var elm$core$List$filterMap = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$foldr,
+			elm$core$List$maybeCons(f),
+			_List_Nil,
+			xs);
+	});
+var author$project$Experiment$Brush$Editor$MultiContent$createMediaItems = function (lines) {
+	return A2(elm$core$List$filterMap, author$project$Experiment$Brush$Editor$MultiContent$parseMediaItem, lines);
+};
 var author$project$Experiment$Brush$Editor$Settings$RangeParam$RangeParam = F2(
 	function (id, value) {
 		return {id: id, value: value};
@@ -4539,6 +4575,20 @@ var author$project$Experiment$Brush$Editor$Settings$RangeParam$parser = A2(
 			elm$parser$Parser$spaces),
 		A2(elm$parser$Parser$ignorer, author$project$Experiment$Brush$Editor$Settings$RangeParamId$parser, elm$parser$Parser$spaces)),
 	elm$parser$Parser$int);
+var author$project$Experiment$Brush$Editor$MultiContent$parseRangeParam = function (line) {
+	return elm$core$Result$toMaybe(
+		A2(elm$parser$Parser$run, author$project$Experiment$Brush$Editor$Settings$RangeParam$parser, line));
+};
+var author$project$Experiment$Brush$Editor$MultiContent$createRangeSettings = function (lines) {
+	return A2(elm$core$List$filterMap, author$project$Experiment$Brush$Editor$MultiContent$parseRangeParam, lines);
+};
+var author$project$Experiment$Brush$Editor$MultiContent$fromStringList = function (lines) {
+	return {
+		failures: author$project$Experiment$Brush$Editor$MultiContent$createFailures(lines),
+		mediaItems: author$project$Experiment$Brush$Editor$MultiContent$createMediaItems(lines),
+		rangeSettings: author$project$Experiment$Brush$Editor$MultiContent$createRangeSettings(lines)
+	};
+};
 var author$project$Experiment$Brush$Editor$Settings$RangeParamId$toString = function (value) {
 	switch (value.$) {
 		case 'CrossoverRangeId':
@@ -4561,9 +4611,532 @@ var author$project$Experiment$Brush$Editor$Settings$RangeParam$toString = functi
 				elm$core$String$fromInt(value.value)
 			]));
 };
+var author$project$Experiment$Brush$Editor$MultiContent$toStringList = function (content) {
+	return _Utils_ap(
+		A2(elm$core$List$map, author$project$Experiment$Brush$Editor$Item$MediaItem$toString, content.mediaItems),
+		A2(elm$core$List$map, author$project$Experiment$Brush$Editor$Settings$RangeParam$toString, content.rangeSettings));
+};
+var elm$core$String$concat = function (strings) {
+	return A2(elm$core$String$join, '', strings);
+};
+var elm$core$Result$map = F2(
+	function (func, ra) {
+		if (ra.$ === 'Ok') {
+			var a = ra.a;
+			return elm$core$Result$Ok(
+				func(a));
+		} else {
+			var e = ra.a;
+			return elm$core$Result$Err(e);
+		}
+	});
+var elm_explorations$test$RoseTree$map = F2(
+	function (f, _n0) {
+		var a = _n0.a;
+		var c = _n0.b;
+		return A2(
+			elm_explorations$test$RoseTree$Rose,
+			f(a),
+			A2(
+				elm_explorations$test$Lazy$List$map,
+				elm_explorations$test$RoseTree$map(f),
+				c));
+	});
+var elm_explorations$test$Fuzz$Internal$map = F2(
+	function (fn, fuzzer) {
+		return A2(
+			A2(
+				elm$core$Basics$composeL,
+				A2(elm$core$Basics$composeL, elm$core$Result$map, elm$random$Random$map),
+				elm_explorations$test$RoseTree$map),
+			fn,
+			fuzzer);
+	});
+var elm_explorations$test$Fuzz$map = elm_explorations$test$Fuzz$Internal$map;
+var author$project$Fuzzing$mediaItemString = A2(
+	elm_explorations$test$Fuzz$map,
+	function (n) {
+		return elm$core$String$concat(
+			_List_fromArray(
+				[
+					'ID ',
+					elm$core$String$fromInt(n),
+					' G 7 T P'
+				]));
+	},
+	author$project$Fuzzing$positiveNumber);
+var author$project$Fuzzing$rangeParamString = A2(
+	elm_explorations$test$Fuzz$map,
+	function (n) {
+		return elm$core$String$concat(
+			_List_fromArray(
+				[
+					'SETTINGS RANGE MUTATION ',
+					elm$core$String$fromInt(n)
+				]));
+	},
+	author$project$Fuzzing$positiveNumber);
+var elm$random$Random$listHelp = F4(
+	function (revList, n, gen, seed) {
+		listHelp:
+		while (true) {
+			if (n < 1) {
+				return _Utils_Tuple2(revList, seed);
+			} else {
+				var _n0 = gen(seed);
+				var value = _n0.a;
+				var newSeed = _n0.b;
+				var $temp$revList = A2(elm$core$List$cons, value, revList),
+					$temp$n = n - 1,
+					$temp$gen = gen,
+					$temp$seed = newSeed;
+				revList = $temp$revList;
+				n = $temp$n;
+				gen = $temp$gen;
+				seed = $temp$seed;
+				continue listHelp;
+			}
+		}
+	});
+var elm$random$Random$list = F2(
+	function (n, _n0) {
+		var gen = _n0.a;
+		return elm$random$Random$Generator(
+			function (seed) {
+				return A4(elm$random$Random$listHelp, _List_Nil, n, gen, seed);
+			});
+	});
+var elm$core$List$drop = F2(
+	function (n, list) {
+		drop:
+		while (true) {
+			if (n <= 0) {
+				return list;
+			} else {
+				if (!list.b) {
+					return list;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs;
+					n = $temp$n;
+					list = $temp$list;
+					continue drop;
+				}
+			}
+		}
+	});
+var elm$core$List$length = function (xs) {
+	return A3(
+		elm$core$List$foldl,
+		F2(
+			function (_n0, i) {
+				return i + 1;
+			}),
+		0,
+		xs);
+};
+var elm$core$List$rangeHelp = F3(
+	function (lo, hi, list) {
+		rangeHelp:
+		while (true) {
+			if (_Utils_cmp(lo, hi) < 1) {
+				var $temp$lo = lo,
+					$temp$hi = hi - 1,
+					$temp$list = A2(elm$core$List$cons, hi, list);
+				lo = $temp$lo;
+				hi = $temp$hi;
+				list = $temp$list;
+				continue rangeHelp;
+			} else {
+				return list;
+			}
+		}
+	});
+var elm$core$List$range = F2(
+	function (lo, hi) {
+		return A3(elm$core$List$rangeHelp, lo, hi, _List_Nil);
+	});
+var elm$core$List$takeReverse = F3(
+	function (n, list, kept) {
+		takeReverse:
+		while (true) {
+			if (n <= 0) {
+				return kept;
+			} else {
+				if (!list.b) {
+					return kept;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs,
+						$temp$kept = A2(elm$core$List$cons, x, kept);
+					n = $temp$n;
+					list = $temp$list;
+					kept = $temp$kept;
+					continue takeReverse;
+				}
+			}
+		}
+	});
+var elm$core$List$takeTailRec = F2(
+	function (n, list) {
+		return elm$core$List$reverse(
+			A3(elm$core$List$takeReverse, n, list, _List_Nil));
+	});
+var elm$core$List$takeFast = F3(
+	function (ctr, n, list) {
+		if (n <= 0) {
+			return _List_Nil;
+		} else {
+			var _n0 = _Utils_Tuple2(n, list);
+			_n0$1:
+			while (true) {
+				_n0$5:
+				while (true) {
+					if (!_n0.b.b) {
+						return list;
+					} else {
+						if (_n0.b.b.b) {
+							switch (_n0.a) {
+								case 1:
+									break _n0$1;
+								case 2:
+									var _n2 = _n0.b;
+									var x = _n2.a;
+									var _n3 = _n2.b;
+									var y = _n3.a;
+									return _List_fromArray(
+										[x, y]);
+								case 3:
+									if (_n0.b.b.b.b) {
+										var _n4 = _n0.b;
+										var x = _n4.a;
+										var _n5 = _n4.b;
+										var y = _n5.a;
+										var _n6 = _n5.b;
+										var z = _n6.a;
+										return _List_fromArray(
+											[x, y, z]);
+									} else {
+										break _n0$5;
+									}
+								default:
+									if (_n0.b.b.b.b && _n0.b.b.b.b.b) {
+										var _n7 = _n0.b;
+										var x = _n7.a;
+										var _n8 = _n7.b;
+										var y = _n8.a;
+										var _n9 = _n8.b;
+										var z = _n9.a;
+										var _n10 = _n9.b;
+										var w = _n10.a;
+										var tl = _n10.b;
+										return (ctr > 1000) ? A2(
+											elm$core$List$cons,
+											x,
+											A2(
+												elm$core$List$cons,
+												y,
+												A2(
+													elm$core$List$cons,
+													z,
+													A2(
+														elm$core$List$cons,
+														w,
+														A2(elm$core$List$takeTailRec, n - 4, tl))))) : A2(
+											elm$core$List$cons,
+											x,
+											A2(
+												elm$core$List$cons,
+												y,
+												A2(
+													elm$core$List$cons,
+													z,
+													A2(
+														elm$core$List$cons,
+														w,
+														A3(elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
+									} else {
+										break _n0$5;
+									}
+							}
+						} else {
+							if (_n0.a === 1) {
+								break _n0$1;
+							} else {
+								break _n0$5;
+							}
+						}
+					}
+				}
+				return list;
+			}
+			var _n1 = _n0.b;
+			var x = _n1.a;
+			return _List_fromArray(
+				[x]);
+		}
+	});
+var elm$core$List$take = F2(
+	function (n, list) {
+		return A3(elm$core$List$takeFast, 0, n, list);
+	});
+var elm_explorations$test$Lazy$List$flatten = function (list) {
+	return elm_explorations$test$Lazy$lazy(
+		function (_n0) {
+			var _n1 = elm_explorations$test$Lazy$force(list);
+			if (_n1.$ === 'Nil') {
+				return elm_explorations$test$Lazy$List$Nil;
+			} else {
+				var first = _n1.a;
+				var rest = _n1.b;
+				return elm_explorations$test$Lazy$force(
+					A2(
+						elm_explorations$test$Lazy$List$append,
+						first,
+						elm_explorations$test$Lazy$List$flatten(rest)));
+			}
+		});
+};
+var elm_explorations$test$Lazy$List$andThen = F2(
+	function (f, list) {
+		return elm_explorations$test$Lazy$List$flatten(
+			A2(elm_explorations$test$Lazy$List$map, f, list));
+	});
+var elm_explorations$test$Lazy$List$fromList = A2(elm$core$List$foldr, elm_explorations$test$Lazy$List$cons, elm_explorations$test$Lazy$List$empty);
+var elm_explorations$test$Lazy$List$iterate = F2(
+	function (f, a) {
+		return elm_explorations$test$Lazy$lazy(
+			function (_n0) {
+				return A2(
+					elm_explorations$test$Lazy$List$Cons,
+					a,
+					A2(
+						elm_explorations$test$Lazy$List$iterate,
+						f,
+						f(a)));
+			});
+	});
+var elm_explorations$test$Lazy$List$numbers = A2(
+	elm_explorations$test$Lazy$List$iterate,
+	elm$core$Basics$add(1),
+	1);
+var elm_explorations$test$Lazy$List$take = F2(
+	function (n, list) {
+		return elm_explorations$test$Lazy$lazy(
+			function (_n0) {
+				if (n <= 0) {
+					return elm_explorations$test$Lazy$List$Nil;
+				} else {
+					var _n1 = elm_explorations$test$Lazy$force(list);
+					if (_n1.$ === 'Nil') {
+						return elm_explorations$test$Lazy$List$Nil;
+					} else {
+						var first = _n1.a;
+						var rest = _n1.b;
+						return A2(
+							elm_explorations$test$Lazy$List$Cons,
+							first,
+							A2(elm_explorations$test$Lazy$List$take, n - 1, rest));
+					}
+				}
+			});
+	});
+var elm_explorations$test$Fuzz$listShrinkRecurse = function (listOfTrees) {
+	var shrinkOne = F2(
+		function (prefix, aList) {
+			if (!aList.b) {
+				return elm_explorations$test$Lazy$List$empty;
+			} else {
+				var _n4 = aList.a;
+				var x = _n4.a;
+				var shrunkenXs = _n4.b;
+				var more = aList.b;
+				return A2(
+					elm_explorations$test$Lazy$List$map,
+					function (childTree) {
+						return elm_explorations$test$Fuzz$listShrinkRecurse(
+							_Utils_ap(
+								prefix,
+								A2(elm$core$List$cons, childTree, more)));
+					},
+					shrunkenXs);
+			}
+		});
+	var root = A2(elm$core$List$map, elm_explorations$test$RoseTree$root, listOfTrees);
+	var removeOne = F2(
+		function (index, aList) {
+			return A2(
+				elm$core$List$append,
+				A2(elm$core$List$take, index, aList),
+				A2(elm$core$List$drop, index + 1, aList));
+		});
+	var n = elm$core$List$length(listOfTrees);
+	var shortened = elm_explorations$test$Lazy$lazy(
+		function (_n2) {
+			return elm_explorations$test$Lazy$force(
+				A2(
+					elm_explorations$test$Lazy$List$map,
+					elm_explorations$test$Fuzz$listShrinkRecurse,
+					A2(
+						elm_explorations$test$Lazy$List$map,
+						function (index) {
+							return A2(removeOne, index, listOfTrees);
+						},
+						elm_explorations$test$Lazy$List$fromList(
+							A2(elm$core$List$range, 0, n - 1)))));
+		});
+	var shrunkenVals = elm_explorations$test$Lazy$lazy(
+		function (_n1) {
+			return elm_explorations$test$Lazy$force(
+				A2(
+					elm_explorations$test$Lazy$List$andThen,
+					function (i) {
+						return A2(
+							shrinkOne,
+							A2(elm$core$List$take, i, listOfTrees),
+							A2(elm$core$List$drop, i, listOfTrees));
+					},
+					A2(
+						elm_explorations$test$Lazy$List$take,
+						n,
+						A2(
+							elm_explorations$test$Lazy$List$map,
+							function (i) {
+								return i - 1;
+							},
+							elm_explorations$test$Lazy$List$numbers))));
+		});
+	var dropSecondHalf = function (list_) {
+		return elm_explorations$test$Fuzz$listShrinkRecurse(
+			A2(
+				elm$core$List$take,
+				(elm$core$List$length(list_) / 2) | 0,
+				list_));
+	};
+	var dropFirstHalf = function (list_) {
+		return elm_explorations$test$Fuzz$listShrinkRecurse(
+			A2(
+				elm$core$List$drop,
+				(elm$core$List$length(list_) / 2) | 0,
+				list_));
+	};
+	var halved = (n >= 8) ? elm_explorations$test$Lazy$lazy(
+		function (_n0) {
+			return elm_explorations$test$Lazy$force(
+				elm_explorations$test$Lazy$List$fromList(
+					_List_fromArray(
+						[
+							dropFirstHalf(listOfTrees),
+							dropSecondHalf(listOfTrees)
+						])));
+		}) : elm_explorations$test$Lazy$List$empty;
+	return A2(
+		elm_explorations$test$RoseTree$Rose,
+		root,
+		A2(
+			elm_explorations$test$Lazy$List$append,
+			halved,
+			A2(elm_explorations$test$Lazy$List$append, shortened, shrunkenVals)));
+};
+var elm_explorations$test$Fuzz$mapChildren = F2(
+	function (fn, _n0) {
+		var root = _n0.a;
+		var children = _n0.b;
+		return A2(
+			elm_explorations$test$RoseTree$Rose,
+			root,
+			fn(children));
+	});
 var elm_explorations$test$RoseTree$singleton = function (a) {
 	return A2(elm_explorations$test$RoseTree$Rose, a, elm_explorations$test$Lazy$List$empty);
 };
+var elm_explorations$test$Fuzz$listShrinkHelp = function (listOfTrees) {
+	return A2(
+		elm_explorations$test$Fuzz$mapChildren,
+		elm_explorations$test$Lazy$List$cons(
+			elm_explorations$test$RoseTree$singleton(_List_Nil)),
+		elm_explorations$test$Fuzz$listShrinkRecurse(listOfTrees));
+};
+var elm_explorations$test$Fuzz$list = function (fuzzer) {
+	var genLength = A2(
+		elm_explorations$test$MicroRandomExtra$frequency,
+		_Utils_Tuple2(
+			1,
+			elm$random$Random$constant(0)),
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				1,
+				elm$random$Random$constant(1)),
+				_Utils_Tuple2(
+				3,
+				A2(elm$random$Random$int, 2, 10)),
+				_Utils_Tuple2(
+				2,
+				A2(elm$random$Random$int, 10, 100)),
+				_Utils_Tuple2(
+				0.5,
+				A2(elm$random$Random$int, 100, 400))
+			]));
+	return A2(
+		elm$core$Result$map,
+		function (validFuzzer) {
+			return A2(
+				elm$random$Random$map,
+				elm_explorations$test$Fuzz$listShrinkHelp,
+				A2(
+					elm$random$Random$andThen,
+					function (a) {
+						return A2(elm$random$Random$list, a, validFuzzer);
+					},
+					genLength));
+		},
+		fuzzer);
+};
+var elm_explorations$test$Test$fuzz2 = F3(
+	function (fuzzA, fuzzB, desc) {
+		var fuzzer = elm_explorations$test$Fuzz$tuple(
+			_Utils_Tuple2(fuzzA, fuzzB));
+		return A2(
+			elm$core$Basics$composeR,
+			F2(
+				function (f, _n0) {
+					var a = _n0.a;
+					var b = _n0.b;
+					return A2(f, a, b);
+				}),
+			A2(elm_explorations$test$Test$fuzz, fuzzer, desc));
+	});
+var author$project$MultiContentUnitTests$suite = A2(
+	elm_explorations$test$Test$describe,
+	'The MultiContent Module',
+	_List_fromArray(
+		[
+			A2(
+			elm_explorations$test$Test$describe,
+			'conversion from amd to list of string',
+			_List_fromArray(
+				[
+					A4(
+					elm_explorations$test$Test$fuzz2,
+					elm_explorations$test$Fuzz$list(author$project$Fuzzing$mediaItemString),
+					elm_explorations$test$Fuzz$list(author$project$Fuzzing$rangeParamString),
+					'should convert valid value',
+					F2(
+						function (mediaItems, rangeParams) {
+							return A2(
+								elm_explorations$test$Expect$equal,
+								_Utils_ap(mediaItems, rangeParams),
+								author$project$Experiment$Brush$Editor$MultiContent$toStringList(
+									author$project$Experiment$Brush$Editor$MultiContent$fromStringList(
+										_Utils_ap(mediaItems, rangeParams))));
+						}))
+				]))
+		]));
 var elm_explorations$test$Fuzz$constant = function (x) {
 	return elm$core$Result$Ok(
 		elm$random$Random$constant(
@@ -4588,17 +5161,6 @@ var elm$core$List$any = F2(
 					continue any;
 				}
 			}
-		}
-	});
-var elm$core$Result$map = F2(
-	function (func, ra) {
-		if (ra.$ === 'Ok') {
-			var a = ra.a;
-			return elm$core$Result$Ok(
-				func(a));
-		} else {
-			var e = ra.a;
-			return elm$core$Result$Err(e);
 		}
 	});
 var elm_explorations$test$Fuzz$extractValid = function (_n0) {
@@ -4684,20 +5246,6 @@ var author$project$Fuzzing$oneRangeParamId = author$project$Fuzzing$oneOfList(
 	_List_fromArray(
 		[author$project$Experiment$Brush$Editor$Settings$RangeParamId$CrossoverRangeId, author$project$Experiment$Brush$Editor$Settings$RangeParamId$MutationRangeId, author$project$Experiment$Brush$Editor$Settings$RangeParamId$PopulationRangeId]));
 var author$project$Fuzzing$rangeNumber = A2(elm_explorations$test$Fuzz$intRange, 1, 1000);
-var elm_explorations$test$Test$fuzz2 = F3(
-	function (fuzzA, fuzzB, desc) {
-		var fuzzer = elm_explorations$test$Fuzz$tuple(
-			_Utils_Tuple2(fuzzA, fuzzB));
-		return A2(
-			elm$core$Basics$composeR,
-			F2(
-				function (f, _n0) {
-					var a = _n0.a;
-					var b = _n0.b;
-					return A2(f, a, b);
-				}),
-			A2(elm_explorations$test$Test$fuzz, fuzzer, desc));
-	});
 var author$project$RangeParamsUnitTests$suite = A2(
 	elm_explorations$test$Test$describe,
 	'The RangeParam Module',
@@ -5144,38 +5692,7 @@ var elm$json$Json$Decode$OneOf = function (a) {
 var elm$core$Char$isAlpha = function (_char) {
 	return elm$core$Char$isLower(_char) || elm$core$Char$isUpper(_char);
 };
-var elm$core$List$length = function (xs) {
-	return A3(
-		elm$core$List$foldl,
-		F2(
-			function (_n0, i) {
-				return i + 1;
-			}),
-		0,
-		xs);
-};
 var elm$core$List$map2 = _List_map2;
-var elm$core$List$rangeHelp = F3(
-	function (lo, hi, list) {
-		rangeHelp:
-		while (true) {
-			if (_Utils_cmp(lo, hi) < 1) {
-				var $temp$lo = lo,
-					$temp$hi = hi - 1,
-					$temp$list = A2(elm$core$List$cons, hi, list);
-				lo = $temp$lo;
-				hi = $temp$hi;
-				list = $temp$list;
-				continue rangeHelp;
-			} else {
-				return list;
-			}
-		}
-	});
-var elm$core$List$range = F2(
-	function (lo, hi) {
-		return A3(elm$core$List$rangeHelp, lo, hi, _List_Nil);
-	});
 var elm$core$List$indexedMap = F2(
 	function (f, xs) {
 		return A3(
@@ -5935,27 +6452,6 @@ var author$project$Test$Reporter$Highlightable$resolve = F2(
 		}
 	});
 var elm$core$Basics$neq = _Utils_notEqual;
-var elm$core$List$drop = F2(
-	function (n, list) {
-		drop:
-		while (true) {
-			if (n <= 0) {
-				return list;
-			} else {
-				if (!list.b) {
-					return list;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs;
-					n = $temp$n;
-					list = $temp$list;
-					continue drop;
-				}
-			}
-		}
-	});
 var elm$core$String$foldr = _String_foldr;
 var elm$core$String$toList = function (string) {
 	return A3(elm$core$String$foldr, elm$core$List$cons, _List_Nil, string);
@@ -7864,15 +8360,15 @@ var elm_explorations$test$Test$concat = function (tests) {
 		}
 	}
 };
-var author$project$Test$Generated$Main2058693447$main = A2(
+var author$project$Test$Generated$Main2624288454$main = A2(
 	author$project$Test$Runner$Node$run,
 	{
 		paths: _List_fromArray(
-			['/Users/olivier/Documents/github/visual-experiments/brush-ui/tests/Fuzzing.elm', '/Users/olivier/Documents/github/visual-experiments/brush-ui/tests/MediaItemUnitTests.elm', '/Users/olivier/Documents/github/visual-experiments/brush-ui/tests/RangeParamsUnitTests.elm']),
+			['/Users/olivier/Documents/github/visual-experiments/brush-ui/tests/Fuzzing.elm', '/Users/olivier/Documents/github/visual-experiments/brush-ui/tests/MediaItemUnitTests.elm', '/Users/olivier/Documents/github/visual-experiments/brush-ui/tests/MultiContentUnitTests.elm', '/Users/olivier/Documents/github/visual-experiments/brush-ui/tests/RangeParamsUnitTests.elm']),
 		processes: 4,
 		report: author$project$Test$Reporter$Reporter$ConsoleReport(author$project$Console$Text$UseColor),
 		runs: elm$core$Maybe$Nothing,
-		seed: 153967395699053
+		seed: 90941896832578
 	},
 	elm_explorations$test$Test$concat(
 		_List_fromArray(
@@ -7884,14 +8380,19 @@ var author$project$Test$Generated$Main2058693447$main = A2(
 					[author$project$MediaItemUnitTests$suite])),
 				A2(
 				elm_explorations$test$Test$describe,
+				'MultiContentUnitTests',
+				_List_fromArray(
+					[author$project$MultiContentUnitTests$suite])),
+				A2(
+				elm_explorations$test$Test$describe,
 				'RangeParamsUnitTests',
 				_List_fromArray(
 					[author$project$RangeParamsUnitTests$suite]))
 			])));
-_Platform_export({'Test':{'Generated':{'Main2058693447':{'init':author$project$Test$Generated$Main2058693447$main(elm$json$Json$Decode$int)(0)}}}});}(this));
+_Platform_export({'Test':{'Generated':{'Main2624288454':{'init':author$project$Test$Generated$Main2624288454$main(elm$json$Json$Decode$int)(0)}}}});}(this));
 return this.Elm;
 })({});
-var pipeFilename = "/tmp/elm_test-48094.sock";
+var pipeFilename = "/tmp/elm_test-58727.sock";
 // Make sure necessary things are defined.
 if (typeof Elm === "undefined") {
   throw "test runner config error: Elm is not defined. Make sure you provide a file compiled by Elm!";
