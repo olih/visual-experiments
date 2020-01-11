@@ -1,6 +1,6 @@
 module Experiment.Brush.Editor.Applicative exposing(reset)
 
-import Experiment.Brush.Editor.MultiContent as MultiContent exposing(MultiContent)
+import Experiment.Brush.Editor.Dialect.MultiContent as MultiContent exposing(MultiContent)
 
 type alias Model =
     {   idx: Int

@@ -1,38 +1,46 @@
-module Experiment.Brush.Editor.Dialect.MediaItem exposing(MediaItem, parser, toString)
+module Experiment.Brush.Editor.Dialect.MediaItem exposing (MediaItem, parser, toString)
 
-import Parser exposing ((|.), (|=), Parser, chompWhile, getChompedString, int, map, run, spaces, succeed, symbol, keyword, oneOf)
+import Parser exposing ((|.), (|=), Parser, int, keyword, oneOf, spaces, succeed)
 
-type alias MediaItem = {
-    id: Int
-    , generation: Int
-    , trash: Bool
-    , preserve: Bool
+
+type alias MediaItem =
+    { id : Int
+    , generation : Int
+    , trash : Bool
+    , preserve : Bool
     }
 
-toggleTrash: MediaItem -> MediaItem
-toggleTrash item =
-    { item | trash = not item.trash}
 
-togglePreserve: MediaItem -> MediaItem
+toggleTrash : MediaItem -> MediaItem
+toggleTrash item =
+    { item | trash = not item.trash }
+
+
+togglePreserve : MediaItem -> MediaItem
 togglePreserve item =
-    { item | preserve = not item.preserve}
+    { item | preserve = not item.preserve }
+
 
 trashParser : Parser Bool
 trashParser =
-  oneOf
-    [ succeed True
-        |. keyword "T"
-    , succeed False
-        |. keyword "_"
-    ]
+    oneOf
+        [ succeed True
+            |. keyword "T"
+        , succeed False
+            |. keyword "_"
+        ]
+
+
 preserveParser : Parser Bool
 preserveParser =
-  oneOf
-    [ succeed True
-        |. keyword "P"
-    , succeed False
-        |. keyword "_"
-    ]
+    oneOf
+        [ succeed True
+            |. keyword "P"
+        , succeed False
+            |. keyword "_"
+        ]
+
+
 parser : Parser MediaItem
 parser =
     succeed MediaItem
@@ -48,12 +56,22 @@ parser =
         |. spaces
         |= preserveParser
 
-toString: MediaItem -> String
+
+toString : MediaItem -> String
 toString value =
-    [
-    "ID", String.fromInt value.id
-    ,"G", String.fromInt value.generation
-    , if value.trash then "T" else "_"
-    , if value.preserve then "P" else "_"
+    [ "ID"
+    , String.fromInt value.id
+    , "G"
+    , String.fromInt value.generation
+    , if value.trash then
+        "T"
+
+      else
+        "_"
+    , if value.preserve then
+        "P"
+
+      else
+        "_"
     ]
-    |> String.join " "
+        |> String.join " "

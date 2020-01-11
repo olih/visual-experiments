@@ -1,23 +1,22 @@
-module MediaItemUnitTests exposing (..)
+module MediaItemUnitTests exposing (suite)
 
-import Expect exposing (Expectation)
+import Expect as Expect
+import Experiment.Brush.Editor.Dialect.MediaItem as MediaItem exposing (MediaItem)
+import Fuzz exposing (bool, tuple)
+import Fuzzing exposing (positiveNumber)
+import Parser exposing (run)
+import Test exposing (Test, describe, fuzz3)
 import Tuple exposing (first, second)
-import Fuzz exposing (Fuzzer, int, bool, intRange, list, string, constant, oneOf, tuple)
-import Test exposing (..)
-import Experiment.Brush.Editor.Dialect.MediaItem as MediaItem exposing(MediaItem)
-import Parser exposing(run)
-import Fuzzing exposing(positiveNumber)
+
 
 suite : Test
 suite =
     describe "The MediaItem Module"
-    [
-        describe "parse"
-        [
-            fuzz3 positiveNumber positiveNumber (tuple (bool, bool)) "should parse valid media item" <|
+        [ describe "parse"
+            [ fuzz3 positiveNumber positiveNumber (tuple ( bool, bool )) "should parse valid media item" <|
                 \id gen duo ->
-                    MediaItem.toString (MediaItem id gen (first duo) (second duo)) |> run MediaItem.parser
+                    MediaItem.toString (MediaItem id gen (first duo) (second duo))
+                        |> run MediaItem.parser
                         |> Expect.equal (Ok (MediaItem id gen (first duo) (second duo)))
+            ]
         ]
-
-    ]

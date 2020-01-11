@@ -1,22 +1,20 @@
-module RangeParamsUnitTests exposing (..)
+module RangeParamsUnitTests exposing (suite)
 
-import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, int, intRange, list, string, constant, oneOf)
-import Test exposing (..)
-import Experiment.Brush.Editor.Dialect.RangeParam as RangeParam exposing(RangeParam)
-import Parser exposing(run)
-import Fuzzing exposing(oneRangeParamId, rangeNumber)
+import Expect
+import Experiment.Brush.Editor.Dialect.RangeParam as RangeParam exposing (RangeParam)
+import Fuzzing exposing (oneRangeParamId, rangeNumber)
+import Parser exposing (run)
+import Test exposing (Test, describe, fuzz2)
+
 
 suite : Test
 suite =
     describe "The RangeParam Module"
-    [
-        describe "parse"
-        [
-            fuzz2 oneRangeParamId rangeNumber "should parse valid range" <|
+        [ describe "parse"
+            [ fuzz2 oneRangeParamId rangeNumber "should parse valid range" <|
                 \paramId value ->
-                    RangeParam.toString (RangeParam paramId value) |> run RangeParam.parser
+                    RangeParam.toString (RangeParam paramId value)
+                        |> run RangeParam.parser
                         |> Expect.equal (Ok (RangeParam paramId value))
+            ]
         ]
-
-    ]

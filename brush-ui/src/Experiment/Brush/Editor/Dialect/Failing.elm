@@ -1,72 +1,93 @@
-module Experiment.Brush.Editor.Dialect.Failing exposing (FailureKind(..), Failure, fromDeadEndList, create, createMessage)
+module Experiment.Brush.Editor.Dialect.Failing exposing (Failure, FailureKind(..), create, createMessage, fromDeadEndList)
 
-import Parser exposing(DeadEnd, Problem(..), (|.), (|=), Parser, oneOf, andThen, chompWhile, getChompedString, int, variable, map, run, spaces, succeed, symbol, keyword, chompUntilEndOr, problem)
+import Parser exposing ((|.), DeadEnd, Parser, Problem(..), keyword, map, oneOf, run, succeed)
 
-type FailureKind =
-    InvalidLengthFailure
+
+type FailureKind
+    = InvalidLengthFailure
     | InvalidFormatFailure
 
-type alias Failure = {
-    kind: FailureKind
-    , source: String --source of the failure
-    , message: String --human readable message
+
+type alias Failure =
+    { kind : FailureKind
+    , source : String --source of the failure
+    , message : String --human readable message
     }
 
-deadEndToString: DeadEnd -> String
+
+deadEndToString : DeadEnd -> String
 deadEndToString deadEnd =
     case deadEnd.problem of
         Problem str ->
             str
+
         Expecting str ->
             "Expecting " ++ str
+
         ExpectingSymbol str ->
             "Expecting symbol " ++ str
+
         ExpectingKeyword str ->
             "Expecting keyword " ++ str
+
         UnexpectedChar ->
             "Unexpected character"
+
         ExpectingInt ->
             "Expecting Int"
+
         ExpectingHex ->
             "Expecting Hex"
+
         ExpectingOctal ->
             "Expecting Octal"
+
         ExpectingBinary ->
             "Expecting Binary"
+
         ExpectingFloat ->
             "Expecting Float"
+
         ExpectingNumber ->
             "Expecting Number"
+
         ExpectingVariable ->
             "Expecting Variable"
+
         ExpectingEnd ->
             "Expecting End"
+
         BadRepeat ->
             "Bad Repeat"
 
 
 failureKindParser : Parser FailureKind
 failureKindParser =
-  oneOf
-    [succeed InvalidFormatFailure
-        |. keyword "(753c7eba)"
-     , succeed InvalidLengthFailure
-        |. keyword "(a799245c)"   
-    ]
+    oneOf
+        [ succeed InvalidFormatFailure
+            |. keyword "(753c7eba)"
+        , succeed InvalidLengthFailure
+            |. keyword "(a799245c)"
+        ]
 
-createMessage: FailureKind -> String -> String
+
+createMessage : FailureKind -> String -> String
 createMessage failureKind message =
     case failureKind of
-        InvalidFormatFailure -> "(753c7eba) " ++ message
-        InvalidLengthFailure -> "(a799245c) " ++ message
+        InvalidFormatFailure ->
+            "(753c7eba) " ++ message
 
-create: String -> FailureKind -> String -> Failure
+        InvalidLengthFailure ->
+            "(a799245c) " ++ message
+
+
+create : String -> FailureKind -> String -> Failure
 create source failureKind message =
-    {
-    kind = failureKind
+    { kind = failureKind
     , source = source
     , message = createMessage failureKind message
     }
+
 
 parseFailureKind : String -> FailureKind
 parseFailureKind str =
@@ -74,21 +95,27 @@ parseFailureKind str =
         Ok failureKind ->
             failureKind
 
-        Err msg ->
+        Err _ ->
             InvalidFormatFailure
 
-deadEndToFailureKind: DeadEnd -> FailureKind
+
+deadEndToFailureKind : DeadEnd -> FailureKind
 deadEndToFailureKind deadEnd =
     case deadEnd.problem of
         Problem str ->
             parseFailureKind str
-        otherwise ->
-            InvalidFormatFailure 
 
-fromDeadEndList: List DeadEnd -> String -> Failure
+        _ ->
+            InvalidFormatFailure
+
+
+fromDeadEndList : List DeadEnd -> String -> Failure
 fromDeadEndList deadEnds source =
     let
-        message = deadEnds |> List.map deadEndToString |> String.join "; "
-        failureKind = deadEnds |> List.head |> Maybe.map deadEndToFailureKind |> Maybe.withDefault InvalidFormatFailure
+        message =
+            deadEnds |> List.map deadEndToString |> String.join "; "
+
+        failureKind =
+            deadEnds |> List.head |> Maybe.map deadEndToFailureKind |> Maybe.withDefault InvalidFormatFailure
     in
-        Failure failureKind source message
+    Failure failureKind source message

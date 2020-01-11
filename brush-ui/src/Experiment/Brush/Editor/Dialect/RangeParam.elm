@@ -1,15 +1,19 @@
-module Experiment.Brush.Editor.Dialect.RangeParam exposing(RangeParam, parser, toString, setValue)
+module Experiment.Brush.Editor.Dialect.RangeParam exposing (RangeParam, parser, setValue, toString)
 
-import Parser exposing ((|.), (|=), Parser, chompWhile, getChompedString, int, map, run, spaces, succeed, symbol, keyword, oneOf)
-import Experiment.Brush.Editor.Dialect.RangeParamId as RangeParamId exposing(RangeParamId)
-type alias RangeParam = {
-    id: RangeParamId
-    , value: Int
+import Experiment.Brush.Editor.Dialect.RangeParamId as RangeParamId exposing (RangeParamId)
+import Parser exposing ((|.), (|=), Parser, int, keyword, spaces, succeed)
+
+
+type alias RangeParam =
+    { id : RangeParamId
+    , value : Int
     }
 
-setValue: Int -> RangeParam -> RangeParam
+
+setValue : Int -> RangeParam -> RangeParam
 setValue value param =
-    { param | value = value}
+    { param | value = value }
+
 
 parser : Parser RangeParam
 parser =
@@ -22,11 +26,12 @@ parser =
         |. spaces
         |= int
 
-toString: RangeParam -> String
+
+toString : RangeParam -> String
 toString value =
-    [
-    "SETTINGS", "RANGE"
+    [ "SETTINGS"
+    , "RANGE"
     , RangeParamId.toString value.id
     , String.fromInt value.value
     ]
-    |> String.join " "
+        |> String.join " "

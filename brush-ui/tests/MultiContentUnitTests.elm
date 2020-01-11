@@ -1,8 +1,8 @@
 module MultiContentUnitTests exposing (..)
 
-import Expect exposing (Expectation)
+import Expect as Expect
 import Fuzz exposing (Fuzzer, int, intRange, list, string, constant, oneOf)
-import Test exposing (..)
+import Test exposing (Test, describe, fuzz2)
 import Experiment.Brush.Editor.Dialect.MultiContent as MultiContent exposing (MultiContent)
 import Fuzzing exposing(mediaItemString, rangeParamString, invalidMediaItemString, invalidRangeParamString)
 
