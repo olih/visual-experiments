@@ -20,7 +20,8 @@ suite =
             , fuzz2 (list invalidMediaItemString) (list invalidRangeParamString) "should not convert invalid values" <|
                 \mediaItems rangeParams ->
                     MultiContent.fromStringList (mediaItems ++ rangeParams)
-                    |> MultiContent.toStringList
+                    |> .failures
+                    |> List.map .source
                         |> Expect.equal (mediaItems ++ rangeParams)
         ]
 

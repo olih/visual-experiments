@@ -5406,9 +5406,13 @@ var author$project$MultiContentUnitTests$suite = A2(
 							return A2(
 								elm_explorations$test$Expect$equal,
 								_Utils_ap(mediaItems, rangeParams),
-								author$project$Experiment$Brush$Editor$MultiContent$toStringList(
+								A2(
+									elm$core$List$map,
+									function ($) {
+										return $.source;
+									},
 									author$project$Experiment$Brush$Editor$MultiContent$fromStringList(
-										_Utils_ap(mediaItems, rangeParams))));
+										_Utils_ap(mediaItems, rangeParams)).failures));
 						}))
 				]))
 		]));
@@ -8511,7 +8515,7 @@ var elm_explorations$test$Test$concat = function (tests) {
 		}
 	}
 };
-var author$project$Test$Generated$Main1791660962$main = A2(
+var author$project$Test$Generated$Main2031668304$main = A2(
 	author$project$Test$Runner$Node$run,
 	{
 		paths: _List_fromArray(
@@ -8519,7 +8523,7 @@ var author$project$Test$Generated$Main1791660962$main = A2(
 		processes: 4,
 		report: author$project$Test$Reporter$Reporter$ConsoleReport(author$project$Console$Text$UseColor),
 		runs: elm$core$Maybe$Nothing,
-		seed: 264831844615231
+		seed: 176746106387552
 	},
 	elm_explorations$test$Test$concat(
 		_List_fromArray(
@@ -8540,10 +8544,10 @@ var author$project$Test$Generated$Main1791660962$main = A2(
 				_List_fromArray(
 					[author$project$RangeParamsUnitTests$suite]))
 			])));
-_Platform_export({'Test':{'Generated':{'Main1791660962':{'init':author$project$Test$Generated$Main1791660962$main(elm$json$Json$Decode$int)(0)}}}});}(this));
+_Platform_export({'Test':{'Generated':{'Main2031668304':{'init':author$project$Test$Generated$Main2031668304$main(elm$json$Json$Decode$int)(0)}}}});}(this));
 return this.Elm;
 })({});
-var pipeFilename = "/tmp/elm_test-60345.sock";
+var pipeFilename = "/tmp/elm_test-60856.sock";
 // Make sure necessary things are defined.
 if (typeof Elm === "undefined") {
   throw "test runner config error: Elm is not defined. Make sure you provide a file compiled by Elm!";
