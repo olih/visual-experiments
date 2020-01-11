@@ -1,4 +1,4 @@
-module Experiment.Brush.Editor.Settings.Failing exposing (FailureKind(..), Failure, fromDeadEndList, create, createMessage)
+module Experiment.Brush.Editor.Dialect.Failing exposing (FailureKind(..), Failure, fromDeadEndList, create, createMessage)
 
 import Parser exposing(DeadEnd, Problem(..), (|.), (|=), Parser, oneOf, andThen, chompWhile, getChompedString, int, variable, map, run, spaces, succeed, symbol, keyword, chompUntilEndOr, problem)
 

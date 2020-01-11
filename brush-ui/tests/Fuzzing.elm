@@ -1,7 +1,7 @@
 module Fuzzing exposing(oneOfList, oneRangeParamId, rangeNumber, positiveNumber, mediaItemString, rangeParamString, invalidMediaItemString, invalidRangeParamString)
 
 import Fuzz exposing (Fuzzer, int, list, string, intRange)
-import Experiment.Brush.Editor.Settings.RangeParamId exposing(RangeParamId(..))
+import Experiment.Brush.Editor.Dialect.RangeParamId exposing(RangeParamId(..))
 
 oneOfList: List a -> Fuzzer a
 oneOfList list =

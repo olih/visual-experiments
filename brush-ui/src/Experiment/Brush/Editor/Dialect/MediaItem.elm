@@ -1,4 +1,4 @@
-module Experiment.Brush.Editor.Item.MediaItem exposing(MediaItem, parser, toString)
+module Experiment.Brush.Editor.Dialect.MediaItem exposing(MediaItem, parser, toString)
 
 import Parser exposing ((|.), (|=), Parser, chompWhile, getChompedString, int, map, run, spaces, succeed, symbol, keyword, oneOf)
 

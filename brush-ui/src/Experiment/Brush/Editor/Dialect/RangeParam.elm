@@ -1,7 +1,7 @@
-module Experiment.Brush.Editor.Settings.RangeParam exposing(RangeParam, parser, toString, setValue)
+module Experiment.Brush.Editor.Dialect.RangeParam exposing(RangeParam, parser, toString, setValue)
 
 import Parser exposing ((|.), (|=), Parser, chompWhile, getChompedString, int, map, run, spaces, succeed, symbol, keyword, oneOf)
-import Experiment.Brush.Editor.Settings.RangeParamId as RangeParamId exposing(RangeParamId)
+import Experiment.Brush.Editor.Dialect.RangeParamId as RangeParamId exposing(RangeParamId)
 type alias RangeParam = {
     id: RangeParamId
     , value: Int

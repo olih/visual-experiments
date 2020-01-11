@@ -1,9 +1,9 @@
-module Experiment.Brush.Editor.MultiContent exposing (MultiContent, reset, fromStringList, toStringList)
+module Experiment.Brush.Editor.Dialect.MultiContent exposing (MultiContent, reset, fromStringList, toStringList)
 
 import Parser exposing(run)
-import Experiment.Brush.Editor.Item.MediaItem as MediaItem exposing(MediaItem)
-import Experiment.Brush.Editor.Settings.RangeParam as RangeParam exposing(RangeParam)
-import Experiment.Brush.Editor.Settings.Failing as Failing exposing (FailureKind(..), Failure)
+import Experiment.Brush.Editor.Dialect.MediaItem as MediaItem exposing(MediaItem)
+import Experiment.Brush.Editor.Dialect.RangeParam as RangeParam exposing(RangeParam)
+import Experiment.Brush.Editor.Dialect.Failing as Failing exposing (FailureKind(..), Failure)
 
 type alias MultiContent = {
     mediaItems : List MediaItem

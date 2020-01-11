@@ -4,7 +4,7 @@ import Expect exposing (Expectation)
 import Tuple exposing (first, second)
 import Fuzz exposing (Fuzzer, int, bool, intRange, list, string, constant, oneOf, tuple)
 import Test exposing (..)
-import Experiment.Brush.Editor.Item.MediaItem as MediaItem exposing(MediaItem)
+import Experiment.Brush.Editor.Dialect.MediaItem as MediaItem exposing(MediaItem)
 import Parser exposing(run)
 import Fuzzing exposing(positiveNumber)
 

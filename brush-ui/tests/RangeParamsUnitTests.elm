@@ -3,7 +3,7 @@ module RangeParamsUnitTests exposing (..)
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, intRange, list, string, constant, oneOf)
 import Test exposing (..)
-import Experiment.Brush.Editor.Settings.RangeParam as RangeParam exposing(RangeParam)
+import Experiment.Brush.Editor.Dialect.RangeParam as RangeParam exposing(RangeParam)
 import Parser exposing(run)
 import Fuzzing exposing(oneRangeParamId, rangeNumber)
 
