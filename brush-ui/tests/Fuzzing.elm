@@ -1,7 +1,10 @@
-module Fuzzing exposing (invalidMediaItemString, invalidRangeParamString, mediaItemString, oneOfList, oneRangeParamId, positiveNumber, rangeNumber, rangeParamString)
+module Fuzzing exposing (invalidMediaItemString, invalidRangeParamString, mediaItemString, oneOfList, oneRangeParamId, positiveNumber, rangeNumber, rangeParamString, fraction)
 
-import Experiment.Brush.Editor.Dialect.RangeParamId exposing (RangeParamId(..))
 import Fuzz exposing (Fuzzer, intRange)
+import Random as Random
+import Shrink as Shrink
+import Experiment.Brush.Editor.Dialect.RangeParamId exposing (RangeParamId(..))
+import Experiment.Brush.Editor.Dialect.FractionUnit exposing (Fraction)
 
 
 oneOfList : List a -> Fuzzer a
@@ -45,3 +48,9 @@ invalidMediaItemString =
 invalidRangeParamString : Fuzzer String
 invalidRangeParamString =
     oneOfList [ "SETTINGS RANGE MUTATION", "SETTINGS RANGE WRONG" ]
+
+fraction: Fuzzer Fraction
+fraction =
+    Fuzz.custom
+            (Random.map2 Fraction (Random.int 0 1000000000) (Random.int 1 1000000000))
+            (\{ numerator, denominator } -> Shrink.map Fraction (Shrink.int numerator) |> Shrink.andMap (Shrink.int denominator))
