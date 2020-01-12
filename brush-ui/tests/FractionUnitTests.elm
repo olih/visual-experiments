@@ -1,8 +1,8 @@
-module FractionUnitTests exposing (..)
+module FractionUnitTests exposing (suite)
 
 import Expect as Expect
 import Test exposing (Test, describe, fuzz)
-import Experiment.Brush.Editor.Dialect.FractionUnit as FractionUnit exposing (Fraction)
+import Experiment.Brush.Editor.Dialect.Fraction as Fraction
 import Fuzzing exposing (fraction)
 import Parser exposing(run)
 
@@ -14,7 +14,7 @@ suite =
         [
             fuzz fraction "should parse valid fraction" <|
                 \fn ->
-                    FractionUnit.toString fn |> run FractionUnit.parser
+                    Fraction.toString fn |> run Fraction.parser
                         |> Expect.equal (Ok fn)
         ]
 

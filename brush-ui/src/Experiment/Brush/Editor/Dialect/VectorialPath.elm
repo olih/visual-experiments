@@ -1,7 +1,7 @@
 module Experiment.Brush.Editor.Dialect.VectorialPath exposing (VectorialPath, parser, toString)
 
 import Parser exposing ((|.), (|=), Parser, int, keyword, oneOf, spaces, succeed)
-import Experiment.Brush.Editor.Dialect.FractionUnit as FractionUnit exposing (Fraction)
+import Experiment.Brush.Editor.Dialect.Fraction as Fraction exposing (Fraction)
 import Experiment.Brush.Editor.Dialect.RelativePoint as RelativePoint exposing(RelativePoint)
 
 -- all positions are relative
@@ -28,14 +28,14 @@ horizontalParser =
     succeed Horizontal
         |. keyword "h"
         |. spaces
-        |= FractionUnit.parser
+        |= Fraction.parser
 
 verticalParser : Parser VectorialPath
 verticalParser =
     succeed Vertical
         |. keyword "v"
         |. spaces
-        |= FractionUnit.parser
+        |= Fraction.parser
 
 cubicCurveParser : Parser VectorialPath
 cubicCurveParser =
@@ -91,7 +91,7 @@ toString path =
         LineTo pt -> 
             String.join " " ["l", RelativePoint.toString pt]
         Horizontal f ->
-             String.join " " ["h", Fraction.toString f]        Horizontal f ->
+             String.join " " ["h", Fraction.toString f]
         Vertical f ->
             String.join " " ["v", Fraction.toString f]
         CubicCurve pt1 pt2 pt3 -> 
@@ -100,5 +100,5 @@ toString path =
             String.join " " ["s", RelativePoint.toString pt1, RelativePoint.toString pt2]
         QuadraticCurve pt1 pt2 -> 
             String.join " " ["q", RelativePoint.toString pt1, RelativePoint.toString pt2]
-        SmoothQuadraticCurve pt1 pt2 -> 
+        SmoothQuadraticCurve pt1 -> 
             String.join " " ["t", RelativePoint.toString pt1]

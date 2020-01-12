@@ -1,4 +1,4 @@
-module Experiment.Brush.Editor.Dialect.FractionUnit exposing (Fraction, parser, toString)
+module Experiment.Brush.Editor.Dialect.Fraction exposing (Fraction, parser, toString)
 
 import Parser exposing ((|.), (|=), Parser, int, spaces, succeed, symbol)
 

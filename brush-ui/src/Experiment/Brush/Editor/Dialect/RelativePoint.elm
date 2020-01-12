@@ -4,7 +4,7 @@ module Experiment.Brush.Editor.Dialect.RelativePoint exposing
     , toString
     )
 
-import Experiment.Brush.Editor.Dialect.FractionUnit as FractionUnit exposing (Fraction)
+import Experiment.Brush.Editor.Dialect.Fraction as Fraction exposing (Fraction)
 import Parser exposing ((|.), (|=), Parser, spaces, succeed)
 
 
@@ -16,11 +16,11 @@ type alias RelativePoint =
 parser : Parser RelativePoint
 parser =
     succeed RelativePoint
-        |= FractionUnit.parser
+        |= Fraction.parser
         |. spaces
-        |= FractionUnit.parser
+        |= Fraction.parser
 
 
 toString : RelativePoint -> String
 toString value =
-    FractionUnit.toString value.dx ++ " " ++ FractionUnit.toString value.dy
+    Fraction.toString value.dx ++ " " ++ Fraction.toString value.dy
