@@ -34,7 +34,7 @@ identifier =
 mediaItemString : Fuzzer String
 mediaItemString =
     positiveNumber
-        |> Fuzz.map (\n -> String.concat [ "ID ", String.fromInt n, " G 7 T P" ])
+        |> Fuzz.map (\n -> String.concat [ "ID i:", String.fromInt n, " G 7 T P" ])
 
 
 rangeParamString : Fuzzer String
@@ -46,7 +46,7 @@ rangeParamString =
 invalidMediaItemString : Fuzzer String
 invalidMediaItemString =
     positiveNumber
-        |> Fuzz.map (\n -> String.concat [ "ID ", String.fromInt n, " wrong" ])
+        |> Fuzz.map (\n -> String.concat [ "ID i:", String.fromInt n, " wrong" ])
 
 
 invalidRangeParamString : Fuzzer String
