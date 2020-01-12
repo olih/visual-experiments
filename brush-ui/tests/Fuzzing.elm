@@ -1,10 +1,11 @@
-module Fuzzing exposing (invalidMediaItemString, invalidRangeParamString, mediaItemString, oneOfList, oneRangeParamId, positiveNumber, rangeNumber, rangeParamString, fraction, vectorialPathString)
+module Fuzzing exposing (invalidMediaItemString, invalidRangeParamString, mediaItemString, oneOfList, oneRangeParamId, positiveNumber, rangeNumber, rangeParamString, fraction, vectorialPathString, identifier)
 
 import Fuzz exposing (Fuzzer, intRange)
 import Random as Random
 import Shrink as Shrink
 import Experiment.Brush.Editor.Dialect.RangeParamId exposing (RangeParamId(..))
 import Experiment.Brush.Editor.Dialect.Fraction exposing (Fraction)
+import Experiment.Brush.Editor.Dialect.Identifier exposing(Identifier(..))
 
 
 oneOfList : List a -> Fuzzer a
@@ -26,6 +27,9 @@ positiveNumber : Fuzzer Int
 positiveNumber =
     intRange 1 1000000000
 
+identifier : Fuzzer Identifier
+identifier =
+    positiveNumber |> Fuzz.map IntIdentifier
 
 mediaItemString : Fuzzer String
 mediaItemString =
