@@ -38,7 +38,7 @@ parseInvalidMediaItem line =
             Nothing
 
         Err msg ->
-            if line |> String.startsWith "ID " then
+            if line |> String.startsWith "Media " then
                 Failing.fromDeadEndList msg line |> Just
 
             else
@@ -52,7 +52,7 @@ parseInvalidRangeParam line =
             Nothing
 
         Err msg ->
-            if line |> String.startsWith "SETTINGS RANGE " then
+            if line |> String.startsWith "Settings Range " then
                 Failing.fromDeadEndList msg line |> Just
 
             else

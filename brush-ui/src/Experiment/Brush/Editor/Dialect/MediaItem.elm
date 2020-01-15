@@ -44,7 +44,7 @@ preserveParser =
 parser : Parser MediaItem
 parser =
     succeed MediaItem
-        |. keyword "ID"
+        |. keyword "Media"
         |. spaces
         |= Identifier.parser
         |. spaces
@@ -59,7 +59,7 @@ parser =
 
 toString : MediaItem -> String
 toString value =
-    [ "ID"
+    [ "Media"
     , Identifier.toString value.id
     , "G"
     , String.fromInt value.generation

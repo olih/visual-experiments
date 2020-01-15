@@ -34,24 +34,24 @@ identifier =
 mediaItemString : Fuzzer String
 mediaItemString =
     positiveNumber
-        |> Fuzz.map (\n -> String.concat [ "ID i:", String.fromInt n, " G 7 T P" ])
+        |> Fuzz.map (\n -> String.concat [ "Media i:", String.fromInt n, " G 7 T P" ])
 
 
 rangeParamString : Fuzzer String
 rangeParamString =
     positiveNumber
-        |> Fuzz.map (\n -> String.concat [ "SETTINGS RANGE MUTATION ", String.fromInt n ])
+        |> Fuzz.map (\n -> String.concat [ "Settings Range range:mutation ", String.fromInt n ])
 
 
 invalidMediaItemString : Fuzzer String
 invalidMediaItemString =
     positiveNumber
-        |> Fuzz.map (\n -> String.concat [ "ID i:", String.fromInt n, " wrong" ])
+        |> Fuzz.map (\n -> String.concat [ "Media i:", String.fromInt n, " wrong" ])
 
 
 invalidRangeParamString : Fuzzer String
 invalidRangeParamString =
-    oneOfList [ "SETTINGS RANGE MUTATION", "SETTINGS RANGE WRONG" ]
+    oneOfList [ "Settings Range range:mutation", "Settings Range WRONG" ]
 
 fraction: Fuzzer Fraction
 fraction =

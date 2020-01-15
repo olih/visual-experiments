@@ -18,9 +18,9 @@ setValue value param =
 parser : Parser RangeParam
 parser =
     succeed RangeParam
-        |. keyword "SETTINGS"
+        |. keyword "Settings"
         |. spaces
-        |. keyword "RANGE"
+        |. keyword "Range"
         |. spaces
         |= RangeParamId.parser
         |. spaces
@@ -29,8 +29,8 @@ parser =
 
 toString : RangeParam -> String
 toString value =
-    [ "SETTINGS"
-    , "RANGE"
+    [ "Settings"
+    , "Range"
     , RangeParamId.toString value.id
     , String.fromInt value.value
     ]

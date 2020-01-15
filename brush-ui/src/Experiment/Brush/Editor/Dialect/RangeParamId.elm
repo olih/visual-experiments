@@ -2,6 +2,7 @@ module Experiment.Brush.Editor.Dialect.RangeParamId exposing (RangeParamId(..), 
 
 import Parser exposing ((|.), Parser, keyword, oneOf, succeed)
 
+-- Predefined list now but open to evolution
 
 type RangeParamId
     = CrossoverRangeId
@@ -13,11 +14,11 @@ parser : Parser RangeParamId
 parser =
     oneOf
         [ succeed CrossoverRangeId
-            |. keyword "CROSSOVER"
+            |. keyword "range:crossover"
         , succeed MutationRangeId
-            |. keyword "MUTATION"
+            |. keyword "range:mutation"
         , succeed PopulationRangeId
-            |. keyword "POPULATION"
+            |. keyword "range:population"
         ]
 
 
@@ -25,10 +26,10 @@ toString : RangeParamId -> String
 toString value =
     case value of
         CrossoverRangeId ->
-            "CROSSOVER"
+            "range:crossover"
 
         MutationRangeId ->
-            "MUTATION"
+            "range:mutation"
 
         PopulationRangeId ->
-            "POPULATION"
+            "range:population"
