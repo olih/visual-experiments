@@ -1,4 +1,4 @@
-module Experiment.Brush.Editor.Dialect.VectorialPath exposing (VectorialPath, parser, toString)
+module Experiment.Brush.Editor.Dialect.VectorialSegment exposing (VectorialSegment, parser, toString)
 
 import Parser exposing ((|.), (|=), Parser, int, keyword, oneOf, spaces, succeed)
 import Experiment.Brush.Editor.Dialect.Fraction as Fraction exposing (Fraction)
@@ -6,7 +6,7 @@ import Experiment.Brush.Editor.Dialect.RelativePoint as RelativePoint exposing(R
 
 -- all positions are relative
 
-type VectorialPath =
+type VectorialSegment =
     LineTo RelativePoint
     | Horizontal Fraction
     | Vertical Fraction
@@ -16,28 +16,28 @@ type VectorialPath =
     | SmoothQuadraticCurve RelativePoint
 
 
-lineParser : Parser VectorialPath
+lineParser : Parser VectorialSegment
 lineParser =
     succeed LineTo
         |. keyword "l"
         |. spaces
         |= RelativePoint.parser
 
-horizontalParser : Parser VectorialPath
+horizontalParser : Parser VectorialSegment
 horizontalParser =
     succeed Horizontal
         |. keyword "h"
         |. spaces
         |= Fraction.parser
 
-verticalParser : Parser VectorialPath
+verticalParser : Parser VectorialSegment
 verticalParser =
     succeed Vertical
         |. keyword "v"
         |. spaces
         |= Fraction.parser
 
-cubicCurveParser : Parser VectorialPath
+cubicCurveParser : Parser VectorialSegment
 cubicCurveParser =
     succeed CubicCurve
         |. keyword "c"
@@ -48,7 +48,7 @@ cubicCurveParser =
         |. spaces
         |= RelativePoint.parser
 
-smoothCubicCurveParser : Parser VectorialPath
+smoothCubicCurveParser : Parser VectorialSegment
 smoothCubicCurveParser =
     succeed SmoothCubicCurve
         |. keyword "s"
@@ -57,7 +57,7 @@ smoothCubicCurveParser =
         |. spaces
         |= RelativePoint.parser
 
-quadraticCurveParser : Parser VectorialPath
+quadraticCurveParser : Parser VectorialSegment
 quadraticCurveParser =
     succeed QuadraticCurve
         |. keyword "q"
@@ -66,14 +66,14 @@ quadraticCurveParser =
         |. spaces
         |= RelativePoint.parser
 
-smoothQuadraticCurveParser : Parser VectorialPath
+smoothQuadraticCurveParser : Parser VectorialSegment
 smoothQuadraticCurveParser =
     succeed SmoothQuadraticCurve
         |. keyword "t"
         |. spaces
         |= RelativePoint.parser
 
-parser: Parser VectorialPath
+parser: Parser VectorialSegment
 parser =
     oneOf [
         lineParser
@@ -85,7 +85,7 @@ parser =
         , smoothQuadraticCurveParser
     ]
 
-toString: VectorialPath -> String
+toString: VectorialSegment -> String
 toString path =
     case path of
         LineTo pt -> 

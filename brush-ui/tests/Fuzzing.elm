@@ -1,4 +1,4 @@
-module Fuzzing exposing (invalidMediaItemString, invalidRangeParamString, mediaItemString, oneOfList, oneRangeParamId, positiveNumber, rangeNumber, rangeParamString, fraction, vectorialPathString, identifier)
+module Fuzzing exposing (invalidMediaItemString, invalidRangeParamString, mediaItemString, oneOfList, oneRangeParamId, positiveNumber, rangeNumber, rangeParamString, fraction, vectorialSegmentString, identifier)
 
 import Fuzz exposing (Fuzzer, intRange)
 import Random as Random
@@ -98,8 +98,8 @@ smoothQuadraticCurveToString : Fuzzer String
 smoothQuadraticCurveToString =
     Fuzz.map (\pt1 -> String.join " " [ "t", pt1]) relativePointString
 
-vectorialPathString: Fuzzer String
-vectorialPathString =
+vectorialSegmentString: Fuzzer String
+vectorialSegmentString =
     Fuzz.oneOf [
         lineToString
         , horizontalString
