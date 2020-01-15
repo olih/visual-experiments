@@ -1,6 +1,6 @@
-module Fuzzing exposing (invalidMediaItemString, invalidRangeParamString, mediaItemString, oneOfList, oneRangeParamId, positiveNumber, rangeNumber, rangeParamString, fraction, vectorialSegmentString, identifier)
+module Fuzzing exposing (invalidMediaItemString, invalidRangeParamString, mediaItemString, oneOfList, oneRangeParamId, positiveNumber, rangeNumber, rangeParamString, fraction, vectorialSegmentString, identifier, vectorialPathString)
 
-import Fuzz exposing (Fuzzer, intRange)
+import Fuzz exposing (Fuzzer, intRange, list)
 import Random as Random
 import Shrink as Shrink
 import Experiment.Brush.Editor.Dialect.RangeParamId exposing (RangeParamId(..))
@@ -11,7 +11,6 @@ import Experiment.Brush.Editor.Dialect.Identifier exposing(Identifier(..))
 oneOfList : List a -> Fuzzer a
 oneOfList list =
     List.map Fuzz.constant list |> Fuzz.oneOf
-
 
 oneRangeParamId : Fuzzer RangeParamId
 oneRangeParamId =
@@ -109,3 +108,7 @@ vectorialSegmentString =
         , quadraticCurveToString
         , smoothQuadraticCurveToString
     ]
+
+vectorialPathString: Fuzzer String
+vectorialPathString = 
+    Fuzz.map (\segments -> String.concat["Path i:7 [", String.join "," segments, "]"]) (list vectorialSegmentString)
