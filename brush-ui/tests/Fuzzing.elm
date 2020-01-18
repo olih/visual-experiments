@@ -111,4 +111,4 @@ vectorialSegmentString =
 
 vectorialPathString: Fuzzer String
 vectorialPathString = 
-    Fuzz.map (\segments -> String.concat["Path i:7 [", String.join "," segments, "]"]) (list vectorialSegmentString)
+    Fuzz.map (\segments -> String.concat["Path i:7 [ ", String.join "," segments |> String.trim, " ]"]) (list vectorialSegmentString)

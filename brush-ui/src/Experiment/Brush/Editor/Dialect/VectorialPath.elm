@@ -18,7 +18,7 @@ segmentsParser =
     , end = "]"
     , spaces = spaces
     , item = VectorialSegment.parser
-    , trailing = Mandatory -- demand a trailing semi-colon
+    , trailing = Optional
     }
 parser : Parser VectorialPath
 parser =
