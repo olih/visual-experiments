@@ -1,7 +1,7 @@
 module Experiment.Brush.Editor.Dialect.RangeParam exposing (RangeParam, parser, setValue, toString)
 
 import Experiment.Brush.Editor.Dialect.RangeParamId as RangeParamId exposing (RangeParamId)
-import Parser exposing ((|.), (|=), Parser, int, keyword, spaces, succeed)
+import Parser exposing ((|.), (|=), Parser, int, keyword, spaces, succeed, end)
 
 
 type alias RangeParam =
@@ -18,19 +18,17 @@ setValue value param =
 parser : Parser RangeParam
 parser =
     succeed RangeParam
-        |. keyword "Settings"
-        |. spaces
         |. keyword "Range"
         |. spaces
         |= RangeParamId.parser
         |. spaces
         |= int
+        |.end
 
 
 toString : RangeParam -> String
 toString value =
-    [ "Settings"
-    , "Range"
+    [ "Range"
     , RangeParamId.toString value.id
     , String.fromInt value.value
     ]

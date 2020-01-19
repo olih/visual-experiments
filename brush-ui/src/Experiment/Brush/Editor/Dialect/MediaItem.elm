@@ -1,11 +1,10 @@
-module Experiment.Brush.Editor.Dialect.MediaItem exposing (MediaItem, parser, toString)
+module Experiment.Brush.Editor.Dialect.MediaItem exposing (MediaItem, parser, toString, toggleTrash, togglePreserve)
 
-import Parser exposing ((|.), (|=), Parser, int, keyword, oneOf, spaces, succeed)
+import Parser exposing ((|.), (|=), Parser, keyword, oneOf, spaces, succeed)
 import Experiment.Brush.Editor.Dialect.Identifier as Identifier exposing(Identifier)
 
 type alias MediaItem =
     { id : Identifier
-    , generation : Int
     , trash : Bool
     , preserve : Bool
     }
@@ -48,10 +47,6 @@ parser =
         |. spaces
         |= Identifier.parser
         |. spaces
-        |. keyword "G"
-        |. spaces
-        |= int
-        |. spaces
         |= trashParser
         |. spaces
         |= preserveParser
@@ -61,16 +56,12 @@ toString : MediaItem -> String
 toString value =
     [ "Media"
     , Identifier.toString value.id
-    , "G"
-    , String.fromInt value.generation
     , if value.trash then
         "T"
-
       else
         "_"
     , if value.preserve then
         "P"
-
       else
         "_"
     ]

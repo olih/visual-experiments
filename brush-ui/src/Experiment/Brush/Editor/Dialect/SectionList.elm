@@ -1,6 +1,6 @@
 module Experiment.Brush.Editor.Dialect.SectionList exposing (fromString, toString)
 
-import Parser exposing (DeadEnd, Problem(..), run)
+import Parser exposing (DeadEnd, Problem(..))
 import Experiment.Brush.Editor.Dialect.Section as Section exposing (Section)
 
 sectionMarker: String

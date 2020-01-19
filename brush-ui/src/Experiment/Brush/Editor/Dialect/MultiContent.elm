@@ -52,7 +52,7 @@ parseInvalidRangeParam line =
             Nothing
 
         Err msg ->
-            if line |> String.startsWith "Settings Range " then
+            if line |> String.startsWith "Range " then
                 Failing.fromDeadEndList msg line |> Just
 
             else

@@ -1,6 +1,6 @@
 module Experiment.Brush.Editor.Dialect.VectorialPath exposing (VectorialPath, parser, toString)
 
-import Parser exposing ((|.), (|=), Parser, int, keyword, spaces, succeed, Trailing(..))
+import Parser exposing ((|.), (|=), Parser, keyword, spaces, succeed, Trailing(..))
 import Experiment.Brush.Editor.Dialect.Identifier as Identifier exposing(Identifier)
 import Experiment.Brush.Editor.Dialect.VectorialSegment as VectorialSegment exposing (VectorialSegment)
 
