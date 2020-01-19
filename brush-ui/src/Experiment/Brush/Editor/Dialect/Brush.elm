@@ -1,6 +1,6 @@
-module Experiment.Brush.Editor.Dialect.Brush exposing (Brush, parser, toString, toggleTrash, togglePreserve)
+module Experiment.Brush.Editor.Dialect.Brush exposing (Brush, parser, toString, toggleTrash, togglePreserve, fromStringList)
 
-import Parser exposing ((|.), (|=), Parser, keyword, spaces, succeed, Trailing(..), oneOf)
+import Parser exposing ((|.), (|=), Parser, keyword, spaces, succeed, Trailing(..), oneOf, run, DeadEnd)
 import Experiment.Brush.Editor.Dialect.Identifier as Identifier exposing(Identifier)
 import Experiment.Brush.Editor.Dialect.VectorialSegment as VectorialSegment exposing (VectorialSegment)
 
@@ -82,3 +82,11 @@ toString value =
     , "]"
     ]
         |> String.join " "
+
+fromString: String -> (String, Result (List DeadEnd) Brush)
+fromString line  =
+    (line, run parser line)
+
+fromStringList: List String -> List (String, Result (List DeadEnd) Brush)
+fromStringList lines =
+    List.map fromString lines

@@ -1,7 +1,7 @@
-module Experiment.Brush.Editor.Dialect.RangeParam exposing (RangeParam, parser, setValue, toString)
+module Experiment.Brush.Editor.Dialect.RangeParam exposing (RangeParam, parser, setValue, toString, fromStringList)
 
 import Experiment.Brush.Editor.Dialect.RangeParamId as RangeParamId exposing (RangeParamId)
-import Parser exposing ((|.), (|=), Parser, int, keyword, spaces, succeed, end)
+import Parser exposing ((|.), (|=), Parser, int, keyword, spaces, succeed, end, run, DeadEnd)
 
 
 type alias RangeParam =
@@ -33,3 +33,11 @@ toString value =
     , String.fromInt value.value
     ]
         |> String.join " "
+
+fromString: String -> (String, Result (List DeadEnd) RangeParam)
+fromString line  =
+    (line, run parser line)
+
+fromStringList: List String -> List (String, Result (List DeadEnd) RangeParam)
+fromStringList lines =
+    List.map fromString lines
