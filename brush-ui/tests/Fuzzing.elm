@@ -1,4 +1,4 @@
-module Fuzzing exposing (invalidMediaItemString, invalidRangeParamString, mediaItemString, oneOfList, oneRangeParamId, positiveNumber, rangeNumber, rangeParamString, fraction, vectorialSegmentString, identifier, vectorialPathString)
+module Fuzzing exposing (invalidMediaItemString, invalidRangeParamString, mediaItemString, oneOfList, oneRangeParamId, positiveNumber, rangeNumber, rangeParamString, fraction, vectorialSegmentString, identifier, brushString)
 
 import Fuzz exposing (Fuzzer, intRange, list)
 import Random as Random
@@ -109,6 +109,6 @@ vectorialSegmentString =
         , smoothQuadraticCurveToString
     ]
 
-vectorialPathString: Fuzzer String
-vectorialPathString = 
-    Fuzz.map (\segments -> String.concat["Path i:7 [ ", String.join "," segments |> String.trim, " ]"]) (list vectorialSegmentString)
+brushString: Fuzzer String
+brushString = 
+    Fuzz.map (\segments -> String.concat["Brush i:7 [ ", String.join "," segments |> String.trim, " ]"]) (list vectorialSegmentString)

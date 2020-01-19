@@ -1,10 +1,10 @@
-module Experiment.Brush.Editor.Dialect.VectorialPath exposing (VectorialPath, parser, toString)
+module Experiment.Brush.Editor.Dialect.Brush exposing (Brush, parser, toString)
 
 import Parser exposing ((|.), (|=), Parser, keyword, spaces, succeed, Trailing(..))
 import Experiment.Brush.Editor.Dialect.Identifier as Identifier exposing(Identifier)
 import Experiment.Brush.Editor.Dialect.VectorialSegment as VectorialSegment exposing (VectorialSegment)
 
-type alias VectorialPath =
+type alias Brush =
     { id : Identifier
     , segments : List VectorialSegment
     }
@@ -20,19 +20,19 @@ segmentsParser =
     , item = VectorialSegment.parser
     , trailing = Optional
     }
-parser : Parser VectorialPath
+parser : Parser Brush
 parser =
-    succeed VectorialPath
-        |. keyword "Path"
+    succeed Brush
+        |. keyword "Brush"
         |. spaces
         |= Identifier.parser
         |. spaces
         |= segmentsParser
 
 
-toString : VectorialPath -> String
+toString : Brush -> String
 toString value =
-    [ "Path"
+    [ "Brush"
     , Identifier.toString value.id
     , "["
     , value.segments |> List.map VectorialSegment.toString |> String.join ","
