@@ -1,32 +1,36 @@
 module Experiment.Brush.Editor.Dialect.Content exposing (Content, toContent)
-
-import Experiment.Brush.Editor.Dialect.Failing exposing (Failure)
+import Parser exposing (DeadEnd)
+import Tuple exposing (first, second)
+import Experiment.Brush.Editor.Dialect.Failing as Failing exposing (Failure)
 
 type alias Content a =
     { 
-    values : List a
+    lines: List String    
+    , values : List a
     , failures : List Failure
     }
 
-addValue: a -> Content a -> Content a
-addValue value content =
-    { content | values = value :: content.values}
+addValue: String -> a -> Content a -> Content a
+addValue line value content =
+    { content |
+     values = value :: content.values
+     , lines = line :: content.lines }
 
-addFailure: Failure -> Content a -> Content a
-addFailure failure content =
-    { content | failures = failure :: content.failures}
+addFailure: String -> List DeadEnd -> Content a -> Content a
+addFailure line deads content =
+    { content | failures = (Failing.fromDeadEndList deads line) :: content.failures}
 
-add: Result Failure a -> Content a -> Content a
-add rs content =
-    case rs of
+add: (String, Result (List DeadEnd) a) -> Content a -> Content a
+add lineAndResult content =
+    case second lineAndResult of
         Ok v ->
-            addValue v content
+            addValue (first lineAndResult) v content
 
         Err v ->
-            addFailure v content
-toContent : List (Result Failure a) -> Content a
+            addFailure (first lineAndResult) v content
+toContent : List (String, Result (List DeadEnd) a) -> Content a
 toContent list =
     List.foldr
         add
-        { values = [] , failures = []}
+        { lines = [], values = [] , failures = []}
         list
