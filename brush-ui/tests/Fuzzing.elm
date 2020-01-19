@@ -1,4 +1,4 @@
-module Fuzzing exposing (invalidMediaItemString, invalidRangeParamString, mediaItemString, oneOfList, oneRangeParamId, positiveNumber, rangeNumber, rangeParamString, fraction, vectorialSegmentString, identifier, brushString)
+module Fuzzing exposing (invalidMediaItemString, invalidRangeParamString, oneOfList, oneRangeParamId, positiveNumber, rangeNumber, rangeParamString, fraction, vectorialSegmentString, identifier, brushString)
 
 import Fuzz exposing (Fuzzer, intRange, list)
 import Random as Random
@@ -29,12 +29,6 @@ positiveNumber =
 identifier : Fuzzer Identifier
 identifier =
     positiveNumber |> Fuzz.map IntIdentifier
-
-mediaItemString : Fuzzer String
-mediaItemString =
-    positiveNumber
-        |> Fuzz.map (\n -> String.concat [ "Media i:", String.fromInt n, " T P" ])
-
 
 rangeParamString : Fuzzer String
 rangeParamString =
@@ -111,4 +105,4 @@ vectorialSegmentString =
 
 brushString: Fuzzer String
 brushString = 
-    Fuzz.map (\segments -> String.concat["Brush i:7 [ ", String.join "," segments |> String.trim, " ]"]) (list vectorialSegmentString)
+    Fuzz.map (\segments -> String.concat["Brush i:7 T P [ ", String.join "," segments |> String.trim, " ]"]) (list vectorialSegmentString)
