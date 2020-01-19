@@ -8,6 +8,4 @@ type UIEvent
     | OnLast
     | OnTrash
     | OnPreserve
-    | OnGraceful
-    | OnGeneric
 
