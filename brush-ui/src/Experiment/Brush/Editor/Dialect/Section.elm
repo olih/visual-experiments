@@ -1,4 +1,4 @@
-module Experiment.Brush.Editor.Dialect.Section exposing (Section, fromString, toString)
+module Experiment.Brush.Editor.Dialect.Section exposing (Section, fromString, toString, getLatestGeneration)
 
 import Parser exposing (DeadEnd, Problem(..), run)
 import Experiment.Brush.Editor.Dialect.SectionHeader as SectionHeader exposing(SectionHeader)
@@ -22,3 +22,7 @@ toString : Section -> String
 toString value =
     (value.header |> SectionHeader.toString) :: value.lines
     |> String.join "\n"
+
+getLatestGeneration: List Section -> Maybe Int
+getLatestGeneration sections =
+    Just 1

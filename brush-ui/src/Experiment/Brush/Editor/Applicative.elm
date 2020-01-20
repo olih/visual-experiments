@@ -4,6 +4,8 @@ import Experiment.Brush.Editor.Dialect.Section exposing (Section)
 import Experiment.Brush.Editor.Dialect.BrushContent exposing (BrushContent)
 import Experiment.Brush.Editor.Dialect.BrushStrokeContent exposing (BrushStrokeContent)
 import Experiment.Brush.Editor.Dialect.RangeContent exposing (RangeContent)
+import Experiment.Brush.Editor.Dialect.Failing as Failing exposing (Failure)
+import Experiment.Brush.Editor.Dialect.SectionList as SectionList
 type alias Model =
     {   idx: Int
         , generation: Int
@@ -12,6 +14,7 @@ type alias Model =
         , maybeBrushContent: Maybe BrushContent
         , maybeRangeContent: Maybe RangeContent
         , maybeBrushStrokeContent: Maybe BrushStrokeContent
+        , failures : List Failure
     }
 
 reset: Model
@@ -23,4 +26,12 @@ reset = {
         , maybeBrushContent = Nothing
         , maybeRangeContent = Nothing
         , maybeBrushStrokeContent = Nothing
+        , failures = []
     }
+
+fromString: String -> Model -> Model
+fromString content =
+    let
+        sections = SectionList.fromString content
+    in
+    
