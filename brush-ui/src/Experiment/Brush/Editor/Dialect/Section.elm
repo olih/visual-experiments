@@ -2,6 +2,9 @@ module Experiment.Brush.Editor.Dialect.Section exposing (Section, fromString, to
 
 import Parser exposing (DeadEnd, Problem(..), run)
 import Experiment.Brush.Editor.Dialect.SectionHeader as SectionHeader exposing(SectionHeader)
+import Experiment.Brush.Editor.Dialect.SectionTypeId exposing(SectionTypeId(..))
+import Experiment.Brush.Editor.Dialect.Identifier as Identifier
+
 
 type alias Section =
     { header : SectionHeader
@@ -25,4 +28,8 @@ toString value =
 
 getLatestGeneration: List Section -> Maybe Int
 getLatestGeneration sections =
-    Just 1
+    sections 
+    |> List.filter (\section -> section.header.sectionType == BrushesSection)
+    |> List.map (\section -> section.header.id |> Identifier.toInt)
+    |> List.maximum
+

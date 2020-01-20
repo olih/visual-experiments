@@ -1,4 +1,4 @@
-module Experiment.Brush.Editor.Dialect.Identifier exposing (Identifier(..), parser, toString)
+module Experiment.Brush.Editor.Dialect.Identifier exposing (Identifier(..), parser, toString, toInt)
 
 import Parser exposing ((|.), (|=), Parser, int, spaces, succeed, symbol)
 
@@ -17,3 +17,8 @@ toString value =
     case value of
        IntIdentifier n ->
         String.concat["i:", String.fromInt n]
+toInt : Identifier -> Int
+toInt value =
+    case value of
+       IntIdentifier n ->
+        n
