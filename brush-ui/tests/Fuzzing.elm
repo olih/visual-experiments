@@ -1,4 +1,4 @@
-module Fuzzing exposing (invalidMediaItemString, invalidRangeParamString, oneOfList, oneRangeParamId, positiveNumber, rangeNumber, rangeParamString, fraction, vectorialSegmentString, identifier, brushString)
+module Fuzzing exposing (invalidMediaItemString, invalidRangeParamString, oneOfList, oneRangeParamId, positiveNumber, rangeNumber, rangeParamString, fraction, vectorialSegmentString, identifier, brushString, brushStrokeString)
 
 import Fuzz exposing (Fuzzer, intRange, list)
 import Random as Random
@@ -106,3 +106,7 @@ vectorialSegmentString =
 brushString: Fuzzer String
 brushString = 
     Fuzz.map (\segments -> String.concat["Brush i:7 T P [ ", String.join "," segments |> String.trim, " ]"]) (list vectorialSegmentString)
+
+brushStrokeString: Fuzzer String
+brushStrokeString = 
+    Fuzz.map3 (\point scale rotation-> String.concat["BrushStroke i:7 P ", point, " S ", scale, " R ", rotation]) relativePointString fractionString fractionString
