@@ -1,4 +1,4 @@
-module Fuzzing exposing (invalidMediaItemString, invalidRangeParamString, oneOfList, oneRangeParamId, positiveNumber, rangeNumber, rangeParamString, fraction, vectorialSegmentString, identifier, brushString, brushStrokeString, sectionString)
+module Fuzzing exposing (invalidMediaItemString, invalidRangeParamString, oneOfList, oneRangeParamId, positiveNumber, rangeNumber, rangeParamString, fraction, vectorialSegmentString, identifier, brushString, brushStrokeString, sectionString, brushSectionsString)
 
 import Fuzz exposing (Fuzzer, intRange, list)
 import Random as Random
@@ -114,3 +114,8 @@ brushStrokeString =
 sectionString: Fuzzer String
 sectionString = 
     Fuzz.map (\sectionType-> String.concat["Section i:7 ", sectionType, "\nA\nB\nC"]) (oneOfList ["section:settings", "section:brushes", "section:monochrome"]) 
+
+brushSectionsString: Fuzzer (List String)
+brushSectionsString = 
+    Fuzz.map (\id-> String.concat["Section i:", id |> String.fromInt, " section:brushes", "\nA\nB\nC"]) (intRange 5 15)
+    |> list

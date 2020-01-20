@@ -1,11 +1,9 @@
 module SectionUnitTests exposing (suite)
 
 import Expect as Expect
-import Test exposing (Test, describe, fuzz)
+import Test exposing (Test, describe, fuzz, fuzz2)
 import Experiment.Brush.Editor.Dialect.Section as Section
-import Fuzzing exposing (sectionString)
-import Parser exposing(run)
-
+import Fuzzing exposing (sectionString, brushSectionsString)
 suite : Test
 suite =
     describe "The Section Module"
@@ -17,6 +15,14 @@ suite =
                     Section.fromString section
                     |> Result.map Section.toString
                         |> Expect.equal (Ok section)
+        ], 
+        describe "getLatestGeneration"
+        [
+            fuzz2 sectionString brushSectionsString "should get latest generation" <|
+                \i7 sections ->
+                    (i7 :: "Section i:20 section:brushes\nA\nB" :: sections |> List.filterMap (Section.fromString >> Result.toMaybe))
+                    |> Section.getLatestGeneration
+                    |> Expect.equal (Just 20)
         ]
 
     ]
