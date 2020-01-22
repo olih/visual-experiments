@@ -6,9 +6,11 @@ import Experiment.Brush.Editor.Dialect.BrushStrokeContent exposing (BrushStrokeC
 import Experiment.Brush.Editor.Dialect.RangeContent exposing (RangeContent)
 import Experiment.Brush.Editor.Dialect.Failing as Failing exposing (Failure)
 import Experiment.Brush.Editor.Dialect.SectionList as SectionList
+import Experiment.Brush.Editor.Dialect.Identifier exposing (Identifier)
 type alias Model =
-    {   idx: Int
-        , generation: Int
+    {   idx: Maybe Identifier
+        , generation: Maybe Identifier
+        , latestGeneration: Maybe Identifier
         , showTrash: Bool
         , sections: List Section
         , maybeBrushContent: Maybe BrushContent
@@ -19,8 +21,9 @@ type alias Model =
 
 reset: Model
 reset = {
-        idx = 0
-        , generation = 0
+        idx = Nothing
+        , generation = Nothing
+        , latestGeneration = Nothing
         , showTrash = False
         , sections = []
         , maybeBrushContent = Nothing

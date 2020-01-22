@@ -1,4 +1,4 @@
-module Experiment.Brush.Editor.Dialect.Identifier exposing (Identifier(..), parser, toString, toInt)
+module Experiment.Brush.Editor.Dialect.Identifier exposing (Identifier(..), parser, toString, toInt, fromInt)
 
 import Parser exposing ((|.), (|=), Parser, int, spaces, succeed, symbol)
 
@@ -22,3 +22,7 @@ toInt value =
     case value of
        IntIdentifier n ->
         n
+
+fromInt : Int -> Identifier
+fromInt value =
+    IntIdentifier value
