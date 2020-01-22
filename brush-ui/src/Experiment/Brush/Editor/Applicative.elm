@@ -16,7 +16,7 @@ type alias Model =
         , maybeBrushContent: Maybe BrushContent
         , maybeRangeContent: Maybe RangeContent
         , maybeBrushStrokeContent: Maybe BrushStrokeContent
-        , failures : List Failure
+        , failure : Maybe Failure
     }
 
 reset: Model
@@ -29,12 +29,15 @@ reset = {
         , maybeBrushContent = Nothing
         , maybeRangeContent = Nothing
         , maybeBrushStrokeContent = Nothing
-        , failures = []
+        , failure = Nothing
     }
 
 fromString: String -> Model -> Model
-fromString content =
+fromString content model =
     let
-        sections = SectionList.fromString content
+        perhapsSections = SectionList.fromString content
+        sections = Result.withDefault [] perhapsSections
+        failure = Failing.fromResult perhapsSections "section"
+
     in
-    
+        model   

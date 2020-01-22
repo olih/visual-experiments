@@ -1,4 +1,4 @@
-module Experiment.Brush.Editor.Dialect.Failing exposing (Failure, FailureKind(..), create, createMessage, fromDeadEndList)
+module Experiment.Brush.Editor.Dialect.Failing exposing (Failure, FailureKind(..), create, createMessage, fromDeadEndList, fromResult)
 
 import Parser exposing ((|.), DeadEnd, Parser, Problem(..), keyword, map, oneOf, run, succeed)
 
@@ -119,3 +119,11 @@ fromDeadEndList deadEnds source =
             deadEnds |> List.head |> Maybe.map deadEndToFailureKind |> Maybe.withDefault InvalidFormatFailure
     in
     Failure failureKind source message
+
+fromResult:  Result (List DeadEnd) a -> String -> Maybe Failure
+fromResult result source =
+    case result of
+        Ok _ ->
+            Nothing
+        Err deadEnds ->
+           fromDeadEndList deadEnds source |> Just 
