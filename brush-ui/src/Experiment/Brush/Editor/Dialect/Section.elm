@@ -32,12 +32,13 @@ getIdsByType sectionType sections =
     |> List.filter (\section -> section.header.sectionType == sectionType)
     |> List.map (\section -> section.header.id)
 
-getLatestGeneration: List Section -> Maybe Identifier
+getLatestGeneration: List Section -> Identifier
 getLatestGeneration sections =
     getIdsByType BrushesSection sections
     |> List.map Identifier.toInt
     |> List.maximum
-    |> Maybe.map Identifier.fromInt
+    |> Maybe.map Identifier.fromInt 
+    |> Maybe.withDefault Identifier.notFound
 
 byId: Identifier -> Section -> Bool
 byId id section =

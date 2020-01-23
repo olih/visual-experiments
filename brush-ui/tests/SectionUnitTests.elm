@@ -23,7 +23,7 @@ suite =
                 \i7 sections ->
                     (i7 :: "Section i:20 section:brushes\nA\nB" :: sections |> List.filterMap (Section.fromString >> Result.toMaybe))
                     |> Section.getLatestGeneration
-                    |> Expect.equal (Identifier.fromInt 20 |> Just)
+                    |> Expect.equal (Identifier.fromInt 20)
         ]
 
     ]
