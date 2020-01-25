@@ -2,8 +2,8 @@ module Experiment.Brush.Editor.Applicative exposing(reset)
 
 import Experiment.Brush.Editor.Dialect.Section as Section exposing (Section)
 import Experiment.Brush.Editor.Dialect.BrushContent as BrushContent exposing (BrushContent)
-import Experiment.Brush.Editor.Dialect.BrushStrokeContent exposing (BrushStrokeContent)
-import Experiment.Brush.Editor.Dialect.RangeContent exposing (RangeContent)
+import Experiment.Brush.Editor.Dialect.BrushStrokeContent as BrushStrokeContent exposing (BrushStrokeContent)
+import Experiment.Brush.Editor.Dialect.RangeContent as RangeContent exposing (RangeContent)
 import Experiment.Brush.Editor.Dialect.Failing as Failing exposing (Failure)
 import Experiment.Brush.Editor.Dialect.SectionList as SectionList
 import Experiment.Brush.Editor.Dialect.Identifier as Identifier exposing (Identifier)
@@ -47,6 +47,17 @@ fromString content model =
             |> List.filter (Section.byId latestGeneration)
             |> List.head
             |> Maybe.map BrushContent.fromSection
+        
+        maybeRangeContent = sections 
+            |> List.filter (Section.bySectionType SettingsSection)
+            |> List.filter (Section.byId latestGeneration)
+            |> List.head
+            |> Maybe.map RangeContent.fromSection
+
+        maybeBrushStrokeContent = sections 
+            |> List.filter (Section.bySectionType MonochromeSection)
+            |> List.head
+            |> Maybe.map BrushStrokeContent.fromSection
 
     in
         { model | 
@@ -55,4 +66,6 @@ fromString content model =
             , latestGeneration = latestGeneration
             , generation = latestGeneration
             , maybeBrushContent = maybeBrushContent
+            , maybeRangeContent = maybeRangeContent
+            , maybeBrushStrokeContent = maybeBrushStrokeContent
         }   
