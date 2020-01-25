@@ -1,4 +1,4 @@
-module Experiment.Brush.Editor.Dialect.BrushContent exposing (BrushContent, fromSection, setBrushes)
+module Experiment.Brush.Editor.Dialect.BrushContent exposing (BrushContent, fromSection, setBrushes, asBrushesIn)
 
 import Experiment.Brush.Editor.Dialect.Content as Content exposing (Content)
 import Experiment.Brush.Editor.Dialect.Section exposing (Section)
@@ -16,4 +16,8 @@ fromSection section =
 
 setBrushes: Content Brush -> BrushContent -> BrushContent
 setBrushes brushes content =
+    { content | brushes = brushes }
+
+asBrushesIn: BrushContent -> Content Brush -> BrushContent
+asBrushesIn content brushes  =
     { content | brushes = brushes }

@@ -1,4 +1,4 @@
-module Experiment.Brush.Editor.Dialect.Content exposing (Content, toContent, setValues)
+module Experiment.Brush.Editor.Dialect.Content exposing (Content, toContent, setValues, asValuesIn)
 import Parser exposing (DeadEnd)
 import Tuple exposing (first, second)
 import Experiment.Brush.Editor.Dialect.Failing as Failing exposing (Failure)
@@ -37,4 +37,8 @@ toContent list =
 
 setValues: List a -> List String -> Content a -> Content a
 setValues values lines content =
+    { content | values = values, lines = lines}
+
+asValuesIn: Content a -> List a -> List String  -> Content a
+asValuesIn content values lines =
     { content | values = values, lines = lines}

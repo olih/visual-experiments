@@ -83,13 +83,13 @@ fromString content model =
 trash: Model -> Model
 trash model =
     let
-        maybeNewBrush = model.maybeBrushContent 
-            |> Maybe.map (.brushes >> .values) 
+        brushes =  model.maybeBrushContent 
+            |> Maybe.map (.brushes >> .values)
             |> Maybe.withDefault []
-            |> List.filter (Brush.byId model.idx)
-            |> List.head
-            |> Maybe.map Brush.toggleTrash
-        
+            |> Brush.toggleTrashForId model.idx
 
     in
-        model
+        { model | 
+            maybeBrushContent = model.maybeBrushContent 
+                |> Maybe.map  BrushContent.setBrushes 
+            }
