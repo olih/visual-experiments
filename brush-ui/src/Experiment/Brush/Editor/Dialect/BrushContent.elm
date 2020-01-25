@@ -1,4 +1,4 @@
-module Experiment.Brush.Editor.Dialect.BrushContent exposing (BrushContent, fromSection)
+module Experiment.Brush.Editor.Dialect.BrushContent exposing (BrushContent, fromSection, setBrushes)
 
 import Experiment.Brush.Editor.Dialect.Content as Content exposing (Content)
 import Experiment.Brush.Editor.Dialect.Section exposing (Section)
@@ -13,3 +13,7 @@ type alias BrushContent =
 fromSection: Section -> BrushContent
 fromSection section =
     BrushContent section (Brush.fromStringList section.lines |> Content.toContent)
+
+setBrushes: Content Brush -> BrushContent -> BrushContent
+setBrushes brushes content =
+    { content | brushes = brushes }

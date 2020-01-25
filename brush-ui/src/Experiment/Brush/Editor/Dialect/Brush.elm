@@ -1,4 +1,4 @@
-module Experiment.Brush.Editor.Dialect.Brush exposing (Brush, parser, toString, toggleTrash, togglePreserve, fromStringList)
+module Experiment.Brush.Editor.Dialect.Brush exposing (Brush, parser, toString, toggleTrash, togglePreserve, fromStringList, toStringList, byId, toggleTrashForId, togglePreserveForId)
 
 import Parser exposing ((|.), (|=), Parser, keyword, spaces, succeed, Trailing(..), oneOf, run, DeadEnd)
 import Experiment.Brush.Editor.Dialect.Identifier as Identifier exposing(Identifier)
@@ -90,3 +90,31 @@ fromString line  =
 fromStringList: List String -> List (String, Result (List DeadEnd) Brush)
 fromStringList lines =
     List.map fromString lines
+
+toStringList: List Brush -> List String
+toStringList brushes =
+    List.map toString brushes
+
+byId: Identifier -> Brush -> Bool
+byId id brush =
+    brush.id == id
+
+toggleTrashForId : Identifier -> List Brush -> List Brush
+toggleTrashForId id list =
+    list |> List.map
+        (\brush ->
+            if brush.id == id then
+                toggleTrash brush
+            else
+                brush
+        )
+
+togglePreserveForId : Identifier -> List Brush -> List Brush
+togglePreserveForId id list =
+    list |> List.map
+        (\brush ->
+            if brush.id == id then
+                togglePreserve brush
+            else
+                brush
+        )

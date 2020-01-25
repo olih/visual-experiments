@@ -1,7 +1,8 @@
-module Experiment.Brush.Editor.Applicative exposing(reset)
+module Experiment.Brush.Editor.Applicative exposing(reset, fromString)
 
 import Experiment.Brush.Editor.Dialect.Section as Section exposing (Section)
 import Experiment.Brush.Editor.Dialect.BrushContent as BrushContent exposing (BrushContent)
+import Experiment.Brush.Editor.Dialect.Brush as Brush
 import Experiment.Brush.Editor.Dialect.BrushStrokeContent as BrushStrokeContent exposing (BrushStrokeContent)
 import Experiment.Brush.Editor.Dialect.RangeContent as RangeContent exposing (RangeContent)
 import Experiment.Brush.Editor.Dialect.Failing as Failing exposing (Failure)
@@ -13,7 +14,6 @@ type alias Model =
         , idxList: List Identifier
         , generation: Identifier
         , latestGeneration: Identifier
-        , showTrash: Bool
         , sections: List Section
         , maybeBrushContent: Maybe BrushContent
         , maybeRangeContent: Maybe RangeContent
@@ -27,7 +27,6 @@ reset = {
         , idxList = []
         , generation = Identifier.notFound
         , latestGeneration = Identifier.notFound
-        , showTrash = False
         , sections = []
         , failure = Nothing
         , maybeBrushContent = Nothing
@@ -79,4 +78,18 @@ fromString content model =
             , maybeBrushStrokeContent = maybeBrushStrokeContent
             , idxList = idxList
             , idx = idx
-        }   
+        }
+
+trash: Model -> Model
+trash model =
+    let
+        maybeNewBrush = model.maybeBrushContent 
+            |> Maybe.map (.brushes >> .values) 
+            |> Maybe.withDefault []
+            |> List.filter (Brush.byId model.idx)
+            |> List.head
+            |> Maybe.map Brush.toggleTrash
+        
+
+    in
+        model
