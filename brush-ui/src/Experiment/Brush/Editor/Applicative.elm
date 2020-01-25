@@ -10,6 +10,7 @@ import Experiment.Brush.Editor.Dialect.Identifier as Identifier exposing (Identi
 import Experiment.Brush.Editor.Dialect.SectionTypeId exposing(SectionTypeId(..))
 type alias Model =
     {   idx: Identifier
+        , idxList: List Identifier
         , generation: Identifier
         , latestGeneration: Identifier
         , showTrash: Bool
@@ -23,6 +24,7 @@ type alias Model =
 reset: Model
 reset = {
         idx = Identifier.notFound
+        , idxList = []
         , generation = Identifier.notFound
         , latestGeneration = Identifier.notFound
         , showTrash = False
@@ -59,6 +61,13 @@ fromString content model =
             |> List.head
             |> Maybe.map BrushStrokeContent.fromSection
 
+        idxList = maybeBrushContent 
+            |> Maybe.map (.brushes >> .values)
+            |> Maybe.withDefault []
+            |> List.map .id
+        
+        idx = idxList |> List.head |> Maybe.withDefault (Identifier.notFound)
+
     in
         { model | 
             sections = sections
@@ -68,4 +77,6 @@ fromString content model =
             , maybeBrushContent = maybeBrushContent
             , maybeRangeContent = maybeRangeContent
             , maybeBrushStrokeContent = maybeBrushStrokeContent
+            , idxList = idxList
+            , idx = idx
         }   
