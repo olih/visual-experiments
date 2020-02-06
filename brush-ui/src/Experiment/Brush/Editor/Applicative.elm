@@ -90,6 +90,7 @@ trash model =
 
     in
         { model | 
-            maybeBrushContent = model.maybeBrushContent 
-                |> Maybe.map  BrushContent.setBrushes 
-            }
+            maybeBrushContent = brushes 
+                |> BrushContent.asBrushesIn model.maybeBrushContent
+        
+        }
