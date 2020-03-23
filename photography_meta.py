@@ -9,6 +9,7 @@ from glob import glob
 import re
 import os.path
 from pathlib import Path
+import subprocess
 
 localDir = os.environ['OLI_LOCAL_DIR']
 
@@ -19,12 +20,14 @@ def loadConfAsJson():
 jsonConf = loadConfAsJson()
 
 photographyDir = jsonConf["folders"]["local-parent-directory"]
+photographyImgDir = "{}/img".format(photographyDir)
+photographyDataDir = "{}/data".format(photographyDir)
 
 foldersHashids = Hashids(salt=jsonConf["folders"]["salt"], min_length=15)
 mediasHashids = Hashids(salt=jsonConf["medias"]["salt"], min_length=20)
 
 def findDirectories():
-    return glob(os.path.join(photographyDir, '*'))
+    return glob(os.path.join(photographyImgDir, '*'))
 
 def getDirId(filename):
     if not "--" in filename:
@@ -63,7 +66,7 @@ def ensureIdForFolders():
             print ("Renaming  %s failed" % directory)
 
 def findMediaFiles(ext):
-    return [y for x in os.walk(photographyDir) for y in glob(os.path.join(x[0], '*.{}'.format(ext)))]
+    return [y for x in os.walk(photographyImgDir) for y in glob(os.path.join(x[0], '*.{}'.format(ext)))]
 
 def findAllMediaFiles():
     all = findMediaFiles('jpg') + findMediaFiles('jepg') + findMediaFiles('png')
@@ -71,6 +74,9 @@ def findAllMediaFiles():
 
 def getFileExt(filename):
     return os.path.splitext(filename)[1]
+
+def getFilename(filename):
+    return os.path.basename(filename)
 
 def getParentDirectory(filename):
     return Path(filename).parent
@@ -82,7 +88,7 @@ def isOriginalMedia(filename):
     return True if "/original-" in filename else False
 
 def shouldAddMediaId(filename):
-    return False if isSmallMedia(filename) or isOriginalMedia(filename) else True
+    return False if isOriginalMedia(filename) else True
 
 def ensureIdForMediaFiles():
     print("Ensuring ids for media files")
@@ -96,7 +102,24 @@ def ensureIdForMediaFiles():
         except OSError:
             print ("Renaming  %s failed" % filename)
 
+def asTagInfo(line):
+    if not "\t" in line:
+        folder = getFilename(line)
+        dirId = getDirId(folder)
+        return { "id": dirId, "folder": folder, "tags": []}
+    filename, tagCSV =  line.split("\t")
+    tags = tagCSV.split(",")
+    folder = getFilename(filename)
+    dirId = getDirId(folder)
+    return {"id": dirId,  "folder": folder, "tags": tags }
 
-ensureIdForFolders()
-ensureIdForMediaFiles()
+def extractTags():
+    stream = os.popen("tag -l {}/*".format(photographyImgDir))
+    lines = stream.readlines()
+    tagInfoLines = [asTagInfo(line.strip()) for line in lines ]
+    print(tagInfoLines)
+# ensureIdForFolders()
+# ensureIdForMediaFiles()
+
+extractTags()
 
