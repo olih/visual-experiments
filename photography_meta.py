@@ -125,6 +125,10 @@ def saveMediaTagsAsJson(jsonContent):
     with open('{}/media-tags.json'.format(photographyDataDir), 'w') as outfile:
             json.dump(jsonContent, outfile, indent=2)
 
+def saveMediaGroupAsJson(groupId, jsonContent):
+    with open('{}/group-{}.json'.format(photographyDataDir, groupId), 'w') as outfile:
+            json.dump(jsonContent, outfile, indent=2)
+
 def extractTags():
     stream = os.popen("tag -l {}/*".format(photographyImgDir))
     lines = stream.readlines()
@@ -137,6 +141,10 @@ def loadFoldersJson():
     with open('{}/folders.json'.format(photographyDataDir), 'r') as jsonfile:
         return json.load(jsonfile)
 
+def loadMediaTagsAsJson():
+    with open('{}/media-tags.json'.format(photographyDataDir), 'r') as jsonfile:
+        return json.load(jsonfile)
+
 def fileTagsForFolder(folderInfo):
     tags = folderInfo["tags"]
     folder = folderInfo["folder"]
@@ -147,17 +155,18 @@ def tagsByFile():
     foldersJson = loadFoldersJson()
     mediaTags = [fileTagsForFolder(folder) for folder in foldersJson]
     flatMediaTags= [item for sublist in mediaTags for item in sublist]
-    dictMediaTags = { i["item"] : i for i in flatMediaTags }
-    saveMediaTagsAsJson(dictMediaTags)
+    saveMediaTagsAsJson(flatMediaTags)
 
-# def organizeGroup(group, foldersJson):
-#     groupFolders = 
+def organizeGroup(group, mediaTags):
+    return [mediaItem for mediaItem in mediaTags if group["name"] in mediaItem["tags"]]
 
-# def organizeByGroup():
-#     foldersJson = loadFoldersJson()
-#     groups = jsonConf["groups"]
-#     for group in groups:
-#         organizeGroup(group, foldersJson)
+def organizeByGroup():
+    mediaTags = loadMediaTagsAsJson()
+    groups = jsonConf["groups"]
+    for group in groups:
+        groupMediaTags = organizeGroup(group, mediaTags)
+        saveMediaGroupAsJson(group["id"], groupMediaTags)
 
 extractTags()
 tagsByFile()
+organizeByGroup()
