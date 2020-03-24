@@ -109,7 +109,7 @@ def asTagInfo(line):
     if not "\t" in line:
         folder = getFilename(line)
         dirId = getDirId(folder)
-        return { "id": dirId, "folder": folder, "tags": []}
+        return { "id": dirId, "folder": folder, "tags": [], "items": []}
     filename, tagCSV =  line.split("\t")
     tags = tagCSV.split(",")
     folder = getFilename(filename)
@@ -121,6 +121,10 @@ def saveFoldersMetaAsJson(jsonContent):
     with open('{}/folders.json'.format(photographyDataDir), 'w') as outfile:
             json.dump(jsonContent, outfile, indent=2)
 
+def saveMediaTagsAsJson(jsonContent):
+    with open('{}/media-tags.json'.format(photographyDataDir), 'w') as outfile:
+            json.dump(jsonContent, outfile, indent=2)
+
 def extractTags():
     stream = os.popen("tag -l {}/*".format(photographyImgDir))
     lines = stream.readlines()
@@ -129,5 +133,29 @@ def extractTags():
 # ensureIdForFolders()
 # ensureIdForMediaFiles()
 
-# extractTags()
-print(extractTags())
+def loadFoldersJson():
+    with open('{}/folders.json'.format(photographyDataDir), 'r') as jsonfile:
+        return json.load(jsonfile)
+
+def fileTagsForFolder(folderInfo):
+    tags = folderInfo["tags"]
+    folder = folderInfo["folder"]
+    return [ { "item": item, "folder": folder, "tags": tags} for item in folderInfo["items"]]
+    
+
+def tagsByFile():
+    foldersJson = loadFoldersJson()
+    mediaTags = [fileTagsForFolder(folder) for folder in foldersJson]
+    saveMediaTagsAsJson(mediaTags)
+
+# def organizeGroup(group, foldersJson):
+#     groupFolders = 
+
+# def organizeByGroup():
+#     foldersJson = loadFoldersJson()
+#     groups = jsonConf["groups"]
+#     for group in groups:
+#         organizeGroup(group, foldersJson)
+
+extractTags()
+tagsByFile()
