@@ -146,7 +146,9 @@ def fileTagsForFolder(folderInfo):
 def tagsByFile():
     foldersJson = loadFoldersJson()
     mediaTags = [fileTagsForFolder(folder) for folder in foldersJson]
-    saveMediaTagsAsJson(mediaTags)
+    flatMediaTags= [item for sublist in mediaTags for item in sublist]
+    dictMediaTags = { i["item"] : i for i in flatMediaTags }
+    saveMediaTagsAsJson(dictMediaTags)
 
 # def organizeGroup(group, foldersJson):
 #     groupFolders = 
