@@ -69,8 +69,11 @@ def findMediaFiles(ext):
     return [y for x in os.walk(photographyImgDir) for y in glob(os.path.join(x[0], '*.{}'.format(ext)))]
 
 def findAllMediaFiles():
-    all = findMediaFiles('jpg') + findMediaFiles('jepg') + findMediaFiles('png')
+    all = findMediaFiles('jpg') + findMediaFiles('jpeg') + findMediaFiles('png')
     return all
+
+def findMediaIds(folderName):
+    return [getFilename(filename).replace("original-", "") for filename in glob(os.path.join("{}/{}".format(photographyImgDir, folderName), 'original-*'))]
 
 def getFileExt(filename):
     return os.path.splitext(filename)[1]
@@ -111,15 +114,20 @@ def asTagInfo(line):
     tags = tagCSV.split(",")
     folder = getFilename(filename)
     dirId = getDirId(folder)
-    return {"id": dirId,  "folder": folder, "tags": tags }
+    mediaIds = findMediaIds(folder)
+    return {"id": dirId,  "folder": folder, "tags": tags, "items": mediaIds }
+
+def saveFoldersMetaAsJson(jsonContent):
+    with open('{}/folders.json'.format(photographyDataDir), 'w') as outfile:
+            json.dump(jsonContent, outfile, indent=2)
 
 def extractTags():
     stream = os.popen("tag -l {}/*".format(photographyImgDir))
     lines = stream.readlines()
     tagInfoLines = [asTagInfo(line.strip()) for line in lines ]
-    print(tagInfoLines)
+    saveFoldersMetaAsJson(tagInfoLines)
 # ensureIdForFolders()
 # ensureIdForMediaFiles()
 
-extractTags()
-
+# extractTags()
+print(extractTags())
