@@ -134,8 +134,6 @@ def extractTags():
     lines = stream.readlines()
     tagInfoLines = [asTagInfo(line.strip()) for line in lines ]
     saveFoldersMetaAsJson(tagInfoLines)
-# ensureIdForFolders()
-# ensureIdForMediaFiles()
 
 def loadFoldersJson():
     with open('{}/folders.json'.format(photographyDataDir), 'r') as jsonfile:
@@ -160,12 +158,27 @@ def tagsByFile():
 def organizeGroup(group, mediaTags):
     return [mediaItem for mediaItem in mediaTags if group["name"] in mediaItem["tags"]]
 
+def withoutGroup(tags):
+    return [tag for tag in tags if "Group" not in tag]
+
+def deleteAllGroupTags(groupMediaTags):
+    return [ { "item": i["item"], "folder": i["folder"], "tags": withoutGroup(i["tags"])} for i in  groupMediaTags]
+
+def getAllTags(groupMediaTags):
+    justTags = [i["tags"] for i in groupMediaTags]
+    flatTags= [item for sublist in justTags for item in sublist]
+    return list(set(flatTags))
+
 def organizeByGroup():
     mediaTags = loadMediaTagsAsJson()
     groups = jsonConf["groups"]
     for group in groups:
-        groupMediaTags = organizeGroup(group, mediaTags)
-        saveMediaGroupAsJson(group["id"], groupMediaTags)
+        groupMediaTags = deleteAllGroupTags(organizeGroup(group, mediaTags))
+        tags = getAllTags(groupMediaTags)
+        saveMediaGroupAsJson(group["id"], { "tags": tags, "items": groupMediaTags })
+
+# ensureIdForFolders()
+# ensureIdForMediaFiles()
 
 extractTags()
 tagsByFile()
