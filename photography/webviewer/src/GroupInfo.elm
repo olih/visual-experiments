@@ -1,4 +1,4 @@
-module GroupInfo exposing (Model, decoder)
+module GroupInfo exposing (Model, decoder, reset)
 
 import Json.Decode exposing (Decoder, map2, field, string, list)
 import MediaFileInfo as MediaFileInfo
@@ -9,6 +9,11 @@ type alias Model =
     , items: List MediaFileInfo.Model
     }
 
+reset: Model
+reset = {
+    tags = []
+    , items = []   
+ }
 decoder : Decoder Model
 decoder =
   map2 Model

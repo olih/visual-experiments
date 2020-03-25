@@ -1,6 +1,7 @@
-module MediaFileInfo exposing (Model, decoder)
+module MediaFileInfo exposing (Model, decoder, view)
 
 import Json.Decode exposing (Decoder, map3, field, string, list)
+import Html exposing (..)
 
 type alias Model =
     { item : String
@@ -14,3 +15,9 @@ decoder =
       (field "item" string)
       (field "folder" string)
       (field "tags" (list string))
+
+view : Model -> Html a
+view model =
+    div []
+        [ text model.item
+        ]

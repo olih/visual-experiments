@@ -5,8 +5,8 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
-import Json.Decode exposing (Decoder, field, string, decodeString)
-
+import App as App exposing (Msg(..))
+import GroupInfo as GroupInfo
 -- MAIN
 
 
@@ -22,49 +22,37 @@ main =
 
 -- MODEL
 
-
-type Model
-  = Failure
-  | Loading
-  | Success String
-
-
-init : () -> (Model, Cmd Msg)
+init : () -> (App.Model, Cmd App.Msg)
 init _ =
-  (Loading, getRandomGif)
+  (App.reset, fetchGroupInfo())
 
 
 
 -- UPDATE
 
-
-type Msg
-  = MorePlease
-  | GotGif (Result Http.Error String)
-
-update : Msg -> Model -> (Model, Cmd Msg)
+update : App.Msg -> App.Model -> (App.Model, Cmd App.Msg)
 update msg model =
   case msg of
-    MorePlease ->
-      (Loading, getRandomGif)
+    ToggleTag tag ->
+      (App.toggleTag tag model, Cmd.none)
     
-    GotGif result ->
+    GotGroupInfo result ->
       case result of
-        Ok url ->
-          (Success url, Cmd.none)
+        Ok groupInfo ->
+          (App.setGroupInfo groupInfo, Cmd.none)
 
         Err _ ->
-          (Failure, Cmd.none)
+          (App.reset, Cmd.none)
 
 -- SUBSCRIPTIONS
 
-subscriptions : Model -> Sub Msg
+subscriptions : App.Model -> Sub App.Msg
 subscriptions model =
   Sub.none
 
 -- VIEW
 
-view : Model -> Html Msg
+view : App.Model -> Html App.Msg
 view model =
   div []
     [ h2 [] [ text "Random image" ]
@@ -72,7 +60,7 @@ view model =
     ]
 
 
-viewGif : Model -> Html Msg
+viewGif : App.Model -> Html App.Msg
 viewGif model =
   case model of
     Failure ->
@@ -94,13 +82,9 @@ viewGif model =
 
 -- HTTP
 
-getRandomGif : Cmd Msg
-getRandomGif =
+fetchGroupInfo : Cmd App.Msg
+fetchGroupInfo =
   Http.get
     { url = "http://localhost:8080/some-json.json"
-    , expect = Http.expectJson GotGif gifDecoder
+    , expect = Http.expectJson GotGroupInfo GroupInfo.decoder
     }
-
-gifDecoder : Decoder String
-gifDecoder =
-  field "data" (field "image_url" string)
