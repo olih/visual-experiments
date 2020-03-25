@@ -118,11 +118,11 @@ def asTagInfo(line):
     return {"id": dirId,  "folder": folder, "tags": tags, "items": mediaIds }
 
 def saveFoldersMetaAsJson(jsonContent):
-    with open('{}/folders.json'.format(photographyDataDir), 'w') as outfile:
+    with open('{}/photography/folders.json'.format(localDir), 'w') as outfile:
             json.dump(jsonContent, outfile, indent=2)
 
 def saveMediaTagsAsJson(jsonContent):
-    with open('{}/media-tags.json'.format(photographyDataDir), 'w') as outfile:
+    with open('{}/photography/media-tags.json'.format(localDir), 'w') as outfile:
             json.dump(jsonContent, outfile, indent=2)
 
 def saveMediaGroupAsJson(groupId, jsonContent):
@@ -136,11 +136,11 @@ def extractTags():
     saveFoldersMetaAsJson(tagInfoLines)
 
 def loadFoldersJson():
-    with open('{}/folders.json'.format(photographyDataDir), 'r') as jsonfile:
+    with open('{}/photography/folders.json'.format(localDir), 'r') as jsonfile:
         return json.load(jsonfile)
 
 def loadMediaTagsAsJson():
-    with open('{}/media-tags.json'.format(photographyDataDir), 'r') as jsonfile:
+    with open('{}/photography/media-tags.json'.format(localDir), 'r') as jsonfile:
         return json.load(jsonfile)
 
 def fileTagsForFolder(folderInfo):

@@ -5,4 +5,7 @@ __pycache__/
 temp/
 target/
 
+elm-stuff/
+
 brush-ui/elm-stuff/
+photography/webviewer/elm-stuff/
