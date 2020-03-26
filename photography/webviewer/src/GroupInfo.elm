@@ -1,4 +1,4 @@
-module GroupInfo exposing (Model, decoder, reset, setItems)
+module GroupInfo exposing (Model, decoder, reset, setItems, getDefaultTag)
 
 import Json.Decode exposing (Decoder, map2, field, list)
 import MediaFileInfo as MediaFileInfo
@@ -25,3 +25,10 @@ decoder =
 setItems: List MediaFileInfo.Model -> Model -> Model
 setItems items model =
     { model | items = items}
+
+getDefaultTag: Model -> String
+getDefaultTag model =
+    model.tags
+    |> Set.toList
+    |> List.head
+    |> Maybe.withDefault "tag"

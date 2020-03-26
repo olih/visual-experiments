@@ -1,7 +1,8 @@
 module MediaFileInfo exposing (Model, decoder, view)
 
 import Json.Decode exposing (Decoder, map3, field, string)
-import Html exposing (..)
+import Html exposing (Html, figure, img)
+import Html.Attributes as Attr exposing (src)
 import Set exposing(Set)
 import Tags as Tags
 
@@ -21,6 +22,7 @@ decoder =
 
 view : Model -> Html a
 view model =
-    div []
-        [ text model.item
-        ]
+    figure [ Attr.class "image is-128x128" ]
+    [ img [ [model.folder, "/small-", model.item] |> String.concat |> src]
+        []
+    ]

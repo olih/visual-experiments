@@ -85,6 +85,6 @@ viewGif model =
 fetchGroupInfo : Cmd App.Msg
 fetchGroupInfo =
   Http.get
-    { url = "http://localhost:8080/some-json.json"
+    { url = "/default.json"
     , expect = Http.expectJson GotGroupInfo GroupInfo.decoder
     }
