@@ -1,7 +1,7 @@
-module Fuzzing exposing(oneOfList, exGroupInfo)
-import Fuzz exposing (Fuzzer, int, list, string)
-
-
+module Fuzzing exposing(oneOfList, exGroupInfo, mediaFileInfo, defaultMediaFile)
+import Fuzz as Fuzz exposing (Fuzzer, list, string)
+import MediaFileInfo
+import Set
 oneOfList: List a -> Fuzzer a
 oneOfList list =
     List.map Fuzz.constant list |> Fuzz.oneOf
@@ -49,3 +49,13 @@ exGroupInfo = """
 }
 """
 
+createMediaFileInfo: (String, List String) -> MediaFileInfo.Model
+createMediaFileInfo twoParams =
+    MediaFileInfo.Model (Tuple.first twoParams) (Tuple.first twoParams) (Set.fromList (Tuple.second twoParams))
+
+mediaFileInfo: Fuzzer MediaFileInfo.Model
+mediaFileInfo = Fuzz.tuple (string, list string) |> Fuzz.map createMediaFileInfo
+
+defaultMediaFile: MediaFileInfo.Model
+defaultMediaFile =
+    createMediaFileInfo ("default", ["tag"])
