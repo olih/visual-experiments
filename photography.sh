@@ -1,6 +1,6 @@
 #!/bin/zsh
 echo "Retrieve the metadata about the images" 
-# python photography_meta.py
+python photography_meta.py
 PHOTO_DIR=`jq -r '.folders.directory' "$OLI_LOCAL_DIR/photography/conf.json"`
 echo $PHOTO_DIR
 if [[ ! -d "$PHOTO_DIR" ]]

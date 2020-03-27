@@ -5,26 +5,34 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
+import Url exposing (Url)
+import Browser.Navigation as Nav
 import App as App exposing (Msg(..))
 import GroupInfo as GroupInfo
 -- MAIN
 
 
 main =
-  Browser.element
+  Browser.application
     { init = init
     , update = update
     , subscriptions = subscriptions
     , view = view
+    , onUrlRequest = LinkClicked
+    , onUrlChange = UrlChanged
     }
 
 
 
+getGroupId: Url -> String
+getGroupId url =
+    url.fragment |> Maybe.withDefault "default"
+
 -- MODEL
 
-init : () -> (App.Model, Cmd App.Msg)
-init _ =
-  (App.reset, fetchGroupInfo)
+init : () -> Url -> Nav.Key -> (App.Model, Cmd App.Msg)
+init _ url key=
+  (App.reset key, fetchGroupInfo <| getGroupId url)
 
 
 
@@ -42,7 +50,25 @@ update msg model =
           (App.setGroupInfo groupInfo model, Cmd.none)
 
         Err _ ->
-          (App.reset, Cmd.none)
+          (model, Cmd.none)
+        
+    LinkClicked urlRequest ->
+        case urlRequest of
+            Browser.Internal url ->
+                ( model
+                , Nav.pushUrl model.navKey (Url.toString url)
+                )
+            Browser.External href ->
+                ( model
+                , Nav.load href
+                )        
+    UrlChanged url ->
+        stepUrl url model
+
+
+stepUrl : Url -> App.Model -> (App.Model, Cmd App.Msg)
+stepUrl url model =
+    (model,  fetchGroupInfo <| getGroupId url)
 
 -- SUBSCRIPTIONS
 
@@ -52,20 +78,33 @@ subscriptions model =
 
 -- VIEW
 
-view : App.Model -> Html App.Msg
+view : App.Model -> Browser.Document App.Msg
 view model =
+  { title = "Photography Olivier Huin"
+  , body =
+      [ viewHeader
+      , App.view model
+      , viewFooter
+      ]
+  }
+  
+
+viewHeader : Html msg
+viewHeader =
   div []
     [ h2 [] [ text "Photography by Olivier Huin" ]
-    , App.view model
     ]
 
-
-
+viewFooter : Html msg
+viewFooter =
+  div [class "footer"]
+    [ 
+    ]
 -- HTTP
 
-fetchGroupInfo : Cmd App.Msg
-fetchGroupInfo =
+fetchGroupInfo : String -> Cmd App.Msg
+fetchGroupInfo groupId =
   Http.get
-    { url = "/data/group-testing.json"
+    { url = ["/data/group-", groupId, ".json"] |> String.concat
     , expect = Http.expectJson GotGroupInfo GroupInfo.decoder
     }

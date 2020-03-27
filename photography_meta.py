@@ -188,9 +188,8 @@ def organizeByGroup():
         tags = getAllTags(groupMediaTags)
         saveMediaGroupAsJson(group["id"], { "tags": tags, "items": groupMediaTags })
 
-# ensureIdForFolders()
+ensureIdForFolders()
 # ensureIdForMediaFiles()
-
 extractTags()
 tagsByFile()
 organizeByGroup()

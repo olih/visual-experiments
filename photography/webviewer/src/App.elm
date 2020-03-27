@@ -6,18 +6,21 @@ import Set exposing(Set)
 import Html exposing (Html, div, select, option, text, span, i)
 import Html.Attributes as Attr exposing (attribute, name)
 import Html.Events as Events
+import Browser exposing(UrlRequest)
+import Url exposing (Url)
+import Browser.Navigation as Nav
 import Tags as Tags
 type alias Model =
     { 
-        groupId: String
+        navKey: Nav.Key
         , groupInfo: GroupInfo.Model
         , tag : String
         , items: List MediaFileInfo.Model
     }
 
-reset: Model
-reset = {
-    groupId = "default"
+reset: Nav.Key -> Model
+reset key = {
+    navKey = key
     , groupInfo = GroupInfo.reset
     , tag = "2020"
     , items = []
@@ -26,10 +29,13 @@ reset = {
 type Msg
   = GotGroupInfo (Result Http.Error GroupInfo.Model)
   | SelectTag String
+  | LinkClicked UrlRequest
+  | UrlChanged Url
 
 setTag: String -> Model -> Model
 setTag tag model =
     { model | tag = tag}
+
 setGroupInfo: GroupInfo.Model -> Model -> Model
 setGroupInfo groupInfo model =
     { model | groupInfo = groupInfo, tag = GroupInfo.getDefaultTag groupInfo }
