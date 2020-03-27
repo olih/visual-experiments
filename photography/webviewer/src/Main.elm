@@ -24,7 +24,7 @@ main =
 
 init : () -> (App.Model, Cmd App.Msg)
 init _ =
-  (App.reset, fetchGroupInfo())
+  (App.reset, fetchGroupInfo)
 
 
 
@@ -33,13 +33,13 @@ init _ =
 update : App.Msg -> App.Model -> (App.Model, Cmd App.Msg)
 update msg model =
   case msg of
-    ToggleTag tag ->
-      (App.toggleTag tag model, Cmd.none)
+    SelectTag tag ->
+      (App.setTag tag model |> App.filterByTag, Cmd.none)
     
     GotGroupInfo result ->
       case result of
         Ok groupInfo ->
-          (App.setGroupInfo groupInfo, Cmd.none)
+          (App.setGroupInfo groupInfo model, Cmd.none)
 
         Err _ ->
           (App.reset, Cmd.none)
@@ -55,28 +55,9 @@ subscriptions model =
 view : App.Model -> Html App.Msg
 view model =
   div []
-    [ h2 [] [ text "Random image" ]
-    , viewGif model
+    [ h2 [] [ text "Photography by Olivier Huin" ]
+    , App.view model
     ]
-
-
-viewGif : App.Model -> Html App.Msg
-viewGif model =
-  case model of
-    Failure ->
-      div []
-        [ text "I could not load a random image for some reason. "
-        , button [ onClick MorePlease ] [ text "Try Again from application/json!" ]
-        ]
-
-    Loading ->
-      text "Loading..."
-
-    Success url ->
-      div []
-        [ button [ onClick MorePlease, style "display" "block" ] [ text "Another from application/json!" ]
-        , img [ src url ] []
-        ]
 
 
 
@@ -85,6 +66,6 @@ viewGif model =
 fetchGroupInfo : Cmd App.Msg
 fetchGroupInfo =
   Http.get
-    { url = "/default.json"
+    { url = "/data/group-testing.json"
     , expect = Http.expectJson GotGroupInfo GroupInfo.decoder
     }

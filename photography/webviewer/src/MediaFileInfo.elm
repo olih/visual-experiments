@@ -23,6 +23,6 @@ decoder =
 view : Model -> Html a
 view model =
     figure [ Attr.class "image is-128x128" ]
-    [ img [ [model.folder, "/small-", model.item] |> String.concat |> src]
+    [ img [ ["img/", model.folder, "/small-", model.item] |> String.concat |> src]
         []
     ]

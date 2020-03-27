@@ -8,8 +8,15 @@ from typing import List, Tuple
 from glob import glob
 import re
 import os.path
+from os import path
 from pathlib import Path
 import subprocess
+import sys
+
+if not (sys.version_info.major == 3 and sys.version_info.minor >= 5):
+    print("The photography script requires Python 3.5 or higher!")
+    print("You are using Python {}.{}.".format(sys.version_info.major, sys.version_info.minor))
+    sys.exit(1)
 
 localDir = os.environ['OLI_LOCAL_DIR']
 
@@ -19,9 +26,13 @@ def loadConfAsJson():
 
 jsonConf = loadConfAsJson()
 
-photographyDir = jsonConf["folders"]["local-parent-directory"]
+photographyDir = jsonConf["folders"]["directory"]
 photographyImgDir = "{}/img".format(photographyDir)
 photographyDataDir = "{}/data".format(photographyDir)
+
+if not path.exists(photographyDir):
+    print("The directory with the images is not connected {}: ".format(photographyDir))
+    sys.exit(1)
 
 foldersHashids = Hashids(salt=jsonConf["folders"]["salt"], min_length=15)
 mediasHashids = Hashids(salt=jsonConf["medias"]["salt"], min_length=20)

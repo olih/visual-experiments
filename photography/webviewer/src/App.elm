@@ -1,10 +1,11 @@
-module App exposing (Model, reset, Msg(..), setGroupInfo, setItems, setTag, filterByTag)
+module App exposing (Model, reset, Msg(..), setGroupInfo, setItems, setTag, filterByTag, view)
 import Http
 import GroupInfo as GroupInfo
 import MediaFileInfo as MediaFileInfo
 import Set exposing(Set)
 import Html exposing (Html, div, select, option, text, span, i)
-import Html.Attributes as Attr exposing (attribute)
+import Html.Attributes as Attr exposing (attribute, name)
+import Html.Events as Events
 import Tags as Tags
 type alias Model =
     { 
@@ -23,8 +24,8 @@ reset = {
  }
 
 type Msg
-  = GotGroupInfo (Result Http.Error String)
-  | ToggleTag String
+  = GotGroupInfo (Result Http.Error GroupInfo.Model)
+  | SelectTag String
 
 setTag: String -> Model -> Model
 setTag tag model =
@@ -51,14 +52,14 @@ viewItems mediaFiles =
 asOption: String -> Html a
 asOption desc =
     option [] [ text desc ]
-viewTag : String -> Set String -> Html a
+viewTag : String -> Set String -> Html Msg
 viewTag tag tags =
     div [ Attr.class "control has-icons-left" ]
     [ div [ Attr.class "select is-small" ]
         [ 
             option [ attribute "selected" "" ]
                 [ text tag ]
-            :: (Tags.toListWithoutOne tag tags |> List.map asOption) |> select []
+            :: (Tags.toListWithoutOne tag tags |> List.map asOption) |> select [ name "tags", Events.onInput SelectTag]
         ]
     , span [ Attr.class "icon is-small is-left" ]
         [ i [ Attr.class "fas fa-globe" ]
@@ -66,7 +67,7 @@ viewTag tag tags =
         ]
     ]
 
-view: Model ->  Html a
+view: Model ->  Html Msg
 view model =
     div [] [
         viewTag model.tag model.groupInfo.tags
