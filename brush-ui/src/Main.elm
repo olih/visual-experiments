@@ -1,12 +1,17 @@
 module Main exposing (Document, Model, Msg(..), init, main, subscriptions, update, view)
 
 import Browser
-import Dalmatian.Editor.Applicative as Applicative exposing (Model)
-import Dalmatian.Editor.Schema exposing (PanelZone(..), ScreenZone(..))
-import Dalmatian.Editor.AppEvent exposing (UIEvent(..))
+import Experiment.Brush.Editor.Applicative as App
+import Experiment.Brush.Editor.AppEvent exposing (UIEvent(..))
+import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+
+type Model
+  = Unloadable
+  | Loading
+  | Loaded App.Model
 
 
 main =
@@ -21,65 +26,44 @@ main =
 
 -- MODEL
 
-
-type alias Model =
-    { greeting : String
-    , applicative : Applicative.Model
-    }
-
-
-defaultModel : Model
-defaultModel =
-    { greeting = "Hello Goodbye"
-    , applicative = Applicative.reset
-    }
-
-
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( defaultModel, Cmd.none )
-
+    ( Loading, fetchGeneticBrushes )
 
 
 -- UPDATE
 
 
 type Msg
-    = Hello
-    | Goodbye
-    | OnUIEvent UIEvent
+    = OnUIEvent UIEvent
+    | GotText (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Hello ->
-            ( { model | greeting = "I say \"hello\"" }, Cmd.none )
+        GotText result ->
+            case result of
+                Ok fullContent ->
+                   case App.fromString fullContent of
+                      Ok appModel ->
+                        (Loaded appModel, Cmd.none )
+                      Err failure ->
+                        ( Unloadable, Cmd.none )
 
-        Goodbye ->
-            ( { model | greeting = "You say \"goodbye\"" }, Cmd.none )
+                Err _ ->
+                    (Unloadable, Cmd.none)
 
         OnUIEvent event ->
-            ( { model | greeting = "You say \"goodbye\"" }, Cmd.none )
+            ( model , Cmd.none )
 
 
-
-{--each variant should return a model and a command message. If you are not using any command messages,
-   then use "Cmd.none". This is different from what you may have done in "Browser.sandbox" if you started
-   with the official guide's tutorials.
-   
-   For example: 
-   
-   Variant -> 
-        ( { model | key = changeToValue }, Cmd.none ) --}
 -- SUBSCRIPTIONS
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
-
-
 
 -- VIEW
 
@@ -95,19 +79,15 @@ view model =
     { title = "Hello Goodbye"
     , body =
         [ div []
-            [ h1 [] [ text model.greeting ]
-            , button
-                [ type_ "Button"
-                , onClick
-                    (if model.greeting == "You say \"goodbye\"" then
-                        Hello
-
-                     else
-                        Goodbye
-                    )
-                ]
-                [ text "Click me!" ]
-            ]
+            [ h1 [] [ text "ha" ]
+           ]
         ]
     }
 
+
+fetchGeneticBrushes :  Cmd Msg
+fetchGeneticBrushes =
+  Http.get
+    { url = "/brushes.gen.txt"
+    , expect = Http.expectString GotText
+    }

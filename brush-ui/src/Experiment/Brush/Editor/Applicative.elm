@@ -1,11 +1,11 @@
-module Experiment.Brush.Editor.Applicative exposing(reset, fromString)
+module Experiment.Brush.Editor.Applicative exposing(Model, fromString, trash)
 
 import Experiment.Brush.Editor.Dialect.Section as Section exposing (Section)
 import Experiment.Brush.Editor.Dialect.BrushContent as BrushContent exposing (BrushContent)
 import Experiment.Brush.Editor.Dialect.Brush as Brush
 import Experiment.Brush.Editor.Dialect.BrushStrokeContent as BrushStrokeContent exposing (BrushStrokeContent)
 import Experiment.Brush.Editor.Dialect.RangeContent as RangeContent exposing (RangeContent)
-import Experiment.Brush.Editor.Dialect.Failing as Failing exposing (Failure)
+import Experiment.Brush.Editor.Dialect.Failing as Failing exposing (Failure, FailureKind(..))
 import Experiment.Brush.Editor.Dialect.SectionList as SectionList
 import Experiment.Brush.Editor.Dialect.Identifier as Identifier exposing (Identifier)
 import Experiment.Brush.Editor.Dialect.SectionTypeId exposing(SectionTypeId(..))
@@ -15,27 +15,25 @@ type alias Model =
         , generation: Identifier
         , latestGeneration: Identifier
         , sections: List Section
-        , maybeBrushContent: Maybe BrushContent
-        , maybeRangeContent: Maybe RangeContent
-        , maybeBrushStrokeContent: Maybe BrushStrokeContent
-        , failure : Maybe Failure
+        , brushContent: BrushContent
+        , rangeContent: RangeContent
+        , brushStrokeContent: BrushStrokeContent
     }
 
-reset: Model
-reset = {
-        idx = Identifier.notFound
-        , idxList = []
-        , generation = Identifier.notFound
-        , latestGeneration = Identifier.notFound
-        , sections = []
-        , failure = Nothing
-        , maybeBrushContent = Nothing
-        , maybeRangeContent = Nothing
-        , maybeBrushStrokeContent = Nothing
-    }
+create: List Identifier -> Identifier -> List Section -> BrushContent -> RangeContent -> BrushStrokeContent -> Model
+create idxList latestGeneration sections brushContent rangeContent brushStrokeContent =
+  {   idx = idxList |> List.head |> Maybe.withDefault (Identifier.notFound)
+        , idxList = idxList
+        , generation = latestGeneration
+        , latestGeneration = latestGeneration
+        , sections = sections
+        , brushContent = brushContent
+        , rangeContent = rangeContent
+        , brushStrokeContent = brushStrokeContent
+    }  
 
-fromString: String -> Model -> Model
-fromString content model =
+fromString: String -> Result Failure Model
+fromString content =
     let
         perhapsSections = SectionList.fromString content
         sections = Result.withDefault [] perhapsSections
@@ -65,32 +63,10 @@ fromString content model =
             |> Maybe.withDefault []
             |> List.map .id
         
-        idx = idxList |> List.head |> Maybe.withDefault (Identifier.notFound)
-
-    in
-        { model | 
-            sections = sections
-            , failure = failure
-            , latestGeneration = latestGeneration
-            , generation = latestGeneration
-            , maybeBrushContent = maybeBrushContent
-            , maybeRangeContent = maybeRangeContent
-            , maybeBrushStrokeContent = maybeBrushStrokeContent
-            , idxList = idxList
-            , idx = idx
-        }
+        in
+            Maybe.map3 (\ brush range brushStroke -> create idxList latestGeneration sections brush range brushStroke |> Ok) maybeBrushContent maybeRangeContent maybeBrushStrokeContent
+            |> Maybe.withDefault (Maybe.map identity failure |> Maybe.withDefault (Failing.create "whole content" InvalidFormatFailure "A section is missing") |> Err)
 
 trash: Model -> Model
 trash model =
-    let
-        brushes =  model.maybeBrushContent 
-            |> Maybe.map (.brushes >> .values)
-            |> Maybe.withDefault []
-            |> Brush.toggleTrashForId model.idx
-
-    in
-        { model | 
-            maybeBrushContent = brushes 
-                |> BrushContent.asBrushesIn model.maybeBrushContent
-        
-        }
+    { model | brushContent =  BrushContent.setValues (Brush.toggleTrashForId model.idx model.brushContent.brushes.values) model.brushContent }
