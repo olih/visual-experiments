@@ -6282,12 +6282,30 @@ var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$subscriptions = function (model) {
 	return $elm$core$Platform$Sub$none;
 };
+var $author$project$Experiment$Brush$Editor$Dialect$Failing$InvalidFormatFailure = {$: 'InvalidFormatFailure'};
 var $author$project$Main$Loaded = function (a) {
 	return {$: 'Loaded', a: a};
 };
-var $author$project$Main$Unloadable = {$: 'Unloadable'};
+var $author$project$Main$Unloadable = function (a) {
+	return {$: 'Unloadable', a: a};
+};
+var $author$project$Experiment$Brush$Editor$Dialect$Failing$createMessage = F2(
+	function (failureKind, message) {
+		if (failureKind.$ === 'InvalidFormatFailure') {
+			return '(753c7eba) ' + message;
+		} else {
+			return '(a799245c) ' + message;
+		}
+	});
+var $author$project$Experiment$Brush$Editor$Dialect$Failing$create = F3(
+	function (source, failureKind, message) {
+		return {
+			kind: failureKind,
+			message: A2($author$project$Experiment$Brush$Editor$Dialect$Failing$createMessage, failureKind, message),
+			source: source
+		};
+	});
 var $author$project$Experiment$Brush$Editor$Dialect$SectionTypeId$BrushesSection = {$: 'BrushesSection'};
-var $author$project$Experiment$Brush$Editor$Dialect$Failing$InvalidFormatFailure = {$: 'InvalidFormatFailure'};
 var $author$project$Experiment$Brush$Editor$Dialect$SectionTypeId$MonochromeSection = {$: 'MonochromeSection'};
 var $author$project$Experiment$Brush$Editor$Dialect$SectionTypeId$SettingsSection = {$: 'SettingsSection'};
 var $author$project$Experiment$Brush$Editor$Dialect$Section$byId = F2(
@@ -6332,22 +6350,6 @@ var $author$project$Experiment$Brush$Editor$Applicative$create = F6(
 			latestGeneration: latestGeneration,
 			rangeContent: rangeContent,
 			sections: sections
-		};
-	});
-var $author$project$Experiment$Brush$Editor$Dialect$Failing$createMessage = F2(
-	function (failureKind, message) {
-		if (failureKind.$ === 'InvalidFormatFailure') {
-			return '(753c7eba) ' + message;
-		} else {
-			return '(a799245c) ' + message;
-		}
-	});
-var $author$project$Experiment$Brush$Editor$Dialect$Failing$create = F3(
-	function (source, failureKind, message) {
-		return {
-			kind: failureKind,
-			message: A2($author$project$Experiment$Brush$Editor$Dialect$Failing$createMessage, failureKind, message),
-			source: source
 		};
 	});
 var $elm$core$List$filter = F2(
@@ -7921,6 +7923,13 @@ var $author$project$Experiment$Brush$Editor$Applicative$fromString = function (c
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$Main$noCmd = function (model) {
+	return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+};
+var $author$project$Experiment$Brush$Editor$AppEvent$processEvent = F2(
+	function (uiEvent, appModel) {
+		return appModel;
+	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		if (msg.$ === 'GotText') {
@@ -7930,26 +7939,57 @@ var $author$project$Main$update = F2(
 				var _v2 = $author$project$Experiment$Brush$Editor$Applicative$fromString(fullContent);
 				if (_v2.$ === 'Ok') {
 					var appModel = _v2.a;
-					return _Utils_Tuple2(
-						$author$project$Main$Loaded(appModel),
-						$elm$core$Platform$Cmd$none);
+					return $author$project$Main$noCmd(
+						$author$project$Main$Loaded(appModel));
 				} else {
 					var failure = _v2.a;
-					return _Utils_Tuple2($author$project$Main$Unloadable, $elm$core$Platform$Cmd$none);
+					return $author$project$Main$noCmd(
+						$author$project$Main$Unloadable(failure));
 				}
 			} else {
-				return _Utils_Tuple2($author$project$Main$Unloadable, $elm$core$Platform$Cmd$none);
+				return $author$project$Main$noCmd(
+					$author$project$Main$Unloadable(
+						A3($author$project$Experiment$Brush$Editor$Dialect$Failing$create, 'whole content', $author$project$Experiment$Brush$Editor$Dialect$Failing$InvalidFormatFailure, 'fetching /brushes.gen.txt did not work')));
 			}
 		} else {
 			var event = msg.a;
-			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			if (model.$ === 'Loaded') {
+				var appModel = model.a;
+				return $author$project$Main$noCmd(
+					$author$project$Main$Loaded(
+						A2($author$project$Experiment$Brush$Editor$AppEvent$processEvent, event, appModel)));
+			} else {
+				return $author$project$Main$noCmd(model);
+			}
 		}
 	});
+var $author$project$Experiment$Brush$Editor$AppEvent$OnNext = {$: 'OnNext'};
+var $author$project$Main$OnUIEvent = function (a) {
+	return {$: 'OnUIEvent', a: a};
+};
+var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $author$project$Main$view = function (model) {
+var $author$project$Main$viewLoaded = function (appModel) {
 	return {
 		body: _List_fromArray(
 			[
@@ -7963,12 +8003,90 @@ var $author$project$Main$view = function (model) {
 						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$text('ha')
+								$elm$html$Html$text('Loading Brush UI')
+							])),
+						A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick(
+								$author$project$Main$OnUIEvent($author$project$Experiment$Brush$Editor$AppEvent$OnNext))
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Next')
 							]))
 					]))
 			]),
-		title: 'Hello Goodbye'
+		title: 'Brush UI'
 	};
+};
+var $author$project$Main$viewLoading = {
+	body: _List_fromArray(
+		[
+			A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$h1,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Loading Brush UI')
+						]))
+				]))
+		]),
+	title: 'Brush UI'
+};
+var $elm$html$Html$p = _VirtualDom_node('p');
+var $author$project$Main$viewUnloadable = function (failure) {
+	return {
+		body: _List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$h1,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Loading Brush UI failed')
+							])),
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text(failure.source)
+							])),
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text(failure.message)
+							]))
+					]))
+			]),
+		title: 'Brush UI'
+	};
+};
+var $author$project$Main$view = function (model) {
+	switch (model.$) {
+		case 'Loading':
+			return $author$project$Main$viewLoading;
+		case 'Unloadable':
+			var failure = model.a;
+			return $author$project$Main$viewUnloadable(failure);
+		default:
+			var appModel = model.a;
+			return $author$project$Main$viewLoaded(appModel);
+	}
 };
 var $author$project$Main$main = $elm$browser$Browser$document(
 	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});

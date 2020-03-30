@@ -1,8 +1,8 @@
-module Experiment.Brush.Editor.AppEvent exposing (UIEvent(..))
+module Experiment.Brush.Editor.AppEvent exposing (UIEvent(..), processEvent)
 
-type UIEvent
-    = OnLoad String
-    | OnNext
+import Experiment.Brush.Editor.Applicative as App
+type UIEvent = 
+    OnNext
     | OnPrevious
     | OnFirst
     | OnLast
@@ -10,3 +10,7 @@ type UIEvent
     | OnPreserve
     | OnSave
 
+
+processEvent: UIEvent -> App.Model -> App.Model
+processEvent uiEvent appModel =
+    appModel
