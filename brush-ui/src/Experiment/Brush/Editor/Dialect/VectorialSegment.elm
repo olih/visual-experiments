@@ -1,8 +1,17 @@
-module Experiment.Brush.Editor.Dialect.VectorialSegment exposing (VectorialSegment, parser, toString)
+module Experiment.Brush.Editor.Dialect.VectorialSegment exposing (VectorialSegment, parser, toString, toSvgString)
 
 import Parser exposing ((|.), (|=), Parser, int, keyword, oneOf, spaces, succeed)
 import Experiment.Brush.Editor.Dialect.Fraction as Fraction exposing (Fraction)
 import Experiment.Brush.Editor.Dialect.RelativePoint as RelativePoint exposing(RelativePoint)
+import Experiment.Brush.Editor.Dialect.PixelSqDim as PixelSqDim
+
+toPix: Fraction -> String
+toPix fraction =
+    PixelSqDim.fromFraction 1000 fraction |> String.fromInt
+
+toRelPoint: RelativePoint -> String
+toRelPoint relPoint =
+    [toPix relPoint.dx, toPix relPoint.dy] |> String.join " "
 
 -- all positions are relative
 
@@ -102,3 +111,21 @@ toString path =
             String.join " " ["q", RelativePoint.toString pt1, RelativePoint.toString pt2]
         SmoothQuadraticCurve pt1 -> 
             String.join " " ["t", RelativePoint.toString pt1]
+
+toSvgString: VectorialSegment -> String
+toSvgString path =
+    case path of
+        LineTo pt -> 
+            String.join " " ["l", toRelPoint pt]
+        Horizontal f ->
+             String.join " " ["h", toPix f]
+        Vertical f ->
+            String.join " " ["v", toPix f]
+        CubicCurve pt1 pt2 pt3 -> 
+            String.join " " ["c", toRelPoint pt1, toRelPoint pt2, toRelPoint pt3]
+        SmoothCubicCurve pt1 pt2 -> 
+            String.join " " ["s", toRelPoint pt1, toRelPoint pt2]
+        QuadraticCurve pt1 pt2 -> 
+            String.join " " ["q", toRelPoint pt1, toRelPoint pt2]
+        SmoothQuadraticCurve pt1 -> 
+            String.join " " ["t", toRelPoint pt1]

@@ -1,8 +1,12 @@
-module Experiment.Brush.Editor.Dialect.Brush exposing (Brush, parser, toString, toggleTrash, togglePreserve, fromStringList, toStringList, byId, toggleTrashForId, togglePreserveForId)
+module Experiment.Brush.Editor.Dialect.Brush exposing (Brush, parser, toString, toggleTrash, togglePreserve, fromStringList, toStringList, byId, toggleTrashForId, togglePreserveForId, view)
 
 import Parser exposing ((|.), (|=), Parser, keyword, spaces, succeed, Trailing(..), oneOf, run, DeadEnd)
 import Experiment.Brush.Editor.Dialect.Identifier as Identifier exposing(Identifier)
 import Experiment.Brush.Editor.Dialect.VectorialSegment as VectorialSegment exposing (VectorialSegment)
+import Html exposing (Html, text)
+import Html.Attributes exposing (attribute)
+import Svg exposing (svg, defs, path)
+import Svg.Attributes exposing (d, id, fill)
 
 type alias Brush =
     { id : Identifier
@@ -118,3 +122,20 @@ togglePreserveForId id list =
             else
                 brush
         )
+
+asPathString: Brush -> String
+asPathString brush =
+    brush.segments 
+    |> List.map VectorialSegment.toSvgString
+    |> (++) ["z"]
+    |> String.join " "
+
+view : Brush -> Html a
+view brush =
+   svg [ attribute "height" "1000", attribute "width" "1000" ]
+    [ defs []
+        [ path [ d <| asPathString brush, id "brush", fill "black" ]
+            []
+        , text "  "
+        ]
+    ]
