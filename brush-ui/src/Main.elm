@@ -1,7 +1,7 @@
-module Main exposing (Document, Model, Msg(..), init, main, subscriptions, update, view)
+module Main exposing (Document, Model, init, main, subscriptions, update, view)
 
 import Browser
-import Experiment.Brush.Editor.AppEvent as AppEvent exposing (UIEvent(..))
+import Experiment.Brush.Editor.AppEvent as AppEvent exposing (Msg(..))
 import Experiment.Brush.Editor.Applicative as App
 import Experiment.Brush.Editor.Dialect.Failing as Failing exposing (Failure, FailureKind(..))
 import Html exposing (..)
@@ -38,17 +38,12 @@ init _ =
 -- UPDATE
 
 
-type Msg
-    = OnUIEvent UIEvent
-    | GotText (Result Http.Error String)
-
-
 noCmd : Model -> ( Model, Cmd Msg )
 noCmd model =
     ( model, Cmd.none )
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : AppEvent.Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GotText result ->
@@ -64,10 +59,10 @@ update msg model =
                 Err _ ->
                     Unloadable (Failing.create "whole content" InvalidFormatFailure "fetching /brushes.gen.txt did not work") |> noCmd
 
-        OnUIEvent event ->
+        _ ->
             case model of
                 Loaded appModel ->
-                    AppEvent.processEvent event appModel |> Loaded |> noCmd
+                    AppEvent.processEvent msg appModel |> Loaded |> noCmd
 
                 _ ->
                     model |> noCmd
@@ -77,7 +72,7 @@ update msg model =
 -- SUBSCRIPTIONS
 
 
-subscriptions : Model -> Sub Msg
+subscriptions : Model -> Sub AppEvent.Msg
 subscriptions model =
     Sub.none
 
@@ -92,7 +87,7 @@ type alias Document msg =
     }
 
 
-viewLoading : Document Msg
+viewLoading : Document AppEvent.Msg
 viewLoading =
     { title = "Brush UI"
     , body =
@@ -103,7 +98,7 @@ viewLoading =
     }
 
 
-viewUnloadable : Failure -> Document Msg
+viewUnloadable : Failure -> Document AppEvent.Msg
 viewUnloadable failure =
     { title = "Brush UI"
     , body =
@@ -116,19 +111,19 @@ viewUnloadable failure =
     }
 
 
-viewLoaded : App.Model -> Document Msg
+viewLoaded : App.Model -> Document AppEvent.Msg
 viewLoaded appModel =
     { title = "Brush UI"
     , body =
         [ div []
             [ h1 [] [ text "Loading Brush UI" ]
-            , button [ onClick (OnUIEvent OnNext)] [ text "Next" ]
+            , button [ onClick OnNext] [ text "Next" ]
             ]
         ]
     }
 
 
-view : Model -> Document Msg
+view : Model -> Document AppEvent.Msg
 view model =
     case model of
         Loading ->
@@ -141,7 +136,7 @@ view model =
             viewLoaded appModel
 
 
-fetchGeneticBrushes : Cmd Msg
+fetchGeneticBrushes : Cmd AppEvent.Msg
 fetchGeneticBrushes =
     Http.get
         { url = "/brushes.gen.txt"

@@ -1,7 +1,10 @@
-module Experiment.Brush.Editor.AppEvent exposing (UIEvent(..), processEvent)
+module Experiment.Brush.Editor.AppEvent exposing (Msg(..), processEvent)
 
 import Experiment.Brush.Editor.Applicative as App
-type UIEvent = 
+import Experiment.Brush.Editor.Dialect.RangeParamId exposing (RangeParamId)
+import Http
+
+type Msg = 
     OnNext
     | OnPrevious
     | OnFirst
@@ -9,8 +12,10 @@ type UIEvent =
     | OnTrash
     | OnPreserve
     | OnSave
+    | OnChangeParam RangeParamId String
+    | GotText (Result Http.Error String)
 
 
-processEvent: UIEvent -> App.Model -> App.Model
+processEvent: Msg -> App.Model -> App.Model
 processEvent uiEvent appModel =
     appModel

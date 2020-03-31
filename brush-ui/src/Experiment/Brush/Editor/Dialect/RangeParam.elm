@@ -1,8 +1,10 @@
-module Experiment.Brush.Editor.Dialect.RangeParam exposing (RangeParam, parser, setValue, toString, fromStringList)
+module Experiment.Brush.Editor.Dialect.RangeParam exposing (RangeParam, parser, setValue, toString, fromStringList, view)
 
 import Experiment.Brush.Editor.Dialect.RangeParamId as RangeParamId exposing (RangeParamId)
 import Parser exposing ((|.), (|=), Parser, int, keyword, spaces, succeed, end, run, DeadEnd)
 
+import Html exposing (Html, label, input, text, div)
+import Html.Attributes as Attr
 
 type alias RangeParam =
     { id : RangeParamId
@@ -41,3 +43,18 @@ fromString line  =
 fromStringList: List String -> List (String, Result (List DeadEnd) RangeParam)
 fromStringList lines =
     List.map fromString lines
+
+
+viewOption: RangeParamId -> Int -> Html a
+viewOption rgParamId value =
+    label [ Attr.class "radio" ]
+            [ input [ Attr.name <| RangeParamId.toString rgParamId, Attr.type_ "radio", Attr.value <| String.fromInt value ]
+                []
+            , text <| String.fromInt value
+            ]
+
+view : RangeParam -> Html a
+view rgParam =
+    [1, 2, 3]
+    |> List.map (viewOption rgParam.id)
+    |> div [ Attr.class "control" ]

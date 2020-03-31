@@ -5487,7 +5487,7 @@ var $elm$core$Task$perform = F2(
 	});
 var $elm$browser$Browser$document = _Browser_document;
 var $author$project$Main$Loading = {$: 'Loading'};
-var $author$project$Main$GotText = function (a) {
+var $author$project$Experiment$Brush$Editor$AppEvent$GotText = function (a) {
 	return {$: 'GotText', a: a};
 };
 var $elm$http$Http$BadStatus_ = F2(
@@ -6271,7 +6271,7 @@ var $elm$http$Http$get = function (r) {
 };
 var $author$project$Main$fetchGeneticBrushes = $elm$http$Http$get(
 	{
-		expect: $elm$http$Http$expectString($author$project$Main$GotText),
+		expect: $elm$http$Http$expectString($author$project$Experiment$Brush$Editor$AppEvent$GotText),
 		url: '/brushes.gen.txt'
 	});
 var $author$project$Main$init = function (_v0) {
@@ -7952,21 +7952,17 @@ var $author$project$Main$update = F2(
 						A3($author$project$Experiment$Brush$Editor$Dialect$Failing$create, 'whole content', $author$project$Experiment$Brush$Editor$Dialect$Failing$InvalidFormatFailure, 'fetching /brushes.gen.txt did not work')));
 			}
 		} else {
-			var event = msg.a;
 			if (model.$ === 'Loaded') {
 				var appModel = model.a;
 				return $author$project$Main$noCmd(
 					$author$project$Main$Loaded(
-						A2($author$project$Experiment$Brush$Editor$AppEvent$processEvent, event, appModel)));
+						A2($author$project$Experiment$Brush$Editor$AppEvent$processEvent, msg, appModel)));
 			} else {
 				return $author$project$Main$noCmd(model);
 			}
 		}
 	});
 var $author$project$Experiment$Brush$Editor$AppEvent$OnNext = {$: 'OnNext'};
-var $author$project$Main$OnUIEvent = function (a) {
-	return {$: 'OnUIEvent', a: a};
-};
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
@@ -8009,8 +8005,7 @@ var $author$project$Main$viewLoaded = function (appModel) {
 						$elm$html$Html$button,
 						_List_fromArray(
 							[
-								$elm$html$Html$Events$onClick(
-								$author$project$Main$OnUIEvent($author$project$Experiment$Brush$Editor$AppEvent$OnNext))
+								$elm$html$Html$Events$onClick($author$project$Experiment$Brush$Editor$AppEvent$OnNext)
 							]),
 						_List_fromArray(
 							[
