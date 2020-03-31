@@ -4,9 +4,8 @@ import Parser exposing ((|.), (|=), Parser, keyword, spaces, succeed, Trailing(.
 import Experiment.Brush.Editor.Dialect.Identifier as Identifier exposing(Identifier)
 import Experiment.Brush.Editor.Dialect.VectorialSegment as VectorialSegment exposing (VectorialSegment)
 import Html exposing (Html, text)
-import Html.Attributes exposing (attribute)
 import Svg exposing (svg, defs, path)
-import Svg.Attributes exposing (d, id, fill)
+import Svg.Attributes exposing (d, id, fill, viewBox)
 
 type alias Brush =
     { id : Identifier
@@ -132,7 +131,7 @@ asPathString brush =
 
 view : Brush -> Html a
 view brush =
-   svg [ attribute "height" "1000", attribute "width" "1000" ]
+   svg [ viewBox "0 0 1000 1000" ]
     [ defs []
         [ path [ d <| asPathString brush, id "brush", fill "black" ]
             []
