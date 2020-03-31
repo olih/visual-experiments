@@ -62,7 +62,7 @@ update msg model =
         _ ->
             case model of
                 Loaded appModel ->
-                    AppEvent.processEvent msg appModel |> Loaded |> noCmd
+                    processEvent msg appModel |> Loaded |> noCmd
 
                 _ ->
                     model |> noCmd
@@ -142,3 +142,7 @@ fetchGeneticBrushes =
         { url = "/brushes.gen.txt"
         , expect = Http.expectString GotText
         }
+
+processEvent: Msg -> App.Model -> App.Model
+processEvent uiEvent appModel =
+    appModel

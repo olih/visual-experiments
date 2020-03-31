@@ -5,7 +5,8 @@ import Parser exposing ((|.), (|=), Parser, int, keyword, spaces, succeed, end, 
 
 import Html exposing (Html, label, input, text, div)
 import Html.Attributes as Attr
-
+import Experiment.Brush.Editor.AppEvent exposing (Msg(..))
+import Html.Events exposing (onInput)
 type alias RangeParam =
     { id : RangeParamId
     , value : Int
@@ -53,8 +54,8 @@ viewOption rgParamId value =
             , text <| String.fromInt value
             ]
 
-view : RangeParam -> Html a
+view : RangeParam -> Html Msg
 view rgParam =
     [1, 2, 3]
     |> List.map (viewOption rgParam.id)
-    |> div [ Attr.class "control" ]
+    |> div [ Attr.class "control", onInput <| OnChangeParam rgParam.id]

@@ -7926,7 +7926,7 @@ var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$noCmd = function (model) {
 	return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 };
-var $author$project$Experiment$Brush$Editor$AppEvent$processEvent = F2(
+var $author$project$Main$processEvent = F2(
 	function (uiEvent, appModel) {
 		return appModel;
 	});
@@ -7956,7 +7956,7 @@ var $author$project$Main$update = F2(
 				var appModel = model.a;
 				return $author$project$Main$noCmd(
 					$author$project$Main$Loaded(
-						A2($author$project$Experiment$Brush$Editor$AppEvent$processEvent, msg, appModel)));
+						A2($author$project$Main$processEvent, msg, appModel)));
 			} else {
 				return $author$project$Main$noCmd(model);
 			}
