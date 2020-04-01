@@ -6279,7 +6279,7 @@ var $author$project$Main$init = function (_v0) {
 };
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $author$project$Main$subscriptions = function (model) {
+var $author$project$Main$subscriptions = function (_v0) {
 	return $elm$core$Platform$Sub$none;
 };
 var $author$project$Experiment$Brush$Editor$Dialect$Failing$InvalidFormatFailure = {$: 'InvalidFormatFailure'};
@@ -7962,10 +7962,293 @@ var $author$project$Main$update = F2(
 			}
 		}
 	});
-var $author$project$Experiment$Brush$Editor$AppEvent$OnNext = {$: 'OnNext'};
-var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm$html$Html$section = _VirtualDom_node('section');
+var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
+var $author$project$Experiment$Brush$Editor$Dialect$BrushContent$getBrush = F2(
+	function (identifier, content) {
+		return $elm$core$List$head(
+			A2(
+				$elm$core$List$filter,
+				function (brush) {
+					return _Utils_eq(brush.id, identifier);
+				},
+				content.brushes.values));
+	});
+var $author$project$Experiment$Brush$Editor$Dialect$PixelSqDim$fromFraction = F2(
+	function (dim, fraction) {
+		return ((dim * fraction.numerator) / fraction.denominator) | 0;
+	});
+var $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toPix = function (fraction) {
+	return $elm$core$String$fromInt(
+		A2($author$project$Experiment$Brush$Editor$Dialect$PixelSqDim$fromFraction, 1000, fraction));
+};
+var $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toRelPoint = function (relPoint) {
+	return A2(
+		$elm$core$String$join,
+		' ',
+		_List_fromArray(
+			[
+				$author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toPix(relPoint.dx),
+				$author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toPix(relPoint.dy)
+			]));
+};
+var $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toSvgString = function (path) {
+	switch (path.$) {
+		case 'LineTo':
+			var pt = path.a;
+			return A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[
+						'l',
+						$author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toRelPoint(pt)
+					]));
+		case 'Horizontal':
+			var f = path.a;
+			return A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[
+						'h',
+						$author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toPix(f)
+					]));
+		case 'Vertical':
+			var f = path.a;
+			return A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[
+						'v',
+						$author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toPix(f)
+					]));
+		case 'CubicCurve':
+			var pt1 = path.a;
+			var pt2 = path.b;
+			var pt3 = path.c;
+			return A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[
+						'c',
+						$author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toRelPoint(pt1),
+						$author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toRelPoint(pt2),
+						$author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toRelPoint(pt3)
+					]));
+		case 'SmoothCubicCurve':
+			var pt1 = path.a;
+			var pt2 = path.b;
+			return A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[
+						's',
+						$author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toRelPoint(pt1),
+						$author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toRelPoint(pt2)
+					]));
+		case 'QuadraticCurve':
+			var pt1 = path.a;
+			var pt2 = path.b;
+			return A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[
+						'q',
+						$author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toRelPoint(pt1),
+						$author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toRelPoint(pt2)
+					]));
+		default:
+			var pt1 = path.a;
+			return A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[
+						't',
+						$author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toRelPoint(pt1)
+					]));
+	}
+};
+var $author$project$Experiment$Brush$Editor$Dialect$Brush$asPathString = function (brush) {
+	return A2(
+		$elm$core$String$join,
+		' ',
+		_Utils_ap(
+			_List_fromArray(
+				['z']),
+			A2($elm$core$List$map, $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toSvgString, brush.segments)));
+};
+var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
+var $elm$svg$Svg$defs = $elm$svg$Svg$trustedNode('defs');
+var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
+var $elm$svg$Svg$Attributes$id = _VirtualDom_attribute('id');
+var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
+var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var $author$project$Experiment$Brush$Editor$Dialect$Brush$view = function (brush) {
+	return A2(
+		$elm$svg$Svg$svg,
+		_List_fromArray(
+			[
+				$elm$svg$Svg$Attributes$viewBox('0 0 1000 1000')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$svg$Svg$defs,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$svg$Svg$path,
+						_List_fromArray(
+							[
+								$elm$svg$Svg$Attributes$d(
+								$author$project$Experiment$Brush$Editor$Dialect$Brush$asPathString(brush)),
+								$elm$svg$Svg$Attributes$id('brush'),
+								$elm$svg$Svg$Attributes$fill('black')
+							]),
+						_List_Nil),
+						$elm$html$Html$text('  ')
+					]))
+			]));
+};
+var $author$project$Experiment$Brush$Editor$Dialect$BrushContent$view = F2(
+	function (identifier, content) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			A2($elm$svg$Svg$svg, _List_Nil, _List_Nil),
+			A2(
+				$elm$core$Maybe$map,
+				$author$project$Experiment$Brush$Editor$Dialect$Brush$view,
+				A2($author$project$Experiment$Brush$Editor$Dialect$BrushContent$getBrush, identifier, content)));
+	});
+var $elm$core$String$fromFloat = _String_fromNumber;
+var $author$project$Experiment$Brush$Editor$Dialect$Fraction$asFloatString = function (fraction) {
+	return $elm$core$String$fromFloat(fraction.numerator / fraction.denominator);
+};
+var $author$project$Experiment$Brush$Editor$Dialect$BrushStroke$toDeg = function (fraction) {
+	return $elm$core$String$fromInt(
+		A2($author$project$Experiment$Brush$Editor$Dialect$PixelSqDim$fromFraction, 360, fraction));
+};
+var $author$project$Experiment$Brush$Editor$Dialect$BrushStroke$toPix = function (fraction) {
+	return $elm$core$String$fromInt(
+		A2($author$project$Experiment$Brush$Editor$Dialect$PixelSqDim$fromFraction, 1000, fraction));
+};
+var $author$project$Experiment$Brush$Editor$Dialect$BrushStroke$asTransformString = function (brushStroke) {
+	return A2(
+		$elm$core$String$join,
+		' ',
+		_List_fromArray(
+			[
+				'scale(',
+				$author$project$Experiment$Brush$Editor$Dialect$Fraction$asFloatString(brushStroke.scale),
+				')',
+				'rotate(',
+				$author$project$Experiment$Brush$Editor$Dialect$BrushStroke$toDeg(brushStroke.rotation),
+				')',
+				'translate(',
+				$author$project$Experiment$Brush$Editor$Dialect$BrushStroke$toPix(brushStroke.position.dx),
+				$author$project$Experiment$Brush$Editor$Dialect$BrushStroke$toPix(brushStroke.position.dy),
+				')'
+			]));
+};
+var $elm$virtual_dom$VirtualDom$attribute = F2(
+	function (key, value) {
+		return A2(
+			_VirtualDom_attribute,
+			_VirtualDom_noOnOrFormAction(key),
+			_VirtualDom_noJavaScriptOrHtmlUri(value));
+	});
+var $elm$html$Html$Attributes$attribute = $elm$virtual_dom$VirtualDom$attribute;
+var $elm$svg$Svg$g = $elm$svg$Svg$trustedNode('g');
+var $elm$svg$Svg$Attributes$transform = _VirtualDom_attribute('transform');
+var $elm$svg$Svg$use = $elm$svg$Svg$trustedNode('use');
+var $author$project$Experiment$Brush$Editor$Dialect$BrushStroke$view = function (brushStroke) {
+	return A2(
+		$elm$svg$Svg$g,
+		_List_fromArray(
+			[
+				$elm$svg$Svg$Attributes$transform(
+				$author$project$Experiment$Brush$Editor$Dialect$BrushStroke$asTransformString(brushStroke))
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$svg$Svg$use,
+				_List_fromArray(
+					[
+						$elm$svg$Svg$Attributes$fill('black'),
+						A2($elm$html$Html$Attributes$attribute, 'xlink:href', '#brush')
+					]),
+				_List_Nil)
+			]));
+};
+var $author$project$Experiment$Brush$Editor$Dialect$BrushStrokeContent$view = function (content) {
+	return A2(
+		$elm$svg$Svg$svg,
+		_List_fromArray(
+			[
+				$elm$svg$Svg$Attributes$viewBox('0 0 1000 1000')
+			]),
+		A2($elm$core$List$map, $author$project$Experiment$Brush$Editor$Dialect$BrushStroke$view, content.strokes.values));
+};
+var $author$project$Main$viewBrushPreviewSection = function (appModel) {
+	return A2(
+		$elm$html$Html$section,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('section')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('container')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$svg$Svg$svg,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$author$project$Experiment$Brush$Editor$Dialect$BrushStrokeContent$view(appModel.brushStrokeContent),
+								A2($author$project$Experiment$Brush$Editor$Dialect$BrushContent$view, appModel.idx, appModel.brushContent)
+							]))
+					]))
+			]));
+};
+var $author$project$Experiment$Brush$Editor$AppEvent$OnFirst = {$: 'OnFirst'};
+var $author$project$Experiment$Brush$Editor$AppEvent$OnLast = {$: 'OnLast'};
+var $author$project$Experiment$Brush$Editor$AppEvent$OnNext = {$: 'OnNext'};
+var $author$project$Experiment$Brush$Editor$AppEvent$OnPreserve = {$: 'OnPreserve'};
+var $author$project$Experiment$Brush$Editor$AppEvent$OnPrevious = {$: 'OnPrevious'};
+var $author$project$Experiment$Brush$Editor$AppEvent$OnSave = {$: 'OnSave'};
+var $author$project$Experiment$Brush$Editor$AppEvent$OnTrash = {$: 'OnTrash'};
+var $elm$html$Html$p = _VirtualDom_node('p');
+var $elm$html$Html$button = _VirtualDom_node('button');
+var $elm$html$Html$i = _VirtualDom_node('i');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -7983,8 +8266,290 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$span = _VirtualDom_node('span');
+var $author$project$Main$viewIconButton = F2(
+	function (name, action) {
+		return A2(
+			$elm$html$Html$button,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('button'),
+					$elm$html$Html$Events$onClick(action)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$span,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('icon is-small')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$i,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class(
+									$elm$core$String$concat(
+										_List_fromArray(
+											['fas fa-', name])))
+								]),
+							_List_Nil)
+						]))
+				]));
+	});
+var $author$project$Main$viewControlSection = A2(
+	$elm$html$Html$section,
+	_List_fromArray(
+		[
+			$elm$html$Html$Attributes$class('section')
+		]),
+	_List_fromArray(
+		[
+			A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('container')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$p,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('buttons')
+						]),
+					_List_fromArray(
+						[
+							A2($author$project$Main$viewIconButton, 'fast-backward', $author$project$Experiment$Brush$Editor$AppEvent$OnFirst),
+							A2($author$project$Main$viewIconButton, 'caret-left', $author$project$Experiment$Brush$Editor$AppEvent$OnPrevious),
+							A2($author$project$Main$viewIconButton, 'caret-right', $author$project$Experiment$Brush$Editor$AppEvent$OnNext),
+							A2($author$project$Main$viewIconButton, 'fast-forward', $author$project$Experiment$Brush$Editor$AppEvent$OnLast),
+							A2($author$project$Main$viewIconButton, 'trash', $author$project$Experiment$Brush$Editor$AppEvent$OnTrash),
+							A2($author$project$Main$viewIconButton, 'star', $author$project$Experiment$Brush$Editor$AppEvent$OnPreserve),
+							A2($author$project$Main$viewIconButton, 'save', $author$project$Experiment$Brush$Editor$AppEvent$OnSave)
+						]))
+				]))
+		]));
+var $elm$html$Html$nav = _VirtualDom_node('nav');
+var $author$project$Experiment$Brush$Editor$Dialect$Identifier$toString = function (value) {
+	if (value.$ === 'IntIdentifier') {
+		var n = value.a;
+		return $elm$core$String$concat(
+			_List_fromArray(
+				[
+					'i:',
+					$elm$core$String$fromInt(n)
+				]));
+	} else {
+		return 'i:nf';
+	}
+};
+var $author$project$Main$viewLevelItem = F2(
+	function (desc, value) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('level-item has-text-centered')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$p,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('heading')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text(desc)
+								])),
+							A2(
+							$elm$html$Html$p,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('title')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text(value)
+								]))
+						]))
+				]));
+	});
+var $author$project$Main$viewLevelSection = function (appModel) {
+	return A2(
+		$elm$html$Html$section,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('section')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$nav,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('level')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$author$project$Main$viewLevelItem,
+						'Brush',
+						$author$project$Experiment$Brush$Editor$Dialect$Identifier$toString(appModel.idx)),
+						A2(
+						$author$project$Main$viewLevelItem,
+						'Generation',
+						$author$project$Experiment$Brush$Editor$Dialect$Identifier$toString(appModel.generation)),
+						A2(
+						$author$project$Main$viewLevelItem,
+						'Brushes',
+						$elm$core$String$fromInt(
+							$elm$core$List$length(appModel.brushContent.brushes.values)))
+					]))
+			]));
+};
+var $author$project$Experiment$Brush$Editor$AppEvent$OnChangeParam = F2(
+	function (a, b) {
+		return {$: 'OnChangeParam', a: a, b: b};
+	});
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
+var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$html$Html$label = _VirtualDom_node('label');
+var $elm$html$Html$Attributes$name = $elm$html$Html$Attributes$stringProperty('name');
+var $author$project$Experiment$Brush$Editor$Dialect$RangeParamId$toString = function (value) {
+	switch (value.$) {
+		case 'CrossoverRangeId':
+			return 'range:crossover';
+		case 'MutationRangeId':
+			return 'range:mutation';
+		default:
+			return 'range:population';
+	}
+};
+var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $author$project$Experiment$Brush$Editor$Dialect$RangeParam$viewOption = F2(
+	function (rgParamId, value) {
+		return A2(
+			$elm$html$Html$label,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('radio')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$input,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$name(
+							$author$project$Experiment$Brush$Editor$Dialect$RangeParamId$toString(rgParamId)),
+							$elm$html$Html$Attributes$type_('radio'),
+							$elm$html$Html$Attributes$value(
+							$elm$core$String$fromInt(value))
+						]),
+					_List_Nil),
+					$elm$html$Html$text(
+					$elm$core$String$fromInt(value))
+				]));
+	});
+var $author$project$Experiment$Brush$Editor$Dialect$RangeParam$view = function (rgParam) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('control'),
+				$elm$html$Html$Events$onInput(
+				$author$project$Experiment$Brush$Editor$AppEvent$OnChangeParam(rgParam.id))
+			]),
+		A2(
+			$elm$core$List$map,
+			$author$project$Experiment$Brush$Editor$Dialect$RangeParam$viewOption(rgParam.id),
+			_List_fromArray(
+				[1, 2, 3])));
+};
+var $author$project$Experiment$Brush$Editor$Dialect$RangeContent$view = function (rgContent) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('')
+			]),
+		A2($elm$core$List$map, $author$project$Experiment$Brush$Editor$Dialect$RangeParam$view, rgContent.ranges.values));
+};
+var $author$project$Main$viewRangeParamSection = function (appModel) {
+	return A2(
+		$elm$html$Html$section,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('section')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('container')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$h1,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('title')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Genetic Parameters')
+							])),
+						$author$project$Experiment$Brush$Editor$Dialect$RangeContent$view(appModel.rangeContent)
+					]))
+			]));
+};
 var $author$project$Main$viewLoaded = function (appModel) {
 	return {
 		body: _List_fromArray(
@@ -8001,16 +8566,10 @@ var $author$project$Main$viewLoaded = function (appModel) {
 							[
 								$elm$html$Html$text('Loading Brush UI')
 							])),
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick($author$project$Experiment$Brush$Editor$AppEvent$OnNext)
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Next')
-							]))
+						$author$project$Main$viewLevelSection(appModel),
+						$author$project$Main$viewBrushPreviewSection(appModel),
+						$author$project$Main$viewControlSection,
+						$author$project$Main$viewRangeParamSection(appModel)
 					]))
 			]),
 		title: 'Brush UI'
@@ -8035,7 +8594,6 @@ var $author$project$Main$viewLoading = {
 		]),
 	title: 'Brush UI'
 };
-var $elm$html$Html$p = _VirtualDom_node('p');
 var $author$project$Main$viewUnloadable = function (failure) {
 	return {
 		body: _List_fromArray(
