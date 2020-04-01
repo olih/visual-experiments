@@ -8246,8 +8246,33 @@ var $author$project$Experiment$Brush$Editor$AppEvent$OnPreserve = {$: 'OnPreserv
 var $author$project$Experiment$Brush$Editor$AppEvent$OnPrevious = {$: 'OnPrevious'};
 var $author$project$Experiment$Brush$Editor$AppEvent$OnSave = {$: 'OnSave'};
 var $author$project$Experiment$Brush$Editor$AppEvent$OnTrash = {$: 'OnTrash'};
+var $author$project$Experiment$Brush$Editor$Applicative$isPreserve = function (model) {
+	return A2(
+		$elm$core$Maybe$withDefault,
+		true,
+		A2(
+			$elm$core$Maybe$map,
+			function ($) {
+				return $.preserve;
+			},
+			A2($author$project$Experiment$Brush$Editor$Dialect$BrushContent$getBrush, model.idx, model.brushContent)));
+};
+var $author$project$Experiment$Brush$Editor$Applicative$isTrash = function (model) {
+	return A2(
+		$elm$core$Maybe$withDefault,
+		true,
+		A2(
+			$elm$core$Maybe$map,
+			function ($) {
+				return $.trash;
+			},
+			A2($author$project$Experiment$Brush$Editor$Dialect$BrushContent$getBrush, model.idx, model.brushContent)));
+};
 var $elm$html$Html$p = _VirtualDom_node('p');
 var $elm$html$Html$button = _VirtualDom_node('button');
+var $author$project$Main$getFlipFlopClass = function (onOff) {
+	return onOff ? 'button is-success' : 'button';
+};
 var $elm$html$Html$i = _VirtualDom_node('i');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
@@ -8267,6 +8292,39 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		$elm$json$Json$Decode$succeed(msg));
 };
 var $elm$html$Html$span = _VirtualDom_node('span');
+var $author$project$Main$viewFlipFlopButton = F3(
+	function (name, state, action) {
+		return A2(
+			$elm$html$Html$button,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class(
+					$author$project$Main$getFlipFlopClass(state)),
+					$elm$html$Html$Events$onClick(action)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$span,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('icon is-small')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$i,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class(
+									$elm$core$String$concat(
+										_List_fromArray(
+											['fas fa-', name])))
+								]),
+							_List_Nil)
+						]))
+				]));
+	});
 var $author$project$Main$viewIconButton = F2(
 	function (name, action) {
 		return A2(
@@ -8299,40 +8357,50 @@ var $author$project$Main$viewIconButton = F2(
 						]))
 				]));
 	});
-var $author$project$Main$viewControlSection = A2(
-	$elm$html$Html$section,
-	_List_fromArray(
-		[
-			$elm$html$Html$Attributes$class('section')
-		]),
-	_List_fromArray(
-		[
-			A2(
-			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('container')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$p,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('buttons')
-						]),
-					_List_fromArray(
-						[
-							A2($author$project$Main$viewIconButton, 'fast-backward', $author$project$Experiment$Brush$Editor$AppEvent$OnFirst),
-							A2($author$project$Main$viewIconButton, 'caret-left', $author$project$Experiment$Brush$Editor$AppEvent$OnPrevious),
-							A2($author$project$Main$viewIconButton, 'caret-right', $author$project$Experiment$Brush$Editor$AppEvent$OnNext),
-							A2($author$project$Main$viewIconButton, 'fast-forward', $author$project$Experiment$Brush$Editor$AppEvent$OnLast),
-							A2($author$project$Main$viewIconButton, 'trash', $author$project$Experiment$Brush$Editor$AppEvent$OnTrash),
-							A2($author$project$Main$viewIconButton, 'star', $author$project$Experiment$Brush$Editor$AppEvent$OnPreserve),
-							A2($author$project$Main$viewIconButton, 'save', $author$project$Experiment$Brush$Editor$AppEvent$OnSave)
-						]))
-				]))
-		]));
+var $author$project$Main$viewControlSection = function (appModel) {
+	return A2(
+		$elm$html$Html$section,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('section')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('container')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$p,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('buttons')
+							]),
+						_List_fromArray(
+							[
+								A2($author$project$Main$viewIconButton, 'fast-backward', $author$project$Experiment$Brush$Editor$AppEvent$OnFirst),
+								A2($author$project$Main$viewIconButton, 'caret-left', $author$project$Experiment$Brush$Editor$AppEvent$OnPrevious),
+								A2($author$project$Main$viewIconButton, 'caret-right', $author$project$Experiment$Brush$Editor$AppEvent$OnNext),
+								A2($author$project$Main$viewIconButton, 'fast-forward', $author$project$Experiment$Brush$Editor$AppEvent$OnLast),
+								A3(
+								$author$project$Main$viewFlipFlopButton,
+								'trash',
+								$author$project$Experiment$Brush$Editor$Applicative$isTrash(appModel),
+								$author$project$Experiment$Brush$Editor$AppEvent$OnTrash),
+								A3(
+								$author$project$Main$viewFlipFlopButton,
+								'star',
+								$author$project$Experiment$Brush$Editor$Applicative$isPreserve(appModel),
+								$author$project$Experiment$Brush$Editor$AppEvent$OnPreserve),
+								A2($author$project$Main$viewIconButton, 'save', $author$project$Experiment$Brush$Editor$AppEvent$OnSave)
+							]))
+					]))
+			]));
+};
 var $elm$html$Html$nav = _VirtualDom_node('nav');
 var $author$project$Experiment$Brush$Editor$Dialect$Identifier$toString = function (value) {
 	if (value.$ === 'IntIdentifier') {
@@ -8568,7 +8636,7 @@ var $author$project$Main$viewLoaded = function (appModel) {
 							])),
 						$author$project$Main$viewLevelSection(appModel),
 						$author$project$Main$viewBrushPreviewSection(appModel),
-						$author$project$Main$viewControlSection,
+						$author$project$Main$viewControlSection(appModel),
 						$author$project$Main$viewRangeParamSection(appModel)
 					]))
 			]),

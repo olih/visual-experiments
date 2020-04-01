@@ -134,8 +134,22 @@ viewIconButton name action =
             ]
             ]
 
-viewControlSection:  Html AppEvent.Msg
-viewControlSection =
+
+getFlipFlopClass: Bool -> String
+getFlipFlopClass onOff =
+    if onOff then "button is-success" else  "button"
+
+viewFlipFlopButton: String -> Bool -> Msg -> Html AppEvent.Msg
+viewFlipFlopButton name state action =
+    button [ Attr.class <| getFlipFlopClass state, onClick action]
+            [ span [ Attr.class "icon is-small" ]
+                [ i [ Attr.class <| (["fas fa-", name] |> String.concat) ]
+                    []
+            ]
+            ]
+
+viewControlSection:  App.Model -> Html AppEvent.Msg
+viewControlSection appModel =
     section [ Attr.class "section" ]
         [ div [ Attr.class "container" ]
             [ p [ Attr.class "buttons" ]
@@ -144,8 +158,8 @@ viewControlSection =
                     , viewIconButton "caret-left" OnPrevious
                     ,  viewIconButton "caret-right" OnNext
                     ,  viewIconButton "fast-forward" OnLast
-                    , viewIconButton "trash" OnTrash
-                    , viewIconButton "star" OnPreserve
+                    , viewFlipFlopButton "trash" (App.isTrash appModel) OnTrash
+                    , viewFlipFlopButton "star" (App.isPreserve appModel) OnPreserve
                     , viewIconButton "save" OnSave
                 ]
             ]   
@@ -195,7 +209,7 @@ viewLoaded appModel =
             [ h1 [] [ text "Loading Brush UI" ]
             , viewLevelSection appModel
             , viewBrushPreviewSection appModel
-            , viewControlSection
+            , viewControlSection appModel
             , viewRangeParamSection appModel
             ]
         ]

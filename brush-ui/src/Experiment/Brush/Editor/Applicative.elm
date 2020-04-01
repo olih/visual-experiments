@@ -1,4 +1,4 @@
-module Experiment.Brush.Editor.Applicative exposing(Model, fromString, trash)
+module Experiment.Brush.Editor.Applicative exposing(Model, fromString, trash, isTrash, preserve, isPreserve)
 
 import Experiment.Brush.Editor.Dialect.Section as Section exposing (Section)
 import Experiment.Brush.Editor.Dialect.BrushContent as BrushContent exposing (BrushContent)
@@ -70,3 +70,15 @@ fromString content =
 trash: Model -> Model
 trash model =
     { model | brushContent =  BrushContent.setValues (Brush.toggleTrashForId model.idx model.brushContent.brushes.values) model.brushContent }
+
+isTrash: Model -> Bool
+isTrash model =
+    model.brushContent |> BrushContent.getBrush model.idx |> Maybe.map .trash |> Maybe.withDefault True
+
+preserve: Model -> Model
+preserve model =
+    { model | brushContent =  BrushContent.setValues (Brush.togglePreserveForId model.idx model.brushContent.brushes.values) model.brushContent }
+
+isPreserve: Model -> Bool
+isPreserve model =
+    model.brushContent |> BrushContent.getBrush model.idx |> Maybe.map .preserve |> Maybe.withDefault True
