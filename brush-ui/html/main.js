@@ -7926,9 +7926,234 @@ var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$noCmd = function (model) {
 	return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 };
+var $author$project$Experiment$Brush$Editor$Applicative$goFirst = function (model) {
+	return _Utils_update(
+		model,
+		{
+			idx: A2(
+				$elm$core$Maybe$withDefault,
+				$author$project$Experiment$Brush$Editor$Dialect$Identifier$notFound,
+				$elm$core$List$head(model.idxList))
+		});
+};
+var $author$project$Experiment$Brush$Editor$Applicative$goLast = function (model) {
+	return _Utils_update(
+		model,
+		{
+			idx: A2(
+				$elm$core$Maybe$withDefault,
+				$author$project$Experiment$Brush$Editor$Dialect$Identifier$notFound,
+				$elm$core$List$head(
+					$elm$core$List$reverse(model.idxList)))
+		});
+};
+var $author$project$Experiment$Brush$Editor$Dialect$BrushContent$asBrushesIn = F2(
+	function (content, brushes) {
+		return _Utils_update(
+			content,
+			{brushes: brushes});
+	});
+var $author$project$Experiment$Brush$Editor$Dialect$Content$setValues = F3(
+	function (values, lines, content) {
+		return _Utils_update(
+			content,
+			{lines: lines, values: values});
+	});
+var $author$project$Experiment$Brush$Editor$Dialect$Identifier$toString = function (value) {
+	if (value.$ === 'IntIdentifier') {
+		var n = value.a;
+		return $elm$core$String$concat(
+			_List_fromArray(
+				[
+					'i:',
+					$elm$core$String$fromInt(n)
+				]));
+	} else {
+		return 'i:nf';
+	}
+};
+var $author$project$Experiment$Brush$Editor$Dialect$Fraction$toString = function (value) {
+	return $elm$core$String$fromInt(value.numerator) + ('/' + $elm$core$String$fromInt(value.denominator));
+};
+var $author$project$Experiment$Brush$Editor$Dialect$RelativePoint$toString = function (value) {
+	return $author$project$Experiment$Brush$Editor$Dialect$Fraction$toString(value.dx) + (' ' + $author$project$Experiment$Brush$Editor$Dialect$Fraction$toString(value.dy));
+};
+var $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toString = function (path) {
+	switch (path.$) {
+		case 'LineTo':
+			var pt = path.a;
+			return A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[
+						'l',
+						$author$project$Experiment$Brush$Editor$Dialect$RelativePoint$toString(pt)
+					]));
+		case 'Horizontal':
+			var f = path.a;
+			return A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[
+						'h',
+						$author$project$Experiment$Brush$Editor$Dialect$Fraction$toString(f)
+					]));
+		case 'Vertical':
+			var f = path.a;
+			return A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[
+						'v',
+						$author$project$Experiment$Brush$Editor$Dialect$Fraction$toString(f)
+					]));
+		case 'CubicCurve':
+			var pt1 = path.a;
+			var pt2 = path.b;
+			var pt3 = path.c;
+			return A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[
+						'c',
+						$author$project$Experiment$Brush$Editor$Dialect$RelativePoint$toString(pt1),
+						$author$project$Experiment$Brush$Editor$Dialect$RelativePoint$toString(pt2),
+						$author$project$Experiment$Brush$Editor$Dialect$RelativePoint$toString(pt3)
+					]));
+		case 'SmoothCubicCurve':
+			var pt1 = path.a;
+			var pt2 = path.b;
+			return A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[
+						's',
+						$author$project$Experiment$Brush$Editor$Dialect$RelativePoint$toString(pt1),
+						$author$project$Experiment$Brush$Editor$Dialect$RelativePoint$toString(pt2)
+					]));
+		case 'QuadraticCurve':
+			var pt1 = path.a;
+			var pt2 = path.b;
+			return A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[
+						'q',
+						$author$project$Experiment$Brush$Editor$Dialect$RelativePoint$toString(pt1),
+						$author$project$Experiment$Brush$Editor$Dialect$RelativePoint$toString(pt2)
+					]));
+		default:
+			var pt1 = path.a;
+			return A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[
+						't',
+						$author$project$Experiment$Brush$Editor$Dialect$RelativePoint$toString(pt1)
+					]));
+	}
+};
+var $author$project$Experiment$Brush$Editor$Dialect$Brush$toString = function (value) {
+	return A2(
+		$elm$core$String$join,
+		' ',
+		_List_fromArray(
+			[
+				'Brush',
+				$author$project$Experiment$Brush$Editor$Dialect$Identifier$toString(value.id),
+				value.trash ? 'T' : '_',
+				value.preserve ? 'P' : '_',
+				'[',
+				A2(
+				$elm$core$String$join,
+				',',
+				A2($elm$core$List$map, $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toString, value.segments)),
+				']'
+			]));
+};
+var $author$project$Experiment$Brush$Editor$Dialect$Brush$toStringList = function (brushes) {
+	return A2($elm$core$List$map, $author$project$Experiment$Brush$Editor$Dialect$Brush$toString, brushes);
+};
+var $author$project$Experiment$Brush$Editor$Dialect$BrushContent$setValues = F2(
+	function (values, content) {
+		return A2(
+			$author$project$Experiment$Brush$Editor$Dialect$BrushContent$asBrushesIn,
+			content,
+			A3(
+				$author$project$Experiment$Brush$Editor$Dialect$Content$setValues,
+				values,
+				$author$project$Experiment$Brush$Editor$Dialect$Brush$toStringList(values),
+				content.brushes));
+	});
+var $author$project$Experiment$Brush$Editor$Dialect$Brush$togglePreserve = function (item) {
+	return _Utils_update(
+		item,
+		{preserve: !item.preserve});
+};
+var $author$project$Experiment$Brush$Editor$Dialect$Brush$togglePreserveForId = F2(
+	function (id, list) {
+		return A2(
+			$elm$core$List$map,
+			function (brush) {
+				return _Utils_eq(brush.id, id) ? $author$project$Experiment$Brush$Editor$Dialect$Brush$togglePreserve(brush) : brush;
+			},
+			list);
+	});
+var $author$project$Experiment$Brush$Editor$Applicative$preserve = function (model) {
+	return _Utils_update(
+		model,
+		{
+			brushContent: A2(
+				$author$project$Experiment$Brush$Editor$Dialect$BrushContent$setValues,
+				A2($author$project$Experiment$Brush$Editor$Dialect$Brush$togglePreserveForId, model.idx, model.brushContent.brushes.values),
+				model.brushContent)
+		});
+};
+var $author$project$Experiment$Brush$Editor$Dialect$Brush$toggleTrash = function (item) {
+	return _Utils_update(
+		item,
+		{trash: !item.trash});
+};
+var $author$project$Experiment$Brush$Editor$Dialect$Brush$toggleTrashForId = F2(
+	function (id, list) {
+		return A2(
+			$elm$core$List$map,
+			function (brush) {
+				return _Utils_eq(brush.id, id) ? $author$project$Experiment$Brush$Editor$Dialect$Brush$toggleTrash(brush) : brush;
+			},
+			list);
+	});
+var $author$project$Experiment$Brush$Editor$Applicative$trash = function (model) {
+	return _Utils_update(
+		model,
+		{
+			brushContent: A2(
+				$author$project$Experiment$Brush$Editor$Dialect$BrushContent$setValues,
+				A2($author$project$Experiment$Brush$Editor$Dialect$Brush$toggleTrashForId, model.idx, model.brushContent.brushes.values),
+				model.brushContent)
+		});
+};
 var $author$project$Main$processEvent = F2(
 	function (uiEvent, appModel) {
-		return appModel;
+		switch (uiEvent.$) {
+			case 'OnFirst':
+				return $author$project$Experiment$Brush$Editor$Applicative$goFirst(appModel);
+			case 'OnLast':
+				return $author$project$Experiment$Brush$Editor$Applicative$goLast(appModel);
+			case 'OnTrash':
+				return $author$project$Experiment$Brush$Editor$Applicative$trash(appModel);
+			case 'OnPreserve':
+				return $author$project$Experiment$Brush$Editor$Applicative$preserve(appModel);
+			default:
+				return appModel;
+		}
 	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
@@ -8402,19 +8627,6 @@ var $author$project$Main$viewControlSection = function (appModel) {
 			]));
 };
 var $elm$html$Html$nav = _VirtualDom_node('nav');
-var $author$project$Experiment$Brush$Editor$Dialect$Identifier$toString = function (value) {
-	if (value.$ === 'IntIdentifier') {
-		var n = value.a;
-		return $elm$core$String$concat(
-			_List_fromArray(
-				[
-					'i:',
-					$elm$core$String$fromInt(n)
-				]));
-	} else {
-		return 'i:nf';
-	}
-};
 var $author$project$Main$viewLevelItem = F2(
 	function (desc, value) {
 		return A2(

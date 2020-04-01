@@ -1,4 +1,4 @@
-module Experiment.Brush.Editor.Applicative exposing(Model, fromString, trash, isTrash, preserve, isPreserve)
+module Experiment.Brush.Editor.Applicative exposing(Model, fromString, trash, isTrash, preserve, isPreserve, goFirst, goLast)
 
 import Experiment.Brush.Editor.Dialect.Section as Section exposing (Section)
 import Experiment.Brush.Editor.Dialect.BrushContent as BrushContent exposing (BrushContent)
@@ -22,7 +22,7 @@ type alias Model =
 
 create: List Identifier -> Identifier -> List Section -> BrushContent -> RangeContent -> BrushStrokeContent -> Model
 create idxList latestGeneration sections brushContent rangeContent brushStrokeContent =
-  {   idx = idxList |> List.head |> Maybe.withDefault (Identifier.notFound)
+  {   idx = idxList |> List.head |> Maybe.withDefault Identifier.notFound
         , idxList = idxList
         , generation = latestGeneration
         , latestGeneration = latestGeneration
@@ -82,3 +82,10 @@ preserve model =
 isPreserve: Model -> Bool
 isPreserve model =
     model.brushContent |> BrushContent.getBrush model.idx |> Maybe.map .preserve |> Maybe.withDefault True
+
+goFirst: Model -> Model
+goFirst model =
+    { model | idx = model.idxList |> List.head |> Maybe.withDefault Identifier.notFound }
+goLast: Model -> Model
+goLast model =
+    { model | idx = model.idxList |> List.reverse |> List.head |> Maybe.withDefault Identifier.notFound }

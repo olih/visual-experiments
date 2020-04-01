@@ -238,4 +238,10 @@ fetchGeneticBrushes =
 
 processEvent: Msg -> App.Model -> App.Model
 processEvent uiEvent appModel =
-    appModel
+    case uiEvent of
+        OnFirst -> App.goFirst appModel
+        OnLast -> App.goLast appModel
+        OnTrash -> App.trash appModel
+        OnPreserve -> App.preserve appModel
+        _ ->
+            appModel
