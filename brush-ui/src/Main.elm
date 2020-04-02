@@ -241,7 +241,10 @@ processEvent uiEvent appModel =
     case uiEvent of
         OnFirst -> App.goFirst appModel
         OnLast -> App.goLast appModel
+        OnNext -> App.goNext appModel
+        OnPrevious -> App.goPrevious appModel
         OnTrash -> App.trash appModel
         OnPreserve -> App.preserve appModel
-        _ ->
-            appModel
+        OnChangeParam id value -> App.changeParam id value appModel
+        OnSave -> appModel -- should properly save
+        GotText _ -> appModel

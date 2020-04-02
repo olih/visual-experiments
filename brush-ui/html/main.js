@@ -7926,6 +7926,82 @@ var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$noCmd = function (model) {
 	return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 };
+var $author$project$Experiment$Brush$Editor$Dialect$RangeContent$asRangesIn = F2(
+	function (content, ranges) {
+		return _Utils_update(
+			content,
+			{ranges: ranges});
+	});
+var $author$project$Experiment$Brush$Editor$Dialect$Content$setValues = F3(
+	function (values, lines, content) {
+		return _Utils_update(
+			content,
+			{lines: lines, values: values});
+	});
+var $author$project$Experiment$Brush$Editor$Dialect$RangeParamId$toString = function (value) {
+	switch (value.$) {
+		case 'CrossoverRangeId':
+			return 'range:crossover';
+		case 'MutationRangeId':
+			return 'range:mutation';
+		default:
+			return 'range:population';
+	}
+};
+var $author$project$Experiment$Brush$Editor$Dialect$RangeParam$toString = function (value) {
+	return A2(
+		$elm$core$String$join,
+		' ',
+		_List_fromArray(
+			[
+				'Range',
+				$author$project$Experiment$Brush$Editor$Dialect$RangeParamId$toString(value.id),
+				$elm$core$String$fromInt(value.value)
+			]));
+};
+var $author$project$Experiment$Brush$Editor$Dialect$RangeParam$toStringList = function (ranges) {
+	return A2($elm$core$List$map, $author$project$Experiment$Brush$Editor$Dialect$RangeParam$toString, ranges);
+};
+var $author$project$Experiment$Brush$Editor$Dialect$RangeContent$setValues = F2(
+	function (values, content) {
+		return A2(
+			$author$project$Experiment$Brush$Editor$Dialect$RangeContent$asRangesIn,
+			content,
+			A3(
+				$author$project$Experiment$Brush$Editor$Dialect$Content$setValues,
+				values,
+				$author$project$Experiment$Brush$Editor$Dialect$RangeParam$toStringList(values),
+				content.ranges));
+	});
+var $author$project$Experiment$Brush$Editor$Dialect$RangeParam$updateById = F3(
+	function (id, value, list) {
+		return A2(
+			$elm$core$List$map,
+			function (rangePrm) {
+				return _Utils_eq(rangePrm.id, id) ? _Utils_update(
+					rangePrm,
+					{value: value}) : rangePrm;
+			},
+			list);
+	});
+var $author$project$Experiment$Brush$Editor$Applicative$changeParam = F3(
+	function (rangeParamId, value, model) {
+		return _Utils_update(
+			model,
+			{
+				rangeContent: A2(
+					$author$project$Experiment$Brush$Editor$Dialect$RangeContent$setValues,
+					A3(
+						$author$project$Experiment$Brush$Editor$Dialect$RangeParam$updateById,
+						rangeParamId,
+						A2(
+							$elm$core$Maybe$withDefault,
+							0,
+							$elm$core$String$toInt(value)),
+						model.rangeContent.ranges.values),
+					model.rangeContent)
+			});
+	});
 var $author$project$Experiment$Brush$Editor$Applicative$goFirst = function (model) {
 	return _Utils_update(
 		model,
@@ -7947,17 +8023,72 @@ var $author$project$Experiment$Brush$Editor$Applicative$goLast = function (model
 					$elm$core$List$reverse(model.idxList)))
 		});
 };
+var $author$project$Experiment$Brush$Editor$Applicative$asListOfTuple = function (list) {
+	if (list.b) {
+		if (list.b.b) {
+			var head1 = list.a;
+			var _v1 = list.b;
+			var head2 = _v1.a;
+			var more = _v1.b;
+			return A2(
+				$elm$core$List$cons,
+				_Utils_Tuple2(head1, head2),
+				$author$project$Experiment$Brush$Editor$Applicative$asListOfTuple(more));
+		} else {
+			var one = list.a;
+			return _List_fromArray(
+				[
+					_Utils_Tuple2(one, one)
+				]);
+		}
+	} else {
+		return _List_Nil;
+	}
+};
+var $author$project$Experiment$Brush$Editor$Applicative$goNext = function (model) {
+	return _Utils_update(
+		model,
+		{
+			idx: A2(
+				$elm$core$Maybe$withDefault,
+				$author$project$Experiment$Brush$Editor$Dialect$Identifier$notFound,
+				A2(
+					$elm$core$Maybe$map,
+					$elm$core$Tuple$second,
+					$elm$core$List$head(
+						A2(
+							$elm$core$List$filter,
+							function (t) {
+								return _Utils_eq(t.a, model.idx);
+							},
+							$author$project$Experiment$Brush$Editor$Applicative$asListOfTuple(model.idxList)))))
+		});
+};
+var $author$project$Experiment$Brush$Editor$Applicative$goPrevious = function (model) {
+	return _Utils_update(
+		model,
+		{
+			idx: A2(
+				$elm$core$Maybe$withDefault,
+				$author$project$Experiment$Brush$Editor$Dialect$Identifier$notFound,
+				A2(
+					$elm$core$Maybe$map,
+					$elm$core$Tuple$second,
+					$elm$core$List$head(
+						A2(
+							$elm$core$List$filter,
+							function (t) {
+								return _Utils_eq(t.a, model.idx);
+							},
+							$author$project$Experiment$Brush$Editor$Applicative$asListOfTuple(
+								$elm$core$List$reverse(model.idxList))))))
+		});
+};
 var $author$project$Experiment$Brush$Editor$Dialect$BrushContent$asBrushesIn = F2(
 	function (content, brushes) {
 		return _Utils_update(
 			content,
 			{brushes: brushes});
-	});
-var $author$project$Experiment$Brush$Editor$Dialect$Content$setValues = F3(
-	function (values, lines, content) {
-		return _Utils_update(
-			content,
-			{lines: lines, values: values});
 	});
 var $author$project$Experiment$Brush$Editor$Dialect$Identifier$toString = function (value) {
 	if (value.$ === 'IntIdentifier') {
@@ -8147,10 +8278,20 @@ var $author$project$Main$processEvent = F2(
 				return $author$project$Experiment$Brush$Editor$Applicative$goFirst(appModel);
 			case 'OnLast':
 				return $author$project$Experiment$Brush$Editor$Applicative$goLast(appModel);
+			case 'OnNext':
+				return $author$project$Experiment$Brush$Editor$Applicative$goNext(appModel);
+			case 'OnPrevious':
+				return $author$project$Experiment$Brush$Editor$Applicative$goPrevious(appModel);
 			case 'OnTrash':
 				return $author$project$Experiment$Brush$Editor$Applicative$trash(appModel);
 			case 'OnPreserve':
 				return $author$project$Experiment$Brush$Editor$Applicative$preserve(appModel);
+			case 'OnChangeParam':
+				var id = uiEvent.a;
+				var value = uiEvent.b;
+				return A3($author$project$Experiment$Brush$Editor$Applicative$changeParam, id, value, appModel);
+			case 'OnSave':
+				return appModel;
 			default:
 				return appModel;
 		}
@@ -8738,16 +8879,6 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$html$Html$label = _VirtualDom_node('label');
 var $elm$html$Html$Attributes$name = $elm$html$Html$Attributes$stringProperty('name');
-var $author$project$Experiment$Brush$Editor$Dialect$RangeParamId$toString = function (value) {
-	switch (value.$) {
-		case 'CrossoverRangeId':
-			return 'range:crossover';
-		case 'MutationRangeId':
-			return 'range:mutation';
-		default:
-			return 'range:population';
-	}
-};
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$Experiment$Brush$Editor$Dialect$RangeParam$viewOption = F2(

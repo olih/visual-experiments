@@ -1,4 +1,4 @@
-module Experiment.Brush.Editor.Dialect.RangeParam exposing (RangeParam, parser, setValue, toString, fromStringList, view)
+module Experiment.Brush.Editor.Dialect.RangeParam exposing (RangeParam, parser, setValue, toString, byId, fromStringList, toStringList, view, updateById)
 
 import Experiment.Brush.Editor.Dialect.RangeParamId as RangeParamId exposing (RangeParamId)
 import Parser exposing ((|.), (|=), Parser, int, keyword, spaces, succeed, end, run, DeadEnd)
@@ -45,7 +45,23 @@ fromStringList: List String -> List (String, Result (List DeadEnd) RangeParam)
 fromStringList lines =
     List.map fromString lines
 
+toStringList: List RangeParam -> List String
+toStringList ranges =
+    List.map toString ranges
 
+byId: RangeParamId -> RangeParam -> Bool
+byId id rangePrm =
+    rangePrm.id == id
+
+updateById : RangeParamId -> Int ->  List RangeParam -> List RangeParam
+updateById id value list =
+    list |> List.map
+        (\rangePrm ->
+            if rangePrm.id == id then
+                { rangePrm | value = value}
+            else
+                rangePrm
+        )
 viewOption: RangeParamId -> Int -> Html a
 viewOption rgParamId value =
     label [ Attr.class "radio" ]

@@ -1,4 +1,4 @@
-module Experiment.Brush.Editor.Applicative exposing(Model, fromString, trash, isTrash, preserve, isPreserve, goFirst, goLast)
+module Experiment.Brush.Editor.Applicative exposing(Model, fromString, trash, isTrash, preserve, isPreserve, goFirst, goLast, goNext, goPrevious, changeParam)
 
 import Experiment.Brush.Editor.Dialect.Section as Section exposing (Section)
 import Experiment.Brush.Editor.Dialect.BrushContent as BrushContent exposing (BrushContent)
@@ -9,6 +9,9 @@ import Experiment.Brush.Editor.Dialect.Failing as Failing exposing (Failure, Fai
 import Experiment.Brush.Editor.Dialect.SectionList as SectionList
 import Experiment.Brush.Editor.Dialect.Identifier as Identifier exposing (Identifier)
 import Experiment.Brush.Editor.Dialect.SectionTypeId exposing(SectionTypeId(..))
+import Experiment.Brush.Editor.Dialect.RangeParamId exposing (RangeParamId)
+import Experiment.Brush.Editor.Dialect.RangeParam as RangeParam
+import Tuple exposing (first, second)
 type alias Model =
     {   idx: Identifier
         , idxList: List Identifier
@@ -89,3 +92,23 @@ goFirst model =
 goLast: Model -> Model
 goLast model =
     { model | idx = model.idxList |> List.reverse |> List.head |> Maybe.withDefault Identifier.notFound }
+
+asListOfTuple: List a -> List (a, a)
+asListOfTuple list =
+    case list of
+      head1 :: head2 :: more -> (head1, head2) :: asListOfTuple more
+      [one] -> [(one, one)]
+      [] -> []
+
+goNext: Model -> Model
+goNext model =
+    { model | idx = model.idxList |> asListOfTuple |> List.filter (\t -> first t == model.idx) |> List.head |> Maybe.map second |> Maybe.withDefault Identifier.notFound }
+
+goPrevious: Model -> Model
+goPrevious model =
+    { model | idx = model.idxList |> List.reverse |> asListOfTuple |> List.filter (\t -> first t == model.idx) |> List.head |> Maybe.map second |> Maybe.withDefault Identifier.notFound }
+
+changeParam: RangeParamId -> String -> Model -> Model
+changeParam rangeParamId value model =
+     { model | rangeContent =  RangeContent.setValues (RangeParam.updateById rangeParamId (value |> String.toInt |> Maybe.withDefault 0) model.rangeContent.ranges.values) model.rangeContent }
+   
