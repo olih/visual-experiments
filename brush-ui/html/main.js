@@ -7820,6 +7820,7 @@ var $author$project$Experiment$Brush$Editor$Dialect$Section$getLatestGeneration 
 					$author$project$Experiment$Brush$Editor$Dialect$Identifier$toInt,
 					A2($author$project$Experiment$Brush$Editor$Dialect$Section$getIdsByType, $author$project$Experiment$Brush$Editor$Dialect$SectionTypeId$BrushesSection, sections)))));
 };
+var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Maybe$map3 = F4(
 	function (func, ma, mb, mc) {
 		if (ma.$ === 'Nothing') {
@@ -7850,7 +7851,10 @@ var $elm$core$Result$withDefault = F2(
 		}
 	});
 var $author$project$Experiment$Brush$Editor$Applicative$fromString = function (content) {
-	var perhapsSections = $author$project$Experiment$Brush$Editor$Dialect$SectionList$fromString(content);
+	var perhapsSections = A2(
+		$elm$core$Debug$log,
+		'sections',
+		$author$project$Experiment$Brush$Editor$Dialect$SectionList$fromString(content));
 	var sections = A2($elm$core$Result$withDefault, _List_Nil, perhapsSections);
 	var maybeBrushStrokeContent = A2(
 		$elm$core$Maybe$map,
@@ -7917,9 +7921,9 @@ var $author$project$Experiment$Brush$Editor$Applicative$fromString = function (c
 					return $elm$core$Result$Ok(
 						A6($author$project$Experiment$Brush$Editor$Applicative$create, idxList, latestGeneration, sections, brush, range, brushStroke));
 				}),
-			maybeBrushContent,
-			maybeRangeContent,
-			maybeBrushStrokeContent));
+			A2($elm$core$Debug$log, 'brushes', maybeBrushContent),
+			A2($elm$core$Debug$log, 'range', maybeRangeContent),
+			A2($elm$core$Debug$log, 'stroke', maybeBrushStrokeContent)));
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
@@ -8302,7 +8306,8 @@ var $author$project$Main$update = F2(
 			var result = msg.a;
 			if (result.$ === 'Ok') {
 				var fullContent = result.a;
-				var _v2 = $author$project$Experiment$Brush$Editor$Applicative$fromString(fullContent);
+				var _v2 = $author$project$Experiment$Brush$Editor$Applicative$fromString(
+					A2($elm$core$Debug$log, 'full-content', fullContent));
 				if (_v2.$ === 'Ok') {
 					var appModel = _v2.a;
 					return $author$project$Main$noCmd(
@@ -8464,37 +8469,28 @@ var $author$project$Experiment$Brush$Editor$Dialect$Brush$asPathString = functio
 			A2($elm$core$List$map, $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toSvgString, brush.segments)));
 };
 var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
-var $elm$svg$Svg$defs = $elm$svg$Svg$trustedNode('defs');
-var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
 var $elm$svg$Svg$Attributes$id = _VirtualDom_attribute('id');
 var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
+var $elm$svg$Svg$symbol = $elm$svg$Svg$trustedNode('symbol');
 var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
 var $author$project$Experiment$Brush$Editor$Dialect$Brush$view = function (brush) {
 	return A2(
-		$elm$svg$Svg$svg,
+		$elm$svg$Svg$symbol,
 		_List_fromArray(
 			[
-				$elm$svg$Svg$Attributes$viewBox('0 0 1000 1000')
+				$elm$svg$Svg$Attributes$viewBox('0 0 600 600'),
+				$elm$svg$Svg$Attributes$id('brush')
 			]),
 		_List_fromArray(
 			[
 				A2(
-				$elm$svg$Svg$defs,
-				_List_Nil,
+				$elm$svg$Svg$path,
 				_List_fromArray(
 					[
-						A2(
-						$elm$svg$Svg$path,
-						_List_fromArray(
-							[
-								$elm$svg$Svg$Attributes$d(
-								$author$project$Experiment$Brush$Editor$Dialect$Brush$asPathString(brush)),
-								$elm$svg$Svg$Attributes$id('brush'),
-								$elm$svg$Svg$Attributes$fill('black')
-							]),
-						_List_Nil),
-						$elm$html$Html$text('  ')
-					]))
+						$elm$svg$Svg$Attributes$d(
+						$author$project$Experiment$Brush$Editor$Dialect$Brush$asPathString(brush))
+					]),
+				_List_Nil)
 			]));
 };
 var $author$project$Experiment$Brush$Editor$Dialect$BrushContent$view = F2(
@@ -8537,17 +8533,17 @@ var $author$project$Experiment$Brush$Editor$Dialect$BrushStroke$asTransformStrin
 				')'
 			]));
 };
-var $elm$virtual_dom$VirtualDom$attribute = F2(
-	function (key, value) {
-		return A2(
-			_VirtualDom_attribute,
-			_VirtualDom_noOnOrFormAction(key),
-			_VirtualDom_noJavaScriptOrHtmlUri(value));
-	});
-var $elm$html$Html$Attributes$attribute = $elm$virtual_dom$VirtualDom$attribute;
+var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
 var $elm$svg$Svg$g = $elm$svg$Svg$trustedNode('g');
 var $elm$svg$Svg$Attributes$transform = _VirtualDom_attribute('transform');
 var $elm$svg$Svg$use = $elm$svg$Svg$trustedNode('use');
+var $elm$svg$Svg$Attributes$xlinkHref = function (value) {
+	return A3(
+		_VirtualDom_attributeNS,
+		'http://www.w3.org/1999/xlink',
+		'xlink:href',
+		_VirtualDom_noJavaScriptUri(value));
+};
 var $author$project$Experiment$Brush$Editor$Dialect$BrushStroke$view = function (brushStroke) {
 	return A2(
 		$elm$svg$Svg$g,
@@ -8563,19 +8559,13 @@ var $author$project$Experiment$Brush$Editor$Dialect$BrushStroke$view = function 
 				_List_fromArray(
 					[
 						$elm$svg$Svg$Attributes$fill('black'),
-						A2($elm$html$Html$Attributes$attribute, 'xlink:href', '#brush')
+						$elm$svg$Svg$Attributes$xlinkHref('#brush')
 					]),
 				_List_Nil)
 			]));
 };
 var $author$project$Experiment$Brush$Editor$Dialect$BrushStrokeContent$view = function (content) {
-	return A2(
-		$elm$svg$Svg$svg,
-		_List_fromArray(
-			[
-				$elm$svg$Svg$Attributes$viewBox('0 0 1000 1000')
-			]),
-		A2($elm$core$List$map, $author$project$Experiment$Brush$Editor$Dialect$BrushStroke$view, content.strokes.values));
+	return A2($elm$core$List$map, $author$project$Experiment$Brush$Editor$Dialect$BrushStroke$view, content.strokes.values);
 };
 var $author$project$Main$viewBrushPreviewSection = function (appModel) {
 	return A2(
@@ -8597,11 +8587,10 @@ var $author$project$Main$viewBrushPreviewSection = function (appModel) {
 						A2(
 						$elm$svg$Svg$svg,
 						_List_Nil,
-						_List_fromArray(
-							[
-								$author$project$Experiment$Brush$Editor$Dialect$BrushStrokeContent$view(appModel.brushStrokeContent),
-								A2($author$project$Experiment$Brush$Editor$Dialect$BrushContent$view, appModel.idx, appModel.brushContent)
-							]))
+						A2(
+							$elm$core$List$cons,
+							A2($author$project$Experiment$Brush$Editor$Dialect$BrushContent$view, appModel.idx, appModel.brushContent),
+							$author$project$Experiment$Brush$Editor$Dialect$BrushStrokeContent$view(appModel.brushStrokeContent)))
 					]))
 			]));
 };
@@ -8975,7 +8964,7 @@ var $author$project$Main$viewLoaded = function (appModel) {
 						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$text('Loading Brush UI')
+								$elm$html$Html$text('Brush UI')
 							])),
 						$author$project$Main$viewLevelSection(appModel),
 						$author$project$Main$viewBrushPreviewSection(appModel),

@@ -4,8 +4,7 @@ import Experiment.Brush.Editor.Dialect.Content as Content exposing (Content)
 import Experiment.Brush.Editor.Dialect.Section exposing (Section)
 import Experiment.Brush.Editor.Dialect.BrushStroke as BrushStroke exposing (BrushStroke)
 import Html exposing (Html)
-import Svg exposing (svg)
-import Svg.Attributes exposing (viewBox)
+import Svg exposing (g)
 
 type alias BrushStrokeContent =
     { 
@@ -17,8 +16,7 @@ fromSection: Section -> BrushStrokeContent
 fromSection section =
     BrushStrokeContent section (BrushStroke.fromStringList section.lines |> Content.toContent)
 
-view : BrushStrokeContent -> Html a
+view : BrushStrokeContent -> List (Html a)
 view content =
     content.strokes.values 
     |> List.map BrushStroke.view
-    |> svg [ viewBox "0 0 1000 1000" ]

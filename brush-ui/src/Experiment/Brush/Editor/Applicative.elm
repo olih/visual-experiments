@@ -38,7 +38,7 @@ create idxList latestGeneration sections brushContent rangeContent brushStrokeCo
 fromString: String -> Result Failure Model
 fromString content =
     let
-        perhapsSections = SectionList.fromString content
+        perhapsSections = SectionList.fromString content |> Debug.log "sections"
         sections = Result.withDefault [] perhapsSections
         failure = Failing.fromResult perhapsSections "section"
 
@@ -67,7 +67,7 @@ fromString content =
             |> List.map .id
         
         in
-            Maybe.map3 (\ brush range brushStroke -> create idxList latestGeneration sections brush range brushStroke |> Ok) maybeBrushContent maybeRangeContent maybeBrushStrokeContent
+            Maybe.map3 (\ brush range brushStroke -> create idxList latestGeneration sections brush range brushStroke |> Ok) (maybeBrushContent |> Debug.log "brushes") (maybeRangeContent |> Debug.log "range") (maybeBrushStrokeContent |> Debug.log "stroke")
             |> Maybe.withDefault (Maybe.map identity failure |> Maybe.withDefault (Failing.create "whole content" InvalidFormatFailure "A section is missing") |> Err)
 
 trash: Model -> Model

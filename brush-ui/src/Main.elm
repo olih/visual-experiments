@@ -6,6 +6,7 @@ import Html.Attributes as Attr
 import Html.Events exposing (onClick)
 import Http
 import Svg exposing (svg)
+import Svg.Attributes exposing (xlinkHref)
 import Experiment.Brush.Editor.AppEvent as AppEvent exposing (Msg(..))
 import Experiment.Brush.Editor.Applicative as App
 import Experiment.Brush.Editor.Dialect.Failing as Failing exposing (Failure, FailureKind(..))
@@ -53,7 +54,7 @@ update msg model =
         GotText result ->
             case result of
                 Ok fullContent ->
-                    case App.fromString fullContent of
+                    case App.fromString (fullContent |> Debug.log "full-content") of
                         Ok appModel ->
                             Loaded appModel |> noCmd
 
@@ -193,10 +194,9 @@ viewBrushPreviewSection appModel =
     section [ Attr.class "section" ]
         [ div [ Attr.class "container" ]
             [ 
-                svg [] [
-                BrushStrokeContent.view appModel.brushStrokeContent
-                , BrushContent.view appModel.idx appModel.brushContent
-                ]
+                svg [] 
+                <| BrushContent.view appModel.idx appModel.brushContent
+                :: BrushStrokeContent.view appModel.brushStrokeContent
             ]   
         ]
 
@@ -206,7 +206,7 @@ viewLoaded appModel =
     { title = "Brush UI"
     , body =
         [ div []
-            [ h1 [] [ text "Loading Brush UI" ]
+            [ h1 [] [ text "Brush UI" ]
             , viewLevelSection appModel
             , viewBrushPreviewSection appModel
             , viewControlSection appModel

@@ -7,7 +7,7 @@ import Experiment.Brush.Editor.Dialect.Fraction as Fraction exposing (Fraction)
 import Html exposing (Html)
 import Html.Attributes exposing (attribute)
 import Svg exposing (use, g)
-import Svg.Attributes exposing (transform, fill)
+import Svg.Attributes exposing (transform, fill, xlinkHref)
 import Experiment.Brush.Editor.Dialect.PixelSqDim as PixelSqDim
 
 type alias BrushStroke =
@@ -86,7 +86,7 @@ view brushStroke =
     g [ transform <| asTransformString brushStroke ] [
     use [
     fill "black"
-    , attribute "xlink:href" "#brush"
+    , xlinkHref "#brush"
     ]
         []
     ]
