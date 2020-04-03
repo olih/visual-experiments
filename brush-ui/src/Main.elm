@@ -2,11 +2,11 @@ module Main exposing (Document, Model, init, main, subscriptions, update, view)
 
 import Browser
 import Html exposing (Html, div, section, i, button, span, h1, text, p, nav)
-import Html.Attributes as Attr
+import Html.Attributes as Attr exposing(attribute)
 import Html.Events exposing (onClick)
 import Http
 import Svg exposing (svg)
-import Svg.Attributes exposing (xlinkHref)
+import Svg.Attributes exposing (xlinkHref, viewBox)
 import Experiment.Brush.Editor.AppEvent as AppEvent exposing (Msg(..))
 import Experiment.Brush.Editor.Applicative as App
 import Experiment.Brush.Editor.Dialect.Failing as Failing exposing (Failure, FailureKind(..))
@@ -54,7 +54,7 @@ update msg model =
         GotText result ->
             case result of
                 Ok fullContent ->
-                    case App.fromString (fullContent |> Debug.log "full-content") of
+                    case App.fromString fullContent of
                         Ok appModel ->
                             Loaded appModel |> noCmd
 
@@ -194,7 +194,7 @@ viewBrushPreviewSection appModel =
     section [ Attr.class "section" ]
         [ div [ Attr.class "container" ]
             [ 
-                svg [] 
+                svg [ attribute "xmlns:xlink" "http://www.w3.org/1999/xlink", viewBox "0 0 1000 1000"] 
                 <| BrushContent.view appModel.idx appModel.brushContent
                 :: BrushStrokeContent.view appModel.brushStrokeContent
             ]   

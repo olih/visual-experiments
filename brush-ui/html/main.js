@@ -7820,7 +7820,6 @@ var $author$project$Experiment$Brush$Editor$Dialect$Section$getLatestGeneration 
 					$author$project$Experiment$Brush$Editor$Dialect$Identifier$toInt,
 					A2($author$project$Experiment$Brush$Editor$Dialect$Section$getIdsByType, $author$project$Experiment$Brush$Editor$Dialect$SectionTypeId$BrushesSection, sections)))));
 };
-var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Maybe$map3 = F4(
 	function (func, ma, mb, mc) {
 		if (ma.$ === 'Nothing') {
@@ -7851,10 +7850,7 @@ var $elm$core$Result$withDefault = F2(
 		}
 	});
 var $author$project$Experiment$Brush$Editor$Applicative$fromString = function (content) {
-	var perhapsSections = A2(
-		$elm$core$Debug$log,
-		'sections',
-		$author$project$Experiment$Brush$Editor$Dialect$SectionList$fromString(content));
+	var perhapsSections = $author$project$Experiment$Brush$Editor$Dialect$SectionList$fromString(content);
 	var sections = A2($elm$core$Result$withDefault, _List_Nil, perhapsSections);
 	var maybeBrushStrokeContent = A2(
 		$elm$core$Maybe$map,
@@ -7921,9 +7917,9 @@ var $author$project$Experiment$Brush$Editor$Applicative$fromString = function (c
 					return $elm$core$Result$Ok(
 						A6($author$project$Experiment$Brush$Editor$Applicative$create, idxList, latestGeneration, sections, brush, range, brushStroke));
 				}),
-			A2($elm$core$Debug$log, 'brushes', maybeBrushContent),
-			A2($elm$core$Debug$log, 'range', maybeRangeContent),
-			A2($elm$core$Debug$log, 'stroke', maybeBrushStrokeContent)));
+			maybeBrushContent,
+			maybeRangeContent,
+			maybeBrushStrokeContent));
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
@@ -8306,8 +8302,7 @@ var $author$project$Main$update = F2(
 			var result = msg.a;
 			if (result.$ === 'Ok') {
 				var fullContent = result.a;
-				var _v2 = $author$project$Experiment$Brush$Editor$Applicative$fromString(
-					A2($elm$core$Debug$log, 'full-content', fullContent));
+				var _v2 = $author$project$Experiment$Brush$Editor$Applicative$fromString(fullContent);
 				if (_v2.$ === 'Ok') {
 					var appModel = _v2.a;
 					return $author$project$Main$noCmd(
@@ -8337,6 +8332,14 @@ var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$virtual_dom$VirtualDom$attribute = F2(
+	function (key, value) {
+		return A2(
+			_VirtualDom_attribute,
+			_VirtualDom_noOnOrFormAction(key),
+			_VirtualDom_noJavaScriptOrHtmlUri(value));
+	});
+var $elm$html$Html$Attributes$attribute = $elm$virtual_dom$VirtualDom$attribute;
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -8586,7 +8589,11 @@ var $author$project$Main$viewBrushPreviewSection = function (appModel) {
 					[
 						A2(
 						$elm$svg$Svg$svg,
-						_List_Nil,
+						_List_fromArray(
+							[
+								A2($elm$html$Html$Attributes$attribute, 'xmlns:xlink', 'http://www.w3.org/1999/xlink'),
+								$elm$svg$Svg$Attributes$viewBox('0 0 1000 1000')
+							]),
 						A2(
 							$elm$core$List$cons,
 							A2($author$project$Experiment$Brush$Editor$Dialect$BrushContent$view, appModel.idx, appModel.brushContent),
