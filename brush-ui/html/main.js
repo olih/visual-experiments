@@ -6997,6 +6997,18 @@ var $author$project$Experiment$Brush$Editor$Dialect$Fraction$Fraction = F2(
 	function (numerator, denominator) {
 		return {denominator: denominator, numerator: numerator};
 	});
+var $author$project$Experiment$Brush$Editor$Dialect$Fraction$negInt = $elm$parser$Parser$oneOf(
+	_List_fromArray(
+		[
+			A2(
+			$elm$parser$Parser$keeper,
+			A2(
+				$elm$parser$Parser$ignorer,
+				$elm$parser$Parser$succeed($elm$core$Basics$negate),
+				$elm$parser$Parser$symbol('-')),
+			$elm$parser$Parser$int),
+			$elm$parser$Parser$int
+		]));
 var $author$project$Experiment$Brush$Editor$Dialect$Fraction$parser = A2(
 	$elm$parser$Parser$keeper,
 	A2(
@@ -7007,7 +7019,7 @@ var $author$project$Experiment$Brush$Editor$Dialect$Fraction$parser = A2(
 			$elm$parser$Parser$spaces),
 		A2(
 			$elm$parser$Parser$ignorer,
-			$elm$parser$Parser$int,
+			$author$project$Experiment$Brush$Editor$Dialect$Fraction$negInt,
 			$elm$parser$Parser$symbol('/'))),
 	A2($elm$parser$Parser$ignorer, $elm$parser$Parser$int, $elm$parser$Parser$spaces));
 var $author$project$Experiment$Brush$Editor$Dialect$RelativePoint$parser = A2(
@@ -8362,6 +8374,12 @@ var $author$project$Experiment$Brush$Editor$Dialect$BrushContent$getBrush = F2(
 				},
 				content.brushes.values));
 	});
+var $author$project$Experiment$Brush$Editor$Dialect$Brush$appendZ = function (list) {
+	return _Utils_ap(
+		list,
+		_List_fromArray(
+			['z']));
+};
 var $author$project$Experiment$Brush$Editor$Dialect$PixelSqDim$fromFraction = F2(
 	function (dim, fraction) {
 		return ((dim * fraction.numerator) / fraction.denominator) | 0;
@@ -8466,9 +8484,7 @@ var $author$project$Experiment$Brush$Editor$Dialect$Brush$asPathString = functio
 	return A2(
 		$elm$core$String$join,
 		' ',
-		_Utils_ap(
-			_List_fromArray(
-				['z']),
+		$author$project$Experiment$Brush$Editor$Dialect$Brush$appendZ(
 			A2($elm$core$List$map, $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toSvgString, brush.segments)));
 };
 var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
@@ -8592,7 +8608,7 @@ var $author$project$Main$viewBrushPreviewSection = function (appModel) {
 						_List_fromArray(
 							[
 								A2($elm$html$Html$Attributes$attribute, 'xmlns:xlink', 'http://www.w3.org/1999/xlink'),
-								$elm$svg$Svg$Attributes$viewBox('0 0 1000 1000')
+								$elm$svg$Svg$Attributes$viewBox('-500 -500 1000 1000')
 							]),
 						A2(
 							$elm$core$List$cons,

@@ -1,6 +1,6 @@
 module Experiment.Brush.Editor.Dialect.Fraction exposing (Fraction, asFloatString, parser, toString)
 
-import Parser exposing ((|.), (|=), Parser, int, spaces, succeed, symbol)
+import Parser exposing ((|.), (|=), Parser, int, spaces, succeed, symbol, oneOf)
 
 
 type alias Fraction =
@@ -8,12 +8,20 @@ type alias Fraction =
     , denominator : Int
     }
 
+negInt : Parser Int
+negInt =
+  oneOf
+    [ succeed negate
+        |. symbol "-"
+        |= int
+    , int
+    ]
 
 parser : Parser Fraction
 parser =
     succeed Fraction
         |. spaces
-        |= int
+        |= negInt
         |. symbol "/"
         |= int
         |. spaces

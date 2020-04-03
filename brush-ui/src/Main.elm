@@ -194,7 +194,7 @@ viewBrushPreviewSection appModel =
     section [ Attr.class "section" ]
         [ div [ Attr.class "container" ]
             [ 
-                svg [ attribute "xmlns:xlink" "http://www.w3.org/1999/xlink", viewBox "0 0 1000 1000"] 
+                svg [ attribute "xmlns:xlink" "http://www.w3.org/1999/xlink", viewBox "-500 -500 1000 1000"] 
                 <| BrushContent.view appModel.idx appModel.brushContent
                 :: BrushStrokeContent.view appModel.brushStrokeContent
             ]   

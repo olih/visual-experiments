@@ -138,12 +138,15 @@ togglePreserveForId id list =
                     brush
             )
 
+appendZ: List String -> List String
+appendZ list =
+    list ++ ["z"]
 
 asPathString : Brush -> String
 asPathString brush =
     brush.segments
         |> List.map VectorialSegment.toSvgString
-        |> (++) [ "z" ]
+        |> appendZ
         |> String.join " "
 
 

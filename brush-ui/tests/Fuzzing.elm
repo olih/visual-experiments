@@ -49,7 +49,7 @@ invalidRangeParamString =
 fraction: Fuzzer Fraction
 fraction =
     Fuzz.custom
-            (Random.map2 Fraction (Random.int 0 1000000000) (Random.int 1 1000000000))
+            (Random.map2 Fraction (Random.int -10000000 1000000000) (Random.int 1 1000000000))
             (\{ numerator, denominator } -> Shrink.map Fraction (Shrink.int numerator) |> Shrink.andMap (Shrink.int denominator))
 
 fractionString : Fuzzer String
