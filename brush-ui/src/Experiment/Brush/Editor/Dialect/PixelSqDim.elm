@@ -2,7 +2,7 @@ module Experiment.Brush.Editor.Dialect.PixelSqDim exposing (fromFraction)
 
 import Experiment.Brush.Editor.Dialect.Fraction exposing (Fraction)
 
-fromFraction: Int -> Fraction -> Int
+fromFraction: Float -> Fraction -> Float
 fromFraction dim fraction =
-    (dim * fraction.numerator) // fraction.denominator
+    (dim * toFloat fraction.numerator) / toFloat fraction.denominator
 

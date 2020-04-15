@@ -7071,6 +7071,19 @@ var $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$lineParser 
 			$elm$parser$Parser$keyword('l')),
 		$elm$parser$Parser$spaces),
 	$author$project$Experiment$Brush$Editor$Dialect$RelativePoint$parser);
+var $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$MoveTo = function (a) {
+	return {$: 'MoveTo', a: a};
+};
+var $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$moveParser = A2(
+	$elm$parser$Parser$keeper,
+	A2(
+		$elm$parser$Parser$ignorer,
+		A2(
+			$elm$parser$Parser$ignorer,
+			$elm$parser$Parser$succeed($author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$MoveTo),
+			$elm$parser$Parser$keyword('M')),
+		$elm$parser$Parser$spaces),
+	$author$project$Experiment$Brush$Editor$Dialect$RelativePoint$parser);
 var $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$QuadraticCurve = F2(
 	function (a, b) {
 		return {$: 'QuadraticCurve', a: a, b: b};
@@ -7133,7 +7146,7 @@ var $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$verticalPar
 	$author$project$Experiment$Brush$Editor$Dialect$Fraction$parser);
 var $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$parser = $elm$parser$Parser$oneOf(
 	_List_fromArray(
-		[$author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$lineParser, $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$horizontalParser, $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$verticalParser, $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$cubicCurveParser, $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$smoothCubicCurveParser, $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$quadraticCurveParser, $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$smoothQuadraticCurveParser]));
+		[$author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$moveParser, $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$lineParser, $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$horizontalParser, $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$verticalParser, $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$cubicCurveParser, $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$smoothCubicCurveParser, $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$quadraticCurveParser, $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$smoothQuadraticCurveParser]));
 var $elm$parser$Parser$Advanced$andThen = F2(
 	function (callback, _v0) {
 		var parseA = _v0.a;
@@ -8123,6 +8136,16 @@ var $author$project$Experiment$Brush$Editor$Dialect$RelativePoint$toString = fun
 };
 var $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toString = function (path) {
 	switch (path.$) {
+		case 'MoveTo':
+			var pt = path.a;
+			return A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[
+						'M',
+						$author$project$Experiment$Brush$Editor$Dialect$RelativePoint$toString(pt)
+					]));
 		case 'LineTo':
 			var pt = path.a;
 			return A2(
@@ -8380,13 +8403,14 @@ var $author$project$Experiment$Brush$Editor$Dialect$Brush$appendZ = function (li
 		_List_fromArray(
 			['z']));
 };
+var $elm$core$String$fromFloat = _String_fromNumber;
 var $author$project$Experiment$Brush$Editor$Dialect$PixelSqDim$fromFraction = F2(
 	function (dim, fraction) {
-		return ((dim * fraction.numerator) / fraction.denominator) | 0;
+		return (dim * fraction.numerator) / fraction.denominator;
 	});
 var $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toPix = function (fraction) {
-	return $elm$core$String$fromInt(
-		A2($author$project$Experiment$Brush$Editor$Dialect$PixelSqDim$fromFraction, 1000, fraction));
+	return $elm$core$String$fromFloat(
+		A2($author$project$Experiment$Brush$Editor$Dialect$PixelSqDim$fromFraction, 30, fraction));
 };
 var $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toRelPoint = function (relPoint) {
 	return A2(
@@ -8400,6 +8424,16 @@ var $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toRelPoint 
 };
 var $author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toSvgString = function (path) {
 	switch (path.$) {
+		case 'MoveTo':
+			var pt = path.a;
+			return A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[
+						'M',
+						$author$project$Experiment$Brush$Editor$Dialect$VectorialSegment$toRelPoint(pt)
+					]));
 		case 'LineTo':
 			var pt = path.a;
 			return A2(
@@ -8497,7 +8531,7 @@ var $author$project$Experiment$Brush$Editor$Dialect$Brush$view = function (brush
 		$elm$svg$Svg$symbol,
 		_List_fromArray(
 			[
-				$elm$svg$Svg$Attributes$viewBox('0 0 600 600'),
+				$elm$svg$Svg$Attributes$viewBox('-30 -30 60 60'),
 				$elm$svg$Svg$Attributes$id('brush')
 			]),
 		_List_fromArray(
@@ -8522,16 +8556,15 @@ var $author$project$Experiment$Brush$Editor$Dialect$BrushContent$view = F2(
 				$author$project$Experiment$Brush$Editor$Dialect$Brush$view,
 				A2($author$project$Experiment$Brush$Editor$Dialect$BrushContent$getBrush, identifier, content)));
 	});
-var $elm$core$String$fromFloat = _String_fromNumber;
 var $author$project$Experiment$Brush$Editor$Dialect$Fraction$asFloatString = function (fraction) {
 	return $elm$core$String$fromFloat(fraction.numerator / fraction.denominator);
 };
 var $author$project$Experiment$Brush$Editor$Dialect$BrushStroke$toDeg = function (fraction) {
-	return $elm$core$String$fromInt(
+	return $elm$core$String$fromFloat(
 		A2($author$project$Experiment$Brush$Editor$Dialect$PixelSqDim$fromFraction, 360, fraction));
 };
 var $author$project$Experiment$Brush$Editor$Dialect$BrushStroke$toPix = function (fraction) {
-	return $elm$core$String$fromInt(
+	return $elm$core$String$fromFloat(
 		A2($author$project$Experiment$Brush$Editor$Dialect$PixelSqDim$fromFraction, 1000, fraction));
 };
 var $author$project$Experiment$Brush$Editor$Dialect$BrushStroke$asTransformString = function (brushStroke) {
@@ -8540,11 +8573,11 @@ var $author$project$Experiment$Brush$Editor$Dialect$BrushStroke$asTransformStrin
 		' ',
 		_List_fromArray(
 			[
-				'scale(',
-				$author$project$Experiment$Brush$Editor$Dialect$Fraction$asFloatString(brushStroke.scale),
-				')',
 				'rotate(',
 				$author$project$Experiment$Brush$Editor$Dialect$BrushStroke$toDeg(brushStroke.rotation),
+				')',
+				'scale(',
+				$author$project$Experiment$Brush$Editor$Dialect$Fraction$asFloatString(brushStroke.scale),
 				')',
 				'translate(',
 				$author$project$Experiment$Brush$Editor$Dialect$BrushStroke$toPix(brushStroke.position.dx),

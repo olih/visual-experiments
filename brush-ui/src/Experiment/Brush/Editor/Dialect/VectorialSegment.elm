@@ -7,7 +7,7 @@ import Experiment.Brush.Editor.Dialect.PixelSqDim as PixelSqDim
 
 toPix: Fraction -> String
 toPix fraction =
-    PixelSqDim.fromFraction 1000 fraction |> String.fromInt
+    PixelSqDim.fromFraction 30 fraction |> String.fromFloat
 
 toRelPoint: RelativePoint -> String
 toRelPoint relPoint =
@@ -16,7 +16,8 @@ toRelPoint relPoint =
 -- all positions are relative
 
 type VectorialSegment =
-    LineTo RelativePoint
+    MoveTo RelativePoint
+    | LineTo RelativePoint
     | Horizontal Fraction
     | Vertical Fraction
     | CubicCurve RelativePoint RelativePoint RelativePoint
@@ -29,6 +30,13 @@ lineParser : Parser VectorialSegment
 lineParser =
     succeed LineTo
         |. keyword "l"
+        |. spaces
+        |= RelativePoint.parser
+
+moveParser : Parser VectorialSegment
+moveParser =
+    succeed MoveTo
+        |. keyword "M"
         |. spaces
         |= RelativePoint.parser
 
@@ -85,7 +93,8 @@ smoothQuadraticCurveParser =
 parser: Parser VectorialSegment
 parser =
     oneOf [
-        lineParser
+        moveParser
+        , lineParser
         , horizontalParser
         , verticalParser
         , cubicCurveParser
@@ -97,6 +106,8 @@ parser =
 toString: VectorialSegment -> String
 toString path =
     case path of
+        MoveTo pt -> 
+            String.join " " ["M", RelativePoint.toString pt]
         LineTo pt -> 
             String.join " " ["l", RelativePoint.toString pt]
         Horizontal f ->
@@ -115,6 +126,8 @@ toString path =
 toSvgString: VectorialSegment -> String
 toSvgString path =
     case path of
+        MoveTo pt -> 
+            String.join " " ["M", toRelPoint pt]
         LineTo pt -> 
             String.join " " ["l", toRelPoint pt]
         Horizontal f ->

@@ -5,7 +5,6 @@ import Experiment.Brush.Editor.Dialect.Identifier as Identifier exposing(Identif
 import Experiment.Brush.Editor.Dialect.RelativePoint as RelativePoint exposing (RelativePoint)
 import Experiment.Brush.Editor.Dialect.Fraction as Fraction exposing (Fraction)
 import Html exposing (Html)
-import Html.Attributes exposing (attribute)
 import Svg exposing (use, g)
 import Svg.Attributes exposing (transform, fill, xlinkHref)
 import Experiment.Brush.Editor.Dialect.PixelSqDim as PixelSqDim
@@ -60,20 +59,20 @@ fromStringList lines =
 
 toPix: Fraction -> String
 toPix fraction =
-    PixelSqDim.fromFraction 1000 fraction |> String.fromInt
+    PixelSqDim.fromFraction 1000 fraction |> String.fromFloat
 
 toDeg: Fraction -> String
 toDeg fraction =
-    PixelSqDim.fromFraction 360 fraction |> String.fromInt
+    PixelSqDim.fromFraction 360 fraction |> String.fromFloat
 
 asTransformString: BrushStroke -> String
 asTransformString brushStroke =
     [
-        "scale("
-        , Fraction.asFloatString brushStroke.scale
-        , ")"
-        , "rotate("
+        "rotate("
         , toDeg brushStroke.rotation
+        , ")"
+        , "scale("
+        , Fraction.asFloatString brushStroke.scale
         , ")"
         ,"translate("
         , toPix brushStroke.position.dx

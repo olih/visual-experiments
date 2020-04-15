@@ -152,7 +152,7 @@ asPathString brush =
 
 view : Brush -> Html a
 view brush =
-    symbol [ viewBox "0 0 600 600", id "brush" ]
+    symbol [ viewBox "-30 -30 60 60", id "brush" ]
         [ path [ d <| asPathString brush ]
             []
         ]
