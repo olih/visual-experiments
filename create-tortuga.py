@@ -57,6 +57,33 @@ def createRule(mutations):
     rsv = choice(rules) + choice(strokes) + chooseVariable(variables)
     return choice([rvs, vrs, rsv])
 
+
+def applyRulesToChain(rules, start, iterations):
+    chain = start
+    for i in range(iterations):
+        for rule in rules:
+            chain = chain.replace(rule["s"], rule["s"].lower())
+        for rule in rules:
+            chain = chain.replace(rule["s"].lower(), rule["r"])
+    return chain
+
+
+def applyRules(specimen):
+    return {
+        "experiment-type" : "tortuga",
+        "general": specimen["general"],
+        "mutations": specimen["mutations"],
+        "crossovers": specimen["crossovers"],
+        "code": {
+            "brushes": specimen["code"]["brushes"],
+            "lengths": specimen["code"]["lengths"],
+            "angles": specimen["code"]["angles"],
+            "iterations": specimen["code"]["iterations"],
+            "rules": specimen["code"]["rules"],
+            "start": specimen["code"]["start"],
+            "chain": applyRulesToChain(specimen["code"]["rules"], specimen["code"]["start"], specimen["code"]["iterations"])
+        }
+    }
 def createSpecimen(general, mutations, crossovers):
     return {
         "experiment-type" : "tortuga",
@@ -68,7 +95,7 @@ def createSpecimen(general, mutations, crossovers):
             "lengths": sample(mutations["pool"]["lengths"].split(), mutations["init"]["lengths"]),
             "angles": sample(mutations["pool"]["angles"].split(), mutations["init"]["angles"]),
             "iterations": mutations["init"]["iterations"],
-            "rules": { i:createRule(mutations) for i in mutations["variables"]},
+            "rules": [ {"s": i, "r":createRule(mutations) } for i in mutations["variables"]],
             "start": createRule(mutations)
         }
     }
@@ -80,6 +107,7 @@ def initGeneration(expDirectory):
     crossovers = initcfg["crossovers"]
     for m in range(mutations["init"]["population"]):
         specimen = createSpecimen(general, mutations, crossovers)
-        saveStencilAsJson(expDirectory, createStencilId(), specimen)
+        xspecimen = applyRules(specimen)
+        saveStencilAsJson(expDirectory, createStencilId(), xspecimen)
 
 initGeneration(args.directory)
