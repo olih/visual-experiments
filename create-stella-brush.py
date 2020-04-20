@@ -43,6 +43,15 @@ def addPoints (la, lb):
     length = len(la)
     return ",".join([addPoint(la[i], lb[i]) for i in range(length)])
 
+def applyRulesToChain(rules, start, iterations):
+    chain = start
+    for i in range(iterations):
+        for rule in rules:
+            chain = chain.replace(rule["s"], rule["s"].lower())
+        for rule in rules:
+            chain = chain.replace(rule["s"].lower(), rule["r"])
+    return chain
+
 class Experimenting:
     def __init__(self, name):
         self.name = name
@@ -83,16 +92,21 @@ class Experimenting:
 
     def createSpecimen(self):
         stake = choice(self.pool["stakes"]).split(",")
+        iterations = self.init["iterations"]
         deltas = self.createPoints(len(stake))
         points = addPoints(stake, deltas)
+        rules = [ {"s": i, "r":self.createRule() } for i in self.variables]
+        start = self.createRule()
+        chain = applyRulesToChain(rules, start, iterations)
         return {    
                 "id": self.incId(),  
-                "iterations": self.init["iterations"],
+                "iterations": iterations,
                 "stake": stake,
                 "deltas": deltas,
                 "points": points,
-                "rules": [ {"s": i, "r":self.createRule() } for i in self.variables],
-                "start": self.createRule()
+                "rules": rules,
+                "start": start,
+                "chain": chain
         }
 
 experimenting = Experimenting(args.file)
