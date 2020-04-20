@@ -1,0 +1,100 @@
+import os
+import sys
+import argparse
+from fractions import Fraction
+from hashids import Hashids
+import json
+from random import sample, choice
+
+localDir = os.environ['OLI_LOCAL_DIR']
+
+if not (sys.version_info.major == 3 and sys.version_info.minor >= 5):
+    print("This script requires Python 3.5 or higher!")
+    print("You are using Python {}.{}.".format(sys.version_info.major, sys.version_info.minor))
+    sys.exit(1)
+
+def loadConfAsJson():
+    with open('{}/brush/conf.json'.format(localDir), 'r') as jsonfile:
+        return json.load(jsonfile)
+
+jsonConf = loadConfAsJson()
+
+evalDir = jsonConf["brushes"]["evaluation-directory"]
+
+brushesHashids = Hashids(salt=jsonConf["brushes"]["salt"], min_length=jsonConf["brushes"]["id-length"])
+
+parser = argparse.ArgumentParser(description = 'Create brushes')
+parser.add_argument("-f", "--file", help="the file containing the experiments.", required = True)
+args = parser.parse_args()
+
+def chooseVariable(variables):
+    duos = [i+j for i in variables for j in variables]
+    trios = [i+j+k for i in variables for j in variables for k in variables]
+    return choice([choice(duos), choice(trios)])
+
+def addPoint(a, b):
+    xa, ya = a.strip().split(" ")
+    xb, yb = b.strip().split(" ")
+    x = Fraction(xa)+Fraction(xb)
+    y = Fraction(ya)+Fraction(yb)
+    return str(x)+ " "+ str(y)
+
+def addPoints (la, lb):
+    length = len(la)
+    return ",".join([addPoint(la[i], lb[i]) for i in range(length)])
+
+class Experimenting:
+    def __init__(self, name):
+        self.name = name
+        self.content = {}
+
+    def load(self):
+        with open('{}/{}.json'.format(evalDir, self.name), 'r') as jsonfile:
+            self.content = json.load(jsonfile)
+            self.pool = self.content["mutations"]["pool"]
+            self.fractions = self.pool["fractions"].split()
+            self.init = self.content["mutations"]["init"]
+            self.actions = self.content["mutations"]["actions"]
+            self.variables = self.content["mutations"]["variables"]
+            return self.content
+
+    def save(self):
+        with open('{}/{}.json'.format(evalDir, self.name), 'w') as outfile:
+                json.dump(self.content, outfile, indent=2)
+    
+    def incId(self):
+        counter = self.content["general"]["counter"]
+        counter = counter + 1
+        self.content["general"]["counter"] = counter
+        return counter
+
+    def createPoint(self):
+        x = Fraction(choice(self.fractions))*choice([1, -1])
+        y = Fraction(choice(self.fractions))*choice([1, -1])
+        return str(x)+ " "+ str(y)
+
+    def createPoints(self, count):
+        return [self.createPoint() for i in range(count)]
+
+    def createRule(self):
+        rv = choice(self.pool["rules"]) + chooseVariable(self.variables)
+        vr = chooseVariable(self.variables) + choice(self.pool["rules"])
+        return choice([rv, vr])
+
+    def createSpecimen(self):
+        stake = choice(self.pool["stakes"]).split(",")
+        deltas = self.createPoints(len(stake))
+        points = addPoints(stake, deltas)
+        return {    
+                "id": self.incId(),  
+                "iterations": self.init["iterations"],
+                "stake": stake,
+                "deltas": deltas,
+                "points": points,
+                "rules": [ {"s": i, "r":self.createRule() } for i in self.variables],
+                "start": self.createRule()
+        }
+
+experimenting = Experimenting(args.file)
+experimenting.load()
+print(experimenting.createSpecimen())
