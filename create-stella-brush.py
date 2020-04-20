@@ -2,6 +2,7 @@ import os
 import sys
 import argparse
 from fractions import Fraction
+from collections import deque
 from hashids import Hashids
 import json
 from random import sample, choice
@@ -41,7 +42,7 @@ def addPoint(a, b):
 
 def addPoints (la, lb):
     length = len(la)
-    return ",".join([addPoint(la[i], lb[i]) for i in range(length)])
+    return [addPoint(la[i], lb[i]) for i in range(length)]
 
 def applyRulesToChain(rules, start, iterations):
     chain = start
@@ -51,6 +52,17 @@ def applyRulesToChain(rules, start, iterations):
         for rule in rules:
             chain = chain.replace(rule["s"].lower(), rule["r"])
     return chain
+
+def toBrush(chain, points):
+    length = len(points)
+    print(length)
+    pointsStack = deque(points)
+    coreChain = "".join([c for c in chain if c in ["L", "S", "Q"]])
+    chainDot = "M"+ coreChain.replace("L", "l").replace("S", "s.").replace("Q", "t")
+    chainCut = chainDot[0:length-1] if chainDot[length] is "." else chainDot[0:length]
+    chain_ = chainCut.replace("M", "M _ ").replace("l", "l _ ").replace("s.", "s _ _ ").replace("t", "t _ ")
+    brush = chain_.replace("_", pointsStack.popleft())
+    return brush
 
 class Experimenting:
     def __init__(self, name):
@@ -63,7 +75,6 @@ class Experimenting:
             self.pool = self.content["mutations"]["pool"]
             self.fractions = self.pool["fractions"].split()
             self.init = self.content["mutations"]["init"]
-            self.actions = self.content["mutations"]["actions"]
             self.variables = self.content["mutations"]["variables"]
             return self.content
 
@@ -98,6 +109,7 @@ class Experimenting:
         rules = [ {"s": i, "r":self.createRule() } for i in self.variables]
         start = self.createRule()
         chain = applyRulesToChain(rules, start, iterations)
+        brush = toBrush(chain, points)
         return {    
                 "id": self.incId(),  
                 "iterations": iterations,
@@ -106,7 +118,8 @@ class Experimenting:
                 "points": points,
                 "rules": rules,
                 "start": start,
-                "chain": chain
+                "chain": chain,
+                "brush": brush
         }
 
 experimenting = Experimenting(args.file)
