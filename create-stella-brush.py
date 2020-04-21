@@ -5,6 +5,7 @@ from fractions import Fraction
 from collections import deque
 from hashids import Hashids
 import json
+import re
 from random import sample, choice
 
 localDir = os.environ['OLI_LOCAL_DIR']
@@ -55,13 +56,13 @@ def applyRulesToChain(rules, start, iterations):
 
 def toBrush(chain, points):
     length = len(points)
-    print(length)
     pointsStack = deque(points)
     coreChain = "".join([c for c in chain if c in ["L", "S", "Q"]])
     chainDot = "M"+ coreChain.replace("L", "l").replace("S", "s.").replace("Q", "t")
     chainCut = chainDot[0:length-1] if chainDot[length] is "." else chainDot[0:length]
-    chain_ = chainCut.replace("M", "M _ ").replace("l", "l _ ").replace("s.", "s _ _ ").replace("t", "t _ ")
-    brush = chain_.replace("_", pointsStack.popleft())
+    chain_ = chainCut.replace("M", "M _, ").replace("l", "l _, ").replace("s.", "s _ _, ").replace("t", "t _, ")
+    nbrush = re.compile("_").sub(lambda x: pointsStack.popleft(),chain_)
+    brush = "[ " + re.compile(r',\s+$').sub('', nbrush) + " ]"
     return brush
 
 class Experimenting:
