@@ -9,6 +9,7 @@ import re
 from random import sample, choice
 
 localDir = os.environ['OLI_LOCAL_DIR']
+BRUSH_WIDTH=10
 
 if not (sys.version_info.major == 3 and sys.version_info.minor >= 5):
     print("This script requires Python 3.5 or higher!")
@@ -65,6 +66,16 @@ def toBrush(chain, points):
     brush = "[ " + re.compile(r',\s+$').sub('', nbrush) + " ]"
     return brush
 
+def segmentToSvg(segment, width):
+    prefix = segment.strip()[0]
+    values = segment.strip()[1:].strip().split(" ")
+    fvalues = " ".join(["{:.3f}".format(float(Fraction(value)*width)) for value in values])
+    return prefix + " " + fvalues
+
+def brushToSvg(brush, width):
+    segments =  brush.replace("[","").replace("]", "").strip().split(",")   
+    return " ".join([ segmentToSvg(segment, width) for segment in segments])
+
 class Experimenting:
     def __init__(self, name):
         self.name = name
@@ -111,6 +122,7 @@ class Experimenting:
         start = self.createRule()
         chain = applyRulesToChain(rules, start, iterations)
         brush = toBrush(chain, points)
+        brushSvg = brushToSvg(brush, BRUSH_WIDTH)
         return {    
                 "id": self.incId(),  
                 "iterations": iterations,
@@ -120,7 +132,8 @@ class Experimenting:
                 "rules": rules,
                 "start": start,
                 "chain": chain,
-                "brush": brush
+                "brush": brush,
+                "brush-svg": brushSvg
         }
 
 experimenting = Experimenting(args.file)
