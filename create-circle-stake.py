@@ -10,9 +10,10 @@ if not (sys.version_info.major == 3 and sys.version_info.minor >= 5):
     sys.exit(1)
 
 parser = argparse.ArgumentParser(description = 'Create circle stake')
-parser.add_argument("-r", "--radius", help="the radius of circle (Fraction) first last inc next", default="1/4 1/8 -1/16 1/1")
-parser.add_argument("-a", "--angle", help="the angle of circle (Fraction) last inc next", default="1/1 1/16 1/1")
-parser.add_argument("-w", "--width", help="the width in pixel", default=None)
+parser.add_argument("-r", "--radius", help="the radius of circle (Fraction) first last inc next", default="1/4 1/8 -1/48 1/1")
+parser.add_argument("-a", "--angle", help="the angle of circle (Fraction) last inc next", default="1/1 1/64 1/1")
+parser.add_argument("-v", "--view", help="Display mode", default="stake cartesian")
+parser.add_argument("-w", "--width", help="the width in pixel", default="10")
 args = parser.parse_args()
 
 radiusFirst, radiusLast, radiusInc, radiusNext = [Fraction(v) for v in args.radius.split(" ")]
@@ -26,6 +27,12 @@ def cosFract(fract):
 def sinFract(fract):
     numerator = int(1000*sin(radians(360*fract)))
     return Fraction("{}/1000".format(numerator))
+
+def pointToCartesian(point, width):
+    x, y = point.split(" ")
+    xx = float(Fraction(x)*width)
+    yy = float(Fraction(y)*width)
+    return "({:.3f},{:.3f})".format(xx,yy)
 
 def createFractions():
     results = []
@@ -43,5 +50,11 @@ def createFractions():
         currentAngle = currentAngle + currentAngleInc
     return results
 
-print(createFractions())
+fracts = createFractions()
 
+if "stake" in args.view:
+    print("stake:")
+    print (",".join(fracts))
+if "cartesian" in args.view:
+    print("cartesian:")
+    print(" ".join([pointToCartesian(f, int(args.width)) for f in fracts]))
