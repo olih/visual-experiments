@@ -12,7 +12,7 @@ if not (sys.version_info.major == 3 and sys.version_info.minor >= 5):
 parser = argparse.ArgumentParser(description = 'Create circle stake')
 parser.add_argument("-r", "--radius", help="the radius of circle (Fraction) first last inc next", default="1/4 1/8 -1/48 1/1")
 parser.add_argument("-a", "--angle", help="the angle of circle (Fraction) last inc next", default="1/1 1/64 1/1")
-parser.add_argument("-v", "--view", help="Display mode", default="stake cartesian")
+parser.add_argument("-v", "--view", help="Display mode", default="params stake cartesian")
 parser.add_argument("-w", "--width", help="the width in pixel", default="10")
 args = parser.parse_args()
 
@@ -51,10 +51,13 @@ def createFractions():
     return results
 
 fracts = createFractions()
+if "params" in args.view:
+    print("angle: {}, radius: {}".format(args.angle, args.radius))
 
 if "stake" in args.view:
     print("stake:")
     print (",".join(fracts))
+
 if "cartesian" in args.view:
     print("cartesian:")
     print(" ".join([pointToCartesian(f, int(args.width)) for f in fracts]))
