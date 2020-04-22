@@ -40,14 +40,16 @@ def createFractions():
     currentRadiusInc = radiusInc*radiusNext
     currentAngle = Fraction(0)
     currentAngleInc = angleInc*angleNext
-    while currentRadius >= radiusLast and currentAngle <= angleLast:
+    more = True
+    while more:
         x = currentRadius*cosFract(currentAngle)
         y = currentRadius*sinFract(currentAngle)
         results.append("{} {}".format(x, y))
         currentRadiusInc =   currentRadiusInc*radiusNext
-        currentAngleInc = currentAngleInc*angleNext
         currentRadius = currentRadius + currentRadiusInc
+        currentAngleInc = currentAngleInc*angleNext
         currentAngle = currentAngle + currentAngleInc
+        more = currentRadius >= radiusLast and currentAngle <= angleLast
     return results
 
 fracts = createFractions()
