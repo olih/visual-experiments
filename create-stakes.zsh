@@ -6,4 +6,4 @@
 # python create-circle-stake.py --radius "1/4 1/4 0/1 1/1" --angle "1/1 1/360 1597/987"
 # python create-circle-stake.py --radius "1/4 1/4 0/1 1/1" --angle "99/100 1/1 987/1597"
 
-python create-circle-stake.py --radius "1/4 1/12 -1/120 1/1" --angle "1/1 1/20 1/1"
+python create-circle-stake.py --radius "1/4 1/24 -1/220 1/1" --angle "12/1 1/20 1/1"
