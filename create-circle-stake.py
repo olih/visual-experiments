@@ -50,6 +50,8 @@ def createFractions():
         currentAngleInc = currentAngleInc*angleNext
         currentAngle = currentAngle + currentAngleInc
         more = currentRadius >= radiusLast and currentAngle <= angleLast
+        if not more and "debug" in args.view:
+            print("breaking at currentRadius: {} ie {} and currentAngle {} ie {}".format(currentRadius, float(currentRadius), currentAngle, float(currentAngle)))
     return results
 
 fracts = createFractions()
@@ -57,8 +59,8 @@ if "params" in args.view:
     print("angle: {}, radius: {}".format(args.angle, args.radius))
 
 if "stake" in args.view:
-    print("stake:")
-    print (",".join(fracts))
+    row = ",".join(fracts)
+    print('"'+row+'",')
 
 if "cartesian" in args.view:
     print("cartesian:")
