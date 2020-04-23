@@ -1,13 +1,15 @@
 #!/bin/zsh
 VIEW="cartesian"
 
+#sine decrease amplitude
+python create-sine-wave-stake.py --amplitude "1/4 1/16 -1/1400 1/1" --period "7/1 1/30 1/1" --view "$VIEW"
+python create-sine-wave-stake.py --amplitude "1/4 1/16 -1/1400 1/1" --period "11/1 1/30 1/1" --view "$VIEW"
+
 #sine wave
 for period in 3 5 7 11
 do
     python create-sine-wave-stake.py --amplitude "1/4 1/4 0/1 1/1" --period "$period/1 1/20 1/1" --view "$VIEW"
 done
-
-exit 0
 
 #Circles
 for angle in 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21
