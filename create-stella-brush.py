@@ -57,14 +57,10 @@ def applyRulesToChain(rules, start, iterations):
     return chain
 
 def toBrush(chain, points):
-    length = len(points)
-    pointsStack = deque(points)
-    coreChain = "".join([c for c in chain if c in ["L", "S", "Q"]])
-    chainDot = "M"+ coreChain.replace("L", "l").replace("S", "s.").replace("Q", "t")
-    chainCut = chainDot[0:length-1] if chainDot[length] is "." else chainDot[0:length]
-    chain_ = chainCut.replace("M", "M _, ").replace("l", "l _, ").replace("s.", "s _ _, ").replace("t", "t _, ")
-    nbrush = re.compile("_").sub(lambda x: pointsStack.popleft(),chain_)
-    brush = "[ " + re.compile(r',\s+$').sub('', nbrush) + " ]"
+    firstPoint = "M {},".format(points[0])
+    otherPoints = points[1:]
+    shapes = ",".join(["l {}".format(pt) for pt in otherPoints])
+    brush = "[ " +firstPoint + shapes + " ]"
     return brush
 
 def segmentToSvg(segment, width):
