@@ -9,7 +9,7 @@ import re
 from random import sample, choice
 
 localDir = os.environ['OLI_LOCAL_DIR']
-BRUSH_WIDTH=10
+BRUSH_WIDTH=34
 
 if not (sys.version_info.major == 3 and sys.version_info.minor >= 5):
     print("This script requires Python 3.5 or higher!")
@@ -28,6 +28,7 @@ brushesHashids = Hashids(salt=jsonConf["brushes"]["salt"], min_length=jsonConf["
 
 parser = argparse.ArgumentParser(description = 'Create brushes')
 parser.add_argument("-f", "--file", help="the file containing the experiments.", required = True)
+parser.add_argument("-t", "--template", help="the template for visualizing the brush", default = "template-one")
 args = parser.parse_args()
 
 def chooseVariable(variables):
@@ -77,8 +78,10 @@ def brushToSvg(brush, width):
     return " ".join([ segmentToSvg(segment, width) for segment in segments])
 
 class Experimenting:
-    def __init__(self, name):
+    def __init__(self, name, templateName):
         self.name = name
+        self.templateName = templateName
+        self.template = ""
         self.content = {}
 
     def load(self):
@@ -89,6 +92,15 @@ class Experimenting:
             self.init = self.content["mutations"]["init"]
             self.variables = self.content["mutations"]["variables"]
             return self.content
+    
+    def loadTemplate(self):
+        with open('{}/{}.svg'.format(evalDir, self.templateName)) as file:  
+            self.template = file.read()
+    
+    def saveSpecimenSvg(self, name, brushData):
+        with open('{}/{}.svg'.format(evalDir, name), 'w') as file:  
+            specimenContent = self.template.replace('BRUSH_DATA', brushData)
+            file.write(specimenContent)
 
     def save(self):
         with open('{}/{}.json'.format(evalDir, self.name), 'w') as outfile:
@@ -135,7 +147,21 @@ class Experimenting:
                 "brush": brush,
                 "brush-svg": brushSvg
         }
+    def start(self):
+        population = self.init["population"]
+        self.content['specimens'] = [ self.createSpecimen() for _ in range(population) ]
 
-experimenting = Experimenting(args.file)
+    def saveSvg(self):
+        specimens = self.content['specimens']
+        for specimen in specimens:
+            brushSvg = specimen["brush-svg"]
+            filename = "eval-{}".format(specimen["id"])
+            self.saveSpecimenSvg(filename, brushSvg)
+
+
+experimenting = Experimenting(args.file, args.template)
 experimenting.load()
-print(experimenting.createSpecimen())
+experimenting.loadTemplate()
+experimenting.start()
+experimenting.saveSvg()
+

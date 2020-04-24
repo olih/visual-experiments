@@ -1,5 +1,5 @@
 #!/bin/zsh
-VIEW="cartesian"
+VIEW="stake"
 
 # Linear spirales
 for ellipse in 1 2 3 4
@@ -12,7 +12,6 @@ done
 done
 done
 
-exit 0
 #Circles
 for ellipse in 1 2 3 5 7 9
 do
