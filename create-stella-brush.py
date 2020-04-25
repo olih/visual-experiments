@@ -129,10 +129,14 @@ def toBrush(chain, points, fxWeight, tweaks):
     brush = "[ " +firstPoint + shapes + " ]"
     return brush
 
+def getYSign(idx):
+    return 1 if idx % 2 is 0 else -1
+
 def segmentToSvg(segment, width):
     prefix = segment.strip()[0]
     values = segment.strip()[1:].strip().split(" ")
-    fvalues = " ".join(["{:.3f}".format(float(Fraction(value)*width)) for value in values])
+    length = len(values)
+    fvalues = " ".join(["{:.3f}".format(getYSign(i)*float(Fraction(values[i])*width)) for i in range(length)])
     return prefix + " " + fvalues
 
 def brushToSvg(brush, width):
