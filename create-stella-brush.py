@@ -144,6 +144,29 @@ def brushToSvg(brush, width):
     svgPath = " ".join([ segmentToSvg(segment, width) for segment in segments])
     return "{} Z".format(svgPath)
 
+
+def getFilename(filename):
+    return os.path.basename(filename)
+
+def getIdFromFilename(filename):
+    filename = getFilename(filename)
+    id = filename.replace('eval-','').replace('.svg','')
+    return int(id)
+
+def asTagInfo(line):
+    if not "\t" in line:
+        return { "tags": []}
+    filename, tagCSV =  line.split("\t")
+    tags = tagCSV.split(",")
+    return {"id": getIdFromFilename(filename), "tags": tags }
+
+def extractIdWithTags():
+    stream = os.popen("tag -l {}/eval-*".format(evalDir))
+    lines = stream.readlines()
+    tagInfoLines = [asTagInfo(line.strip()) for line in lines ]
+    withTags = [tagInfo for tagInfo in  tagInfoLines if len(tagInfo["tags"])>0]
+    return withTags
+
 class Experimenting:
     def __init__(self, name, templateName):
         self.name = name
@@ -215,7 +238,7 @@ class Experimenting:
         chain = applyRulesToChain(rules, start, iterations)
         brush = toBrush(chain, points, fxWeight, tweaks)
         brushSvg = brushToSvg(brush, BRUSH_WIDTH)
-        summary = "based on a stake of {} points, a weight of {} and the following rules {} starting with {}".format(len(stake), fxWeight, ", ".join([r["s"] + "->" + r["r"] for r in rules]), start)
+        summary = "Brush based on a stake of {} points, a weight of {} and the following rules {} starting with {}".format(len(stake), fxWeight, ", ".join([r["s"] + "->" + r["r"] for r in rules]), start)
         return {    
                 "id": self.incId(),  
                 "iterations": iterations,
@@ -229,7 +252,8 @@ class Experimenting:
                 "chain": chain,
                 "brush": brush,
                 "brush-svg": brushSvg,
-                "summary": summary
+                "summary": summary,
+                "tags": []
         }
     def start(self):
         population = self.init["population"]
@@ -249,4 +273,5 @@ experimenting.load()
 experimenting.loadTemplate()
 experimenting.start()
 experimenting.saveSvg()
+print(extractIdWithTags())
 
