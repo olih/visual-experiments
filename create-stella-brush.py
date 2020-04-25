@@ -157,14 +157,13 @@ def asTagInfo(line):
     if not "\t" in line:
         return { "tags": []}
     filename, tagCSV =  line.split("\t")
-    tags = tagCSV.split(",")
-    return {"id": getIdFromFilename(filename), "tags": tags }
+    return {"id": getIdFromFilename(filename), "tags": tagCSV }
 
 def extractIdWithTags():
     stream = os.popen("tag -l {}/eval-*".format(evalDir))
     lines = stream.readlines()
     tagInfoLines = [asTagInfo(line.strip()) for line in lines ]
-    withTags = [tagInfo for tagInfo in  tagInfoLines if len(tagInfo["tags"])>0]
+    withTags = { tagInfo["id"]: tagInfo["tags"] for tagInfo in  tagInfoLines if len(tagInfo["tags"])>0 }
     return withTags
 
 class Experimenting:
@@ -174,18 +173,19 @@ class Experimenting:
         self.template = ""
         self.content = {}
 
+    def loadTemplate(self):
+        with open('{}/{}.svg'.format(evalDir, self.templateName)) as file:  
+            self.template = file.read()
+
     def load(self):
+        self.loadTemplate()
         with open('{}/{}.json'.format(evalDir, self.name), 'r') as jsonfile:
             self.content = json.load(jsonfile)
             self.pool = self.content["mutations"]["pool"]
             self.fractions = self.pool["fractions"].split()
             self.init = self.content["mutations"]["init"]
             self.variables = self.content["mutations"]["variables"]
-            return self.content
-    
-    def loadTemplate(self):
-        with open('{}/{}.svg'.format(evalDir, self.templateName)) as file:  
-            self.template = file.read()
+            return self.content   
     
     def saveSpecimenSvg(self, name, brushData):
         with open('{}/{}.svg'.format(evalDir, name), 'w') as file:  
@@ -253,11 +253,24 @@ class Experimenting:
                 "brush": brush,
                 "brush-svg": brushSvg,
                 "summary": summary,
-                "tags": []
+                "tags": ""
         }
-    def start(self):
+    def applyTags(self):
+        specimens = self.content['specimens']
+        idWithTags = extractIdWithTags()
+        for specimen in specimens:
+            specimenId = specimen["id"]
+            if specimenId in idWithTags:
+                specimen["tags"] = idWithTags[specimenId]
+            
+    def createNewPopulation(self):
         population = self.init["population"]
-        self.content['specimens'] = [ self.createSpecimen() for _ in range(population) ]
+        newspecimens = [ self.createSpecimen() for _ in range(population) ]
+        self.content['specimens'] = self.content['specimens'] + newspecimens
+ 
+    def start(self):
+        self.applyTags()
+        self.createNewPopulation()
 
     def saveSvg(self):
         specimens = self.content['specimens']
@@ -266,12 +279,14 @@ class Experimenting:
             filename = "eval-{}".format(specimen["id"])
             self.saveSpecimenSvg(filename, brushSvg)
             print(specimen["summary"])
-
+            print("TAG", specimen["tags"])
+    
+    def saveEverything(self):
+        self.saveSvg()
+        self.save()
 
 experimenting = Experimenting(args.file, args.template)
 experimenting.load()
-experimenting.loadTemplate()
 experimenting.start()
-experimenting.saveSvg()
-print(extractIdWithTags())
+experimenting.saveEverything()
 
