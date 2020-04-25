@@ -81,6 +81,10 @@ def addPoints (la, lb):
     length = len(la)
     return [addPoint(la[i], lb[i]) for i in range(length)]
 
+def addWeightedPoints (la, lb, weight):
+    length = len(la)
+    return [addPoint(la[i], multiplyPoint(weight, lb[i])) for i in range(length)]
+
 def applyRulesToChain(rules, start, iterations):
     chain = start
     for i in range(iterations):
@@ -201,7 +205,7 @@ class Experimenting:
         fxWeight = choice(self.pool["fx-weights"].split(" "))
         deltas = self.createPoints(len(stake))
         tweaks = self.createTweaks(len(stake))
-        points = addPoints(stake, deltas)
+        points = addWeightedPoints(stake, deltas, fxWeight)
         rules = [ {"s": i, "r":self.createRule() } for i in self.variables]
         start = self.createRule()
         chain = applyRulesToChain(rules, start, iterations)
