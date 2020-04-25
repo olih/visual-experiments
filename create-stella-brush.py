@@ -43,6 +43,40 @@ def addPoint(a, b):
     y = Fraction(ya)+Fraction(yb)
     return str(x)+ " "+ str(y)
 
+def substractPoint(a, b):
+    xa, ya = a.strip().split(" ")
+    xb, yb = b.strip().split(" ")
+    x = Fraction(xa)-Fraction(xb)
+    y = Fraction(ya)-Fraction(yb)
+    return str(x)+ " "+ str(y)
+
+def multiplyPoint(weight, a):
+    xa, ya = a.strip().split(" ")
+    x = Fraction(xa)*Fraction(weight)
+    y = Fraction(ya)*Fraction(weight)
+    return str(x)+ " "+ str(y)
+
+def midPoint(a, b):
+    xa, ya = a.strip().split(" ")
+    xb, yb = b.strip().split(" ")
+    x = Fraction("1/2")*(Fraction(xa)+Fraction(xb))
+    y = Fraction("1/2")*(Fraction(ya)+Fraction(yb))
+    return str(x)+ " "+ str(y)
+
+def oneThirdPoint(a, b):
+    xa, ya = a.strip().split(" ")
+    xb, yb = b.strip().split(" ")
+    x = Fraction("2/3")*Fraction(xa)+Fraction("1/3")*Fraction(xb)
+    y = Fraction("2/3")*Fraction(ya)+Fraction("1/3")*Fraction(yb)
+    return str(x)+ " "+ str(y)
+
+def twoThirdPoint(a, b):
+    xa, ya = a.strip().split(" ")
+    xb, yb = b.strip().split(" ")
+    x = Fraction("1/3")*Fraction(xa)+Fraction("2/3")*Fraction(xb)
+    y = Fraction("1/3")*Fraction(ya)+Fraction("2/3")*Fraction(yb)
+    return str(x)+ " "+ str(y)
+
 def addPoints (la, lb):
     length = len(la)
     return [addPoint(la[i], lb[i]) for i in range(length)]
@@ -56,10 +90,38 @@ def applyRulesToChain(rules, start, iterations):
             chain = chain.replace(rule["s"].lower(), rule["r"])
     return chain
 
-def toBrush(chain, points):
+def normChain(chain, length):
+    usable = [c for c in chain if c in ["L","T", "C", "S", "Q"]]
+    newchain =  usable
+    while len(newchain)<length:
+        newchain = newchain + usable
+    return newchain[:length]
+
+def actionToSegment(action, ptStart, ptEnd, fxWeight, tweaks):
+    oneThird = oneThirdPoint(ptStart, ptEnd)
+    twoThird = twoThirdPoint(ptStart, ptEnd)
+    halfway = midPoint(ptStart, ptEnd)
+    if action is "L":
+        return "l {}".format(ptEnd)
+    if action is "T":
+        return "t {}".format(ptEnd)
+    if action is "C":
+        startCtlPt = addPoint(oneThird, multiplyPoint(fxWeight,tweaks[0] + " " +tweaks[1]))
+        endCtlPt = addPoint(twoThird, multiplyPoint(fxWeight,tweaks[2] + " " +tweaks[3]))
+        return "c {} {} {}".format(startCtlPt, endCtlPt, ptEnd)
+    if action is "S":
+        ctlPt = addPoint(halfway, multiplyPoint(fxWeight,tweaks[0] + " " +tweaks[1]))
+        return "s {} {}".format(ctlPt, ptEnd)
+    if action is "Q":
+        ctlPt = addPoint(halfway, multiplyPoint(fxWeight,tweaks[0] + " " +tweaks[1]))
+        return "q {} {}".format(ctlPt, ptEnd)
+    
+
+def toBrush(chain, points, fxWeight, tweaks):
     firstPoint = "M {},".format(points[0])
-    otherPoints = points[1:]
-    shapes = ",".join(["l {}".format(pt) for pt in otherPoints])
+    otherlength = len(points)-1
+    usableChain = normChain(chain, otherlength)
+    shapes = ",".join([ actionToSegment(usableChain[i], points[i], points[i+1], fxWeight, tweaks[i+1].split(" ")) for i in range(otherlength)])
     brush = "[ " +firstPoint + shapes + " ]"
     return brush
 
@@ -71,7 +133,8 @@ def segmentToSvg(segment, width):
 
 def brushToSvg(brush, width):
     segments =  brush.replace("[","").replace("]", "").strip().split(",")   
-    return " ".join([ segmentToSvg(segment, width) for segment in segments])
+    svgPath = " ".join([ segmentToSvg(segment, width) for segment in segments])
+    return "{} Z".format(svgPath)
 
 class Experimenting:
     def __init__(self, name, templateName):
@@ -113,8 +176,19 @@ class Experimenting:
         y = Fraction(choice(self.fractions))*choice([1, -1])
         return str(x)+ " "+ str(y)
 
+    def createTweak(self):
+        a = Fraction(choice(self.fractions))*choice([1, -1])
+        b = Fraction(choice(self.fractions))*choice([1, -1])
+        c =  Fraction(choice(self.fractions))*choice([1, -1])
+        d =  Fraction(choice(self.fractions))*choice([1, -1])
+        e =  Fraction(choice(self.fractions))*choice([1, -1])
+        return " ".join([str(a), str(b), str(c), str(d), str(e)])
+
     def createPoints(self, count):
         return [self.createPoint() for i in range(count)]
+    
+    def createTweaks(self, count):
+        return [self.createTweak() for i in range(count)]
 
     def createRule(self):
         rv = choice(self.pool["rules"]) + chooseVariable(self.variables)
@@ -124,18 +198,22 @@ class Experimenting:
     def createSpecimen(self):
         stake = choice(self.pool["stakes"]).split(",")
         iterations = self.init["iterations"]
+        fxWeight = choice(self.pool["fx-weights"].split(" "))
         deltas = self.createPoints(len(stake))
+        tweaks = self.createTweaks(len(stake))
         points = addPoints(stake, deltas)
         rules = [ {"s": i, "r":self.createRule() } for i in self.variables]
         start = self.createRule()
         chain = applyRulesToChain(rules, start, iterations)
-        brush = toBrush(chain, points)
+        brush = toBrush(chain, points, fxWeight, tweaks)
         brushSvg = brushToSvg(brush, BRUSH_WIDTH)
         return {    
                 "id": self.incId(),  
                 "iterations": iterations,
+                "fx-weight": fxWeight,
                 "stake": stake,
                 "deltas": deltas,
+                "tweaks": tweaks,
                 "points": points,
                 "rules": rules,
                 "start": start,
