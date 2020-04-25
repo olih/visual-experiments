@@ -6,6 +6,7 @@ from collections import deque
 from hashids import Hashids
 import json
 import re
+import glob
 from random import sample, choice
 
 localDir = os.environ['OLI_LOCAL_DIR']
@@ -191,6 +192,15 @@ class Experimenting:
         with open('{}/{}.svg'.format(evalDir, name), 'w') as file:  
             specimenContent = self.template.replace('BRUSH_DATA', brushData)
             file.write(specimenContent)
+    
+    def deleteSpecimenSvg(self):
+        oldSvgFiles = glob.glob('{}/eval-*.svg'.format(evalDir))
+        for filePath in oldSvgFiles:
+            try:
+                os.remove(filePath)
+            except:
+                print("Error while deleting file : ", filePath)
+
 
     def save(self):
         with open('{}/{}.json'.format(evalDir, self.name), 'w') as outfile:
@@ -275,13 +285,15 @@ class Experimenting:
         self.createNewPopulation()
 
     def saveSvg(self):
+        self.deleteSpecimenSvg()
         specimens = self.content['specimens']
         for specimen in specimens:
+            if len(specimen["tags"])>0:
+                continue
             brushSvg = specimen["brush-svg"]
             filename = "eval-{}".format(specimen["id"])
             self.saveSpecimenSvg(filename, brushSvg)
             print(specimen["summary"])
-            print("TAG", specimen["tags"])
     
     def saveEverything(self):
         self.saveSvg()
