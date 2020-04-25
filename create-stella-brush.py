@@ -262,6 +262,8 @@ class Experimenting:
             specimenId = specimen["id"]
             if specimenId in idWithTags:
                 specimen["tags"] = idWithTags[specimenId]
+        bestspecimens = [specimen for specimen in specimens if len(specimen["tags"])> 0 ]
+        self.content['specimens'] = bestspecimens
             
     def createNewPopulation(self):
         population = self.init["population"]
