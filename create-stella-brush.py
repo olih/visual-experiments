@@ -215,6 +215,7 @@ class Experimenting:
         chain = applyRulesToChain(rules, start, iterations)
         brush = toBrush(chain, points, fxWeight, tweaks)
         brushSvg = brushToSvg(brush, BRUSH_WIDTH)
+        summary = "based on a stake of {} points, a weight of {} and the following rules {} starting with {}".format(len(stake), fxWeight, ", ".join([r["s"] + "->" + r["r"] for r in rules]), start)
         return {    
                 "id": self.incId(),  
                 "iterations": iterations,
@@ -227,7 +228,8 @@ class Experimenting:
                 "start": start,
                 "chain": chain,
                 "brush": brush,
-                "brush-svg": brushSvg
+                "brush-svg": brushSvg,
+                "summary": summary
         }
     def start(self):
         population = self.init["population"]
@@ -239,6 +241,7 @@ class Experimenting:
             brushSvg = specimen["brush-svg"]
             filename = "eval-{}".format(specimen["id"])
             self.saveSpecimenSvg(filename, brushSvg)
+            print(specimen["summary"])
 
 
 experimenting = Experimenting(args.file, args.template)
