@@ -1,6 +1,6 @@
 import unittest
 from fractions import Fraction
-from fracgeometry import V2d, V2dList
+from fracgeometry import V2d, V2dList, VSegment
 
 pt0 = V2d.from_string("0/1 0/1")
 ptA = V2d.from_string("1/4 1/3")
@@ -83,6 +83,15 @@ class TestV2dList(unittest.TestCase):
     def test_to_bigram(self):
         self.assertEqual(listCDE.to_bigram(), [(ptC, ptD), (ptD, ptE)])
 
+class TestVSegment(unittest.TestCase):
+
+    def test_to_dalmatian_string(self):
+        self.assertEqual(VSegment.from_line_to(ptC).to_dalmatian_string(), "L 1/7 -1/9")
+        self.assertEqual(VSegment.from_move_to(ptA).to_dalmatian_string(), "M 1/4 1/3")
+        self.assertEqual(VSegment.from_close().to_dalmatian_string(), "Z")
+        self.assertEqual(VSegment.from_cubic_bezier(ptE, ptC, ptD).to_dalmatian_string(), "C "+listCDE.to_dalmatian_string())
+        self.assertEqual(VSegment.from_smooth_bezier(ptE, ptC).to_dalmatian_string(), "S 1/7 -1/9 1/17 4/5")
+        self.assertEqual(VSegment.from_quadratic_bezier(ptE, ptC).to_dalmatian_string(), "Q 1/7 -1/9 1/17 4/5")
 
 if __name__ == '__main__':
     unittest.main()

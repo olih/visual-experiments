@@ -1,5 +1,6 @@
 from fractions import Fraction
 from typing import List, Tuple
+from enum import Enum, auto
 
 class V2d:
     def __init__(self, x: Fraction, y: Fraction):
@@ -15,6 +16,9 @@ class V2d:
         return V2d(self.x, self.y)
 
     def __str__(self):
+        return "{} {}".format(self.x, self.y)
+    
+    def to_dalmatian_string(self):
         return "{} {}".format(self.x, self.y)
     
     def to_cartesian_string(self, dpu: int):
@@ -76,6 +80,9 @@ class V2dList:
     def to_svg_string(self, dpu: int, sep=" "):
         return sep.join([ value.to_svg_string(dpu) for value in self.values])
 
+    def to_dalmatian_string(self):
+        return " ".join([ value.to_dalmatian_string() for value in self.values])
+
     @classmethod
     def ljust(cls, v2dlist, length: int, filler: V2d = V2d.from_string("0/1 0/1")):
         values = [value.clone() for value in v2dlist.values]
@@ -123,3 +130,58 @@ class V2dList:
 
     def to_bigram(self)->List[Tuple[V2d, V2d]]:
         return [(self.values[i], self.values[i+1]) for i in range(len(self.values)-1)]
+
+class SegmentShape(Enum):
+    CLOSE_PATH = auto()
+    MOVE_TO = auto()
+    LINE_TO = auto()
+    CUBIC_BEZIER = auto()
+    SMOOTH_BEZIER = auto()
+    QUADRATIC_BEZIER = auto()
+
+class VSegment:
+    def __init__(self, action: SegmentShape = SegmentShape.CLOSE_PATH, pt: V2d = None, pt1: V2d = None, pt2: V2d = None):
+        self.action = action
+        self.pt = pt
+        self.pt1 = pt1
+        self.pt2 = pt2
+    
+    @classmethod
+    def from_close(cls):
+        return cls(SegmentShape.CLOSE_PATH)    
+
+    @classmethod
+    def from_move_to(cls, pt):
+        return cls(SegmentShape.MOVE_TO, pt)    
+    
+    @classmethod
+    def from_line_to(cls, pt):
+        return cls(SegmentShape.LINE_TO, pt)
+
+    @classmethod
+    def from_cubic_bezier(cls, pt, pt1, pt2):
+        return cls(SegmentShape.CUBIC_BEZIER, pt, pt1, pt2)
+
+    @classmethod
+    def from_smooth_bezier(cls, pt, pt1):
+        return cls(SegmentShape.SMOOTH_BEZIER, pt, pt1)
+
+    @classmethod
+    def from_quadratic_bezier(cls, pt, pt1):
+        return cls(SegmentShape.QUADRATIC_BEZIER, pt, pt1)
+
+    def to_dalmatian_string(self):
+        if self.action is SegmentShape.CLOSE_PATH:
+            return "Z"
+        elif self.action is SegmentShape.MOVE_TO:
+            return "M {}".format(self.pt.to_dalmatian_string())
+        elif self.action is SegmentShape.LINE_TO:
+            return "L {}".format(self.pt.to_dalmatian_string())
+        elif self.action is SegmentShape.CUBIC_BEZIER:
+            return "C {} {} {}".format(self.pt1.to_dalmatian_string(), self.pt2.to_dalmatian_string(), self.pt.to_dalmatian_string())
+        elif self.action is SegmentShape.SMOOTH_BEZIER:
+            return "S {} {}".format(self.pt1.to_dalmatian_string(), self.pt.to_dalmatian_string())
+        elif self.action is SegmentShape.QUADRATIC_BEZIER:
+            return "Q {} {}".format(self.pt1.to_dalmatian_string(), self.pt.to_dalmatian_string())
+        else:
+            raise Exception("Unknown action")
