@@ -20,6 +20,9 @@ class V2d:
     def to_cartesian_string(self, dpu: int):
         return "({:.3f},{:.3f})".format(float(self.x*dpu), float(self.y*dpu))
 
+    def to_svg_string(self, dpu: int):
+        return "{:.3f} {:.3f}".format(float(self.x*dpu), float(self.y*dpu*-1))
+
     def __repr__(self):
         return "{} {}".format(self.x, self.y)
 
@@ -69,6 +72,9 @@ class V2dList:
 
     def to_cartesian_string(self, dpu: int, sep=""):
         return sep.join([ value.to_cartesian_string(dpu) for value in self.values])
+
+    def to_svg_string(self, dpu: int, sep=" "):
+        return sep.join([ value.to_svg_string(dpu) for value in self.values])
 
     @classmethod
     def ljust(cls, v2dlist, length: int, filler: V2d = V2d.from_string("0/1 0/1")):

@@ -18,6 +18,9 @@ class TestV2d(unittest.TestCase):
 
     def test_to_cartesian_string(self):
         self.assertEqual(ptA.to_cartesian_string(100), "(25.000,33.333)")
+    
+    def test_to_svg_string(self):
+        self.assertEqual(ptA.to_svg_string(100), "25.000 -33.333")
 
     def test_add(self):
         self.assertEqual(str(pt0 + ptA), "1/4 1/3")
@@ -47,7 +50,10 @@ class TestV2dList(unittest.TestCase):
     
     def test_to_cartesian_string(self):
         self.assertEqual(listABCDE.to_cartesian_string(100), "(25.000,33.333)(20.000,16.667)(14.286,-11.111)(-7.692,-4.348)(5.882,80.000)")
-    
+
+    def test_to_svg_string(self):
+        self.assertEqual(listABCDE.to_svg_string(100), "25.000 -33.333 20.000 -16.667 14.286 11.111 -7.692 4.348 5.882 -80.000")
+
     def test_add(self):
         sumOfList = listABCDE+listCDE
         self.assertEqual(sumOfList, listCDE+listABCDE)
