@@ -11,6 +11,9 @@ class V2d:
         x, y = value.strip().split(" ")
         return cls(Fraction(x), Fraction(y))
 
+    def clone(self):
+        return V2d(self.x, self.y)
+
     def __str__(self):
         return "{} {}".format(self.x, self.y)
     
@@ -69,7 +72,7 @@ class V2dList:
 
     @classmethod
     def ljust(cls, v2dlist, length: int, filler: V2d = V2d.from_string("0/1 0/1")):
-        values = v2dlist.values.copy()
+        values = [value.clone() for value in v2dlist.values]
         while len(values)<length:
             values.append(filler)
         return cls(values)
@@ -78,13 +81,13 @@ class V2dList:
         return self.values[index]
     
     def __neg__(self):
-        return V2dList([- value for value in self.values])
+        return V2dList([- value.clone() for value in self.values])
 
     def neg_x(self):
-        return V2dList([value.neg_x() for value in self.values])
+        return V2dList([value.clone().neg_x() for value in self.values])
 
     def neg_y(self):
-        return V2dList([value.neg_y() for value in self.values])
+        return V2dList([value.clone().neg_y() for value in self.values])
 
     def __add__(self, b):
         maxlength = max(self.length(), b.length())
@@ -98,5 +101,16 @@ class V2dList:
         bb = V2dList.ljust(b, maxlength).values
         return V2dList([aa[i] - bb[i] for i in range(maxlength)])
 
-    def __mul__( self, scalar: Fraction):
-       return V2dList([value * scalar for value in self.values])
+    def __mul__(self, scalar: Fraction):
+       return V2dList([value.clone() * scalar for value in self.values])
+
+    def extend(self, other):
+       return V2dList(self.values.copy()+other.values.copy())
+
+    def append(self, value: V2d):
+        newvalues = self.values.copy()
+        newvalues.append(value)
+        return V2dList(newvalues)
+
+    def circular(self):
+        return self.append(self.values[0])

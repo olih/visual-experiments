@@ -58,18 +58,21 @@ class TestV2dList(unittest.TestCase):
     def test_substract(self):
         substraction = listABCDE - listCDE
         self.assertEqual(substraction, - (listCDE-listABCDE))
-        self.assertEqual(str(substraction), "3/28 4/9, 18/65 29/138, 10/119 -41/45, -1/13 -1/23, 1/17 4/5")
         self.assertEqual(substraction[0], ptA-ptC)
+        self.assertEqual(substraction[2], ptC-ptE)
         self.assertEqual(substraction[-1], ptE)
 
     def test_multiply(self):
-        multiplication = listCDE * Fraction("1/5")
         self.assertEqual(listCDE* Fraction("1/1"), listCDE)
-        self.assertEqual(str(multiplication), "1/35 -1/45, -1/65 -1/115, 1/85 4/25")
+        self.assertEqual(str(listCDE * Fraction("1/5")),"1/35 -1/45, -1/65 -1/115, 1/85 4/25" )
 
     def test_neg(self):
         self.assertEqual(listCDE.neg_x().neg_y(), - listCDE)
         self.assertEqual(str(listCDE.neg_x()), "-1/7 -1/9, 1/13 -1/23, -1/17 4/5")
+
+    def test_circular(self):
+        self.assertEqual(listCDE.circular()[-1], ptC)
+        self.assertEqual(listCDE.circular(), listCDE.extend(V2dList([ptC])))
 
 
 if __name__ == '__main__':
