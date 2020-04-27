@@ -74,6 +74,9 @@ class TestV2dList(unittest.TestCase):
         self.assertEqual(listCDE.circular()[-1], ptC)
         self.assertEqual(listCDE.circular(), listCDE.extend(V2dList([ptC])))
 
+    def test_to_bigram(self):
+        self.assertEqual(listCDE.to_bigram(), [(ptC, ptD), (ptD, ptE)])
+
 
 if __name__ == '__main__':
     unittest.main()

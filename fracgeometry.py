@@ -1,5 +1,5 @@
 from fractions import Fraction
-from typing import List
+from typing import List, Tuple
 
 class V2d:
     def __init__(self, x: Fraction, y: Fraction):
@@ -114,3 +114,6 @@ class V2dList:
 
     def circular(self):
         return self.append(self.values[0])
+
+    def to_bigram(self)->List[Tuple[V2d, V2d]]:
+        return [(self.values[i], self.values[i+1]) for i in range(len(self.values)-1)]
