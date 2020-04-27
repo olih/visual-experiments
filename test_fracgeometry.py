@@ -25,7 +25,11 @@ class TestV2d(unittest.TestCase):
     
     def test_neg(self):
         self.assertEqual(str(-ptA), "-1/4 -1/3")
-    
+        self.assertEqual(str(ptA.neg_x()), "-1/4 1/3")
+        self.assertEqual(str(ptA.neg_y()), "1/4 -1/3")
+        self.assertEqual(ptA.neg_x().neg_y(), -ptA)
+        self.assertEqual(- ptA.neg_x().neg_y(), ptA)
+
     def test_subtract(self):
         self.assertEqual(pt0 - ptA, - ptA)
         self.assertEqual(str(pt0 - ptA), "-1/4 -1/3")        
@@ -62,6 +66,10 @@ class TestV2dList(unittest.TestCase):
         multiplication = listCDE * Fraction("1/5")
         self.assertEqual(listCDE* Fraction("1/1"), listCDE)
         self.assertEqual(str(multiplication), "1/35 -1/45, -1/65 -1/115, 1/85 4/25")
+
+    def test_neg(self):
+        self.assertEqual(listCDE.neg_x().neg_y(), - listCDE)
+        self.assertEqual(str(listCDE.neg_x()), "-1/7 -1/9, 1/13 -1/23, -1/17 4/5")
 
 
 if __name__ == '__main__':

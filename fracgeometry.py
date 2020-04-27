@@ -34,6 +34,12 @@ class V2d:
     
     def __neg__(self):
         return V2d(self.x*-1, self.y*-1)
+    
+    def neg_x(self):
+        return V2d(self.x*-1, self.y)
+
+    def neg_y(self):
+        return V2d(self.x, self.y*-1)
 
     def square_magnitude(self):
         return self.x**2 + self.y**2
@@ -73,6 +79,12 @@ class V2dList:
     
     def __neg__(self):
         return V2dList([- value for value in self.values])
+
+    def neg_x(self):
+        return V2dList([value.neg_x() for value in self.values])
+
+    def neg_y(self):
+        return V2dList([value.neg_y() for value in self.values])
 
     def __add__(self, b):
         maxlength = max(self.length(), b.length())
