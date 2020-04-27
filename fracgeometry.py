@@ -22,34 +22,13 @@ class V2d:
     def __sub__(self, b):
         return V2d(toStr(self.x-b.x, self.y-b.y))
     
+    def __mul__( self, scalar ):
+        return V2d(toStr(self.x*scalar, self.y*scalar))
+
+    def squareMagnitude(self):
+        return self.x**2 + self.y**2
+
         
-def multiplyPoint(weight, a):
-    xa, ya = a.strip().split(" ")
-    x = Fraction(xa)*Fraction(weight)
-    y = Fraction(ya)*Fraction(weight)
-    return str(x)+ " "+ str(y)
-
-def midPoint(a, b):
-    xa, ya = a.strip().split(" ")
-    xb, yb = b.strip().split(" ")
-    x = Fraction("1/2")*(Fraction(xa)+Fraction(xb))
-    y = Fraction("1/2")*(Fraction(ya)+Fraction(yb))
-    return str(x)+ " "+ str(y)
-
-def oneThirdPoint(a, b):
-    xa, ya = a.strip().split(" ")
-    xb, yb = b.strip().split(" ")
-    x = Fraction("2/3")*Fraction(xa)+Fraction("1/3")*Fraction(xb)
-    y = Fraction("2/3")*Fraction(ya)+Fraction("1/3")*Fraction(yb)
-    return str(x)+ " "+ str(y)
-
-def twoThirdPoint(a, b):
-    xa, ya = a.strip().split(" ")
-    xb, yb = b.strip().split(" ")
-    x = Fraction("1/3")*Fraction(xa)+Fraction("2/3")*Fraction(xb)
-    y = Fraction("1/3")*Fraction(ya)+Fraction("2/3")*Fraction(yb)
-    return str(x)+ " "+ str(y)
-
 def addPoints (la, lb):
     length = len(la)
     return [addPoint(la[i], lb[i]) for i in range(length)]
