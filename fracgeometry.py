@@ -82,6 +82,11 @@ class V2dList:
 
     def to_dalmatian_string(self):
         return " ".join([ value.to_dalmatian_string() for value in self.values])
+    
+    @classmethod
+    def from_dalmatian_string(cls, somestr: str):
+        fractions = [Fraction(value) for value in somestr.strip().split(" ")]
+        return [V2d(fractions[2*i], fractions[2*i+1]) for i in range(len(fractions)//2)]
 
     @classmethod
     def ljust(cls, v2dlist, length: int, filler: V2d = V2d.from_string("0/1 0/1")):
@@ -138,9 +143,50 @@ class SegmentShape(Enum):
     CUBIC_BEZIER = auto()
     SMOOTH_BEZIER = auto()
     QUADRATIC_BEZIER = auto()
+    FLUID_BEZIER = auto()
+    NOT_SUPPORTED = auto()
+    
+    @classmethod
+    def from_string(cls, value: str):
+        if value is "Z":
+            return SegmentShape.CLOSE_PATH
+        elif value is "M":
+            return SegmentShape.MOVE_TO
+        elif value is "L":
+            return SegmentShape.LINE_TO
+        elif value is "C":
+            return SegmentShape.CUBIC_BEZIER
+        elif value is "S":
+            return SegmentShape.SMOOTH_BEZIER
+        elif value is "Q":
+            return SegmentShape.QUADRATIC_BEZIER
+        elif value is "T":
+            return SegmentShape.FLUID_BEZIER
+        else:
+            return SegmentShape.NOT_SUPPORTED
+    
+    @classmethod
+    def to_string(cls, value):
+        if value is SegmentShape.CLOSE_PATH:
+            return "Z"
+        elif value is SegmentShape.MOVE_TO:
+            return "M"
+        elif value is SegmentShape.LINE_TO:
+            return "L"
+        elif value is SegmentShape.CUBIC_BEZIER:
+            return "C"
+        elif value is SegmentShape.SMOOTH_BEZIER:
+            return "S"
+        elif value is SegmentShape.QUADRATIC_BEZIER:
+            return "Q"
+        elif value is SegmentShape.FLUID_BEZIER:
+            return "T"
+        else:
+            return "E"
+
 
 class VSegment:
-    def __init__(self, action: SegmentShape = SegmentShape.CLOSE_PATH, pt: V2d = None, pt1: V2d = None, pt2: V2d = None):
+    def __init__(self, action: SegmentShape = SegmentShape.NOT_SUPPORTED, pt: V2d = None, pt1: V2d = None, pt2: V2d = None):
         self.action = action
         self.pt = pt
         self.pt1 = pt1
@@ -170,18 +216,61 @@ class VSegment:
     def from_quadratic_bezier(cls, pt, pt1):
         return cls(SegmentShape.QUADRATIC_BEZIER, pt, pt1)
 
+    @classmethod
+    def from_fluid_bezier(cls, pt):
+        return cls(SegmentShape.FLUID_BEZIER, pt)
+
     def to_dalmatian_string(self):
+        action_str = SegmentShape.to_string(self.action)
         if self.action is SegmentShape.CLOSE_PATH:
-            return "Z"
-        elif self.action is SegmentShape.MOVE_TO:
-            return "M {}".format(self.pt.to_dalmatian_string())
-        elif self.action is SegmentShape.LINE_TO:
-            return "L {}".format(self.pt.to_dalmatian_string())
+            return "{}".format(action_str)
+        elif self.action in [SegmentShape.MOVE_TO, SegmentShape.LINE_TO, SegmentShape.FLUID_BEZIER] :
+            return "{} {}".format(action_str, self.pt.to_dalmatian_string())
+        elif self.action in [ SegmentShape.SMOOTH_BEZIER, SegmentShape.QUADRATIC_BEZIER]:
+            return "{} {} {}".format(action_str, self.pt1.to_dalmatian_string(), self.pt.to_dalmatian_string())
         elif self.action is SegmentShape.CUBIC_BEZIER:
-            return "C {} {} {}".format(self.pt1.to_dalmatian_string(), self.pt2.to_dalmatian_string(), self.pt.to_dalmatian_string())
-        elif self.action is SegmentShape.SMOOTH_BEZIER:
-            return "S {} {}".format(self.pt1.to_dalmatian_string(), self.pt.to_dalmatian_string())
-        elif self.action is SegmentShape.QUADRATIC_BEZIER:
-            return "Q {} {}".format(self.pt1.to_dalmatian_string(), self.pt.to_dalmatian_string())
+            return "{} {} {} {}".format(action_str, self.pt1.to_dalmatian_string(), self.pt2.to_dalmatian_string(), self.pt.to_dalmatian_string())
         else:
-            raise Exception("Unknown action")
+            return "E"
+    
+    @classmethod
+    def from_dalmatian_string(cls, dstr):
+        if dstr is "Z":
+            return VSegment.from_close()
+        action = SegmentShape.from_string(dstr.strip()[0])
+        points = V2dList.from_dalmatian_string(dstr.strip()[1:])
+        length = len(points)
+        if action is SegmentShape.MOVE_TO and length is 1 :
+            return VSegment.from_move_to(points[0])
+        elif action is SegmentShape.LINE_TO and length is 1 :
+            return VSegment.from_line_to(points[0])
+        elif action is SegmentShape.FLUID_BEZIER and length is 1 :
+            return VSegment.from_fluid_bezier(points[0])
+        elif action is SegmentShape.SMOOTH_BEZIER and length is 2:
+            return VSegment.from_smooth_bezier(points[1], points[0])
+        elif action is SegmentShape.QUADRATIC_BEZIER and length is 2:
+            return VSegment.from_quadratic_bezier(points[1], points[0])
+        elif action is SegmentShape.CUBIC_BEZIER and length is 3:
+            return VSegment.from_cubic_bezier(points[2], points[0], points[1])
+        else:
+            return VSegment()
+
+
+    def __str__(self):
+        return self.to_dalmatian_string()
+    
+    def __repr__(self):
+        return self.to_dalmatian_string()
+
+class VPath:
+    def __init__(self, segments: List[VSegment]):
+        self.segments = segments
+    
+    def to_dalmatian_string(self):
+        core = ",".join([segment.to_dalmatian_string() for segment in self.segments])
+        return "[ {} ]".format(core)
+    
+    @classmethod
+    def from_dalmatian_string(cls, dstr):
+        segments =  dstr.replace("[","").replace("]", "").strip().split(",")
+    

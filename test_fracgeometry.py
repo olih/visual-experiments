@@ -93,5 +93,14 @@ class TestVSegment(unittest.TestCase):
         self.assertEqual(VSegment.from_smooth_bezier(ptE, ptC).to_dalmatian_string(), "S 1/7 -1/9 1/17 4/5")
         self.assertEqual(VSegment.from_quadratic_bezier(ptE, ptC).to_dalmatian_string(), "Q 1/7 -1/9 1/17 4/5")
 
+    def test_from_dalmatian_string(self):
+        self.assertEqual(VSegment.from_dalmatian_string("Z").to_dalmatian_string(), "Z")
+        self.assertEqual(VSegment.from_dalmatian_string("L 1/7 -1/9").to_dalmatian_string(), "L 1/7 -1/9")
+        self.assertEqual(VSegment.from_dalmatian_string("M -1/7 -1/9").to_dalmatian_string(), "M -1/7 -1/9")
+        self.assertEqual(VSegment.from_dalmatian_string("T 1/4 1/111").to_dalmatian_string(), "T 1/4 1/111")
+        self.assertEqual(VSegment.from_dalmatian_string("S 1/4 1/113 1/2 2/113").to_dalmatian_string(), "S 1/4 1/113 1/2 2/113")
+        self.assertEqual(VSegment.from_dalmatian_string("Q 1/4 1/115 1/2 2/115").to_dalmatian_string(), "Q 1/4 1/115 1/2 2/115")
+        self.assertEqual(VSegment.from_dalmatian_string("C 1/4 1/117 1/2 2/117 3/4 1/39").to_dalmatian_string(), "C 1/4 1/117 1/2 2/117 3/4 1/39")
+
 if __name__ == '__main__':
     unittest.main()
