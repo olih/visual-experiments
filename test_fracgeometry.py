@@ -1,6 +1,6 @@
 import unittest
 from fractions import Fraction
-from fracgeometry import V2d, V2dList, VSegment
+from fracgeometry import V2d, V2dList, VSegment, VPath
 
 pt0 = V2d.from_string("0/1 0/1")
 ptA = V2d.from_string("1/4 1/3")
@@ -101,6 +101,12 @@ class TestVSegment(unittest.TestCase):
         self.assertEqual(VSegment.from_dalmatian_string("S 1/4 1/113 1/2 2/113").to_dalmatian_string(), "S 1/4 1/113 1/2 2/113")
         self.assertEqual(VSegment.from_dalmatian_string("Q 1/4 1/115 1/2 2/115").to_dalmatian_string(), "Q 1/4 1/115 1/2 2/115")
         self.assertEqual(VSegment.from_dalmatian_string("C 1/4 1/117 1/2 2/117 3/4 1/39").to_dalmatian_string(), "C 1/4 1/117 1/2 2/117 3/4 1/39")
+
+class TestVPath(unittest.TestCase):
+
+    def test_from_to_dalmatian_string(self):
+        dpath = "[ M -1/7 -1/9,L 1/7 -1/9,Q 1/4 1/115 1/2 2/115,T 1/4 1/111,C 1/4 1/117 1/2 2/117 3/4 1/39,S 1/4 1/113 1/2 2/113,Z ]"
+        self.assertEqual(VPath.from_dalmatian_string(dpath).to_dalmatian_string(), dpath)
 
 if __name__ == '__main__':
     unittest.main()

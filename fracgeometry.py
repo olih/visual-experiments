@@ -272,5 +272,6 @@ class VPath:
     
     @classmethod
     def from_dalmatian_string(cls, dstr):
-        segments =  dstr.replace("[","").replace("]", "").strip().split(",")
-    
+        parts =  dstr.replace("[","").replace("]", "").strip().split(",")
+        segments = [VSegment.from_dalmatian_string(segment) for segment in parts]
+        return cls(segments)
