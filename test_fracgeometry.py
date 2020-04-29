@@ -1,6 +1,6 @@
 import unittest
 from fractions import Fraction
-from fracgeometry import V2d, V2dList, VSegment, VPath
+from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
 
 pt0 = V2d.from_string("0/1 0/1")
 ptA = V2d.from_string("1/4 1/3")
@@ -119,6 +119,13 @@ class TestVSegment(unittest.TestCase):
         self.assertEqual(VSegment.from_cubic_bezier(ptE, ptC, ptD).to_svg_string(dpu), "C 14.286 11.111 -7.692 4.348 5.882 -80.000")
         self.assertEqual(VSegment.from_smooth_bezier(ptE, ptC).to_svg_string(dpu), "S 14.286 11.111 5.882 -80.000")
         self.assertEqual(VSegment.from_quadratic_bezier(ptE, ptC).to_svg_string(dpu), "Q 14.286 11.111 5.882 -80.000")
+
+class TestFractionList(unittest.TestCase):
+
+    def test_create(self):
+        fractlist = "1/4 -1/3 1/5 1/6 4/5"
+        self.assertEqual(str(FractionList.from_string(fractlist)), fractlist)
+
 
 class TestVPath(unittest.TestCase):
 

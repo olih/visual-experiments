@@ -92,7 +92,6 @@ class V2dList:
             fractions = [Fraction(value) for value in somestr.strip().split(" ")]
             return cls([V2d(fractions[2*i], fractions[2*i+1]) for i in range(len(fractions)//2)])
         else:
-            print(somestr)
             return cls([V2d.from_string(strv2d) for strv2d in somestr.strip().split(sep)])
 
     @classmethod
@@ -146,6 +145,29 @@ class V2dList:
 
     def to_bigram(self)->List[Tuple[V2d, V2d]]:
         return [(self.values[i], self.values[i+1]) for i in range(len(self.values)-1)]
+
+class FractionList:
+    def __init__(self, values: List[Fraction] ):
+         self.values = values
+    
+    def __str__(self):
+        return " ".join([str(value) for value in self.values])
+    
+    def __repr__(self):
+        return " ".join([str(value) for value in self.values])
+
+    def length(self):
+        return len(self.values)
+    
+    def __len__(self):
+        return len(self.values)
+    
+    def __eq__(self, other):
+        return self.values == other.values
+    
+    @classmethod
+    def from_string(cls, strfracts: str, sep=" "):
+        return cls([Fraction(frac) for frac in strfracts.split(sep)])
 
 class SegmentShape(Enum):
     CLOSE_PATH = auto()

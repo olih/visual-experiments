@@ -190,7 +190,7 @@ class Experimenting:
         return choice([rv, vr])
 
     def createSpecimen(self):
-        stake = choice(self.pool["stakes"]).split(",")
+        stake = V2dList.from_dalmatian_string(choice(self.pool["stakes"]).split(","))
         iterations = self.init["iterations"]
         fxWeight = choice(self.pool["fx-weights"].split(" "))
         deltas = self.createPoints(len(stake))
