@@ -89,7 +89,11 @@ class V2dList:
     @classmethod
     def from_dalmatian_string(cls, somestr: str):
         fractions = [Fraction(value) for value in somestr.strip().split(" ")]
-        return [V2d(fractions[2*i], fractions[2*i+1]) for i in range(len(fractions)//2)]
+        return cls([V2d(fractions[2*i], fractions[2*i+1]) for i in range(len(fractions)//2)])
+
+    @classmethod
+    def from_dalmatian_list(cls, listOfV2d: List[str]):
+        return cls([V2d.from_string(strv2d) for strv2d in listOfV2d])
 
     @classmethod
     def ljust(cls, v2dlist, length: int, filler: V2d = V2d.from_string("0/1 0/1")):
