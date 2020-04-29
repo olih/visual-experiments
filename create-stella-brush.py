@@ -8,6 +8,7 @@ import json
 import re
 import glob
 from random import sample, choice
+from fracgeometry import V2d, V2dList, VSegment, VPath
 
 localDir = os.environ['OLI_LOCAL_DIR']
 BRUSH_WIDTH=34
@@ -37,54 +38,6 @@ def chooseVariable(variables):
     trios = [i+j+k for i in variables for j in variables for k in variables]
     return choice([choice(duos), choice(trios)])
 
-def addPoint(a, b):
-    xa, ya = a.strip().split(" ")
-    xb, yb = b.strip().split(" ")
-    x = Fraction(xa)+Fraction(xb)
-    y = Fraction(ya)+Fraction(yb)
-    return str(x)+ " "+ str(y)
-
-def substractPoint(a, b):
-    xa, ya = a.strip().split(" ")
-    xb, yb = b.strip().split(" ")
-    x = Fraction(xa)-Fraction(xb)
-    y = Fraction(ya)-Fraction(yb)
-    return str(x)+ " "+ str(y)
-
-def multiplyPoint(weight, a):
-    xa, ya = a.strip().split(" ")
-    x = Fraction(xa)*Fraction(weight)
-    y = Fraction(ya)*Fraction(weight)
-    return str(x)+ " "+ str(y)
-
-def midPoint(a, b):
-    xa, ya = a.strip().split(" ")
-    xb, yb = b.strip().split(" ")
-    x = Fraction("1/2")*(Fraction(xa)+Fraction(xb))
-    y = Fraction("1/2")*(Fraction(ya)+Fraction(yb))
-    return str(x)+ " "+ str(y)
-
-def oneThirdPoint(a, b):
-    xa, ya = a.strip().split(" ")
-    xb, yb = b.strip().split(" ")
-    x = Fraction("2/3")*Fraction(xa)+Fraction("1/3")*Fraction(xb)
-    y = Fraction("2/3")*Fraction(ya)+Fraction("1/3")*Fraction(yb)
-    return str(x)+ " "+ str(y)
-
-def twoThirdPoint(a, b):
-    xa, ya = a.strip().split(" ")
-    xb, yb = b.strip().split(" ")
-    x = Fraction("1/3")*Fraction(xa)+Fraction("2/3")*Fraction(xb)
-    y = Fraction("1/3")*Fraction(ya)+Fraction("2/3")*Fraction(yb)
-    return str(x)+ " "+ str(y)
-
-def addPoints (la, lb):
-    length = len(la)
-    return [addPoint(la[i], lb[i]) for i in range(length)]
-
-def addWeightedPoints (la, lb, weight):
-    length = len(la)
-    return [addPoint(la[i], multiplyPoint(weight, lb[i])) for i in range(length)]
 
 def applyRulesToChain(rules, start, iterations):
     chain = start

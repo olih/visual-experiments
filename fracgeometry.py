@@ -80,9 +80,12 @@ class V2dList:
     def to_svg_string(self, dpu: int, sep=" "):
         return sep.join([ value.to_svg_string(dpu) for value in self.values])
 
+    def to_dalmatian_list(self):
+        return [ value.to_dalmatian_string() for value in self.values]
+
     def to_dalmatian_string(self):
-        return " ".join([ value.to_dalmatian_string() for value in self.values])
-    
+        return " ".join(self.to_dalmatian_list())
+
     @classmethod
     def from_dalmatian_string(cls, somestr: str):
         fractions = [Fraction(value) for value in somestr.strip().split(" ")]
