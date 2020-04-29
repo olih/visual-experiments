@@ -126,6 +126,11 @@ class TestFractionList(unittest.TestCase):
         fractlist = "1/4 -1/3 1/5 1/6 4/5"
         self.assertEqual(str(FractionList.from_string(fractlist)), fractlist)
 
+    def test_choice(self):
+        fractlist = FractionList.from_string("1/4 -1/3 1/5 1/6 4/5")
+        self.assertEqual(fractlist.signed_sample(2, ";").count(";"), 1)
+        self.assertEqual(len(fractlist.signed_sample_list(3)), 3)
+
 
 class TestVPath(unittest.TestCase):
 

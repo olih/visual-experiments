@@ -1,6 +1,7 @@
 from fractions import Fraction
 from typing import List, Tuple
 from enum import Enum, auto
+from random import sample, choice
 
 class V2d:
     def __init__(self, x: Fraction, y: Fraction):
@@ -164,7 +165,19 @@ class FractionList:
     
     def __eq__(self, other):
         return self.values == other.values
+
+    def choice(self):
+        return choice(self.values)
+
+    def signed_choice(self):
+        return choice(self.values)*choice([1, -1])
+
+    def signed_sample(self, count = 2, sep=" "):
+        return sep.join([str(self.signed_choice()) for _ in range(count)])
     
+    def signed_sample_list(self, listcount = 3, count = 2, sep=" "):
+        return [self.signed_sample(count, sep) for _ in range(listcount) ]
+       
     @classmethod
     def from_string(cls, strfracts: str, sep=" "):
         return cls([Fraction(frac) for frac in strfracts.split(sep)])

@@ -8,7 +8,7 @@ import json
 import re
 import glob
 from random import sample, choice
-from fracgeometry import V2d, V2dList, VSegment, VPath
+from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
 
 localDir = os.environ['OLI_LOCAL_DIR']
 BRUSH_WIDTH=34
@@ -136,7 +136,7 @@ class Experimenting:
         with open('{}/{}.json'.format(evalDir, self.name), 'r') as jsonfile:
             self.content = json.load(jsonfile)
             self.pool = self.content["mutations"]["pool"]
-            self.fractions = self.pool["fractions"].split()
+            self.fractionList= FractionList.from_string(self.pool["fractions"])
             self.init = self.content["mutations"]["init"]
             self.variables = self.content["mutations"]["variables"]
             return self.content   
@@ -192,7 +192,7 @@ class Experimenting:
     def createSpecimen(self):
         stake = V2dList.from_dalmatian_string(choice(self.pool["stakes"]).split(","))
         iterations = self.init["iterations"]
-        fxWeight = choice(self.pool["fx-weights"].split(" "))
+        fxWeight = FractionList.from_string(self.pool["fx-weights"]).choice()
         deltas = self.createPoints(len(stake))
         tweaks = self.createTweaks(len(stake))
         points = addWeightedPoints(stake, deltas, fxWeight)
