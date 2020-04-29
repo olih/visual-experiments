@@ -184,6 +184,25 @@ class SegmentShape(Enum):
         else:
             return "E"
 
+    @classmethod
+    def count_of_points(cls, value):
+        if value is SegmentShape.CLOSE_PATH:
+            return 0
+        elif value is SegmentShape.MOVE_TO:
+            return 1
+        elif value is SegmentShape.LINE_TO:
+            return 1
+        elif value is SegmentShape.CUBIC_BEZIER:
+            return 3
+        elif value is SegmentShape.SMOOTH_BEZIER:
+            return 2
+        elif value is SegmentShape.QUADRATIC_BEZIER:
+            return 2
+        elif value is SegmentShape.FLUID_BEZIER:
+            return 1
+        else:
+            return 0
+
 
 class VSegment:
     def __init__(self, action: SegmentShape = SegmentShape.NOT_SUPPORTED, pt: V2d = None, pt1: V2d = None, pt2: V2d = None):
@@ -265,7 +284,22 @@ class VSegment:
 class VPath:
     def __init__(self, segments: List[VSegment]):
         self.segments = segments
+
+    def __str__(self):
+        return str(self.segments)
     
+    def __repr__(self):
+        return str(self.segments)
+
+    def length(self):
+        return len(self.segments)
+    
+    def __len__(self):
+        return len(self.segments)
+    
+    def __eq__(self, other):
+        return self.segments == other.segments
+
     def to_dalmatian_string(self):
         core = ",".join([segment.to_dalmatian_string() for segment in self.segments])
         return "[ {} ]".format(core)
@@ -275,3 +309,12 @@ class VPath:
         parts =  dstr.replace("[","").replace("]", "").strip().split(",")
         segments = [VSegment.from_dalmatian_string(segment) for segment in parts]
         return cls(segments)
+
+    def core_points(self):
+        return [segment.pt for segment in self.segments if SegmentShape.count_of_points(segment.action)>0]
+
+    def to_core_cartesian_string(self, dpu: int, sep=""):
+        return sep.join([point.to_cartesian_string(dpu) for point in self.core_points()])
+
+    def to_core_svg_string(self, dpu: int):
+        return " ".join(["L {}".format(point.to_svg_string(dpu)) for point in self.core_points()]).replace("L", "M", 1) + " Z"
