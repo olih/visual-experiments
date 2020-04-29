@@ -210,7 +210,13 @@ class VSegment:
         self.pt = pt
         self.pt1 = pt1
         self.pt2 = pt2
+
+    def __str__(self):
+        return self.to_dalmatian_string()
     
+    def __repr__(self):
+        return self.to_dalmatian_string()
+
     @classmethod
     def from_close(cls):
         return cls(SegmentShape.CLOSE_PATH)    
@@ -274,12 +280,19 @@ class VSegment:
         else:
             return VSegment()
 
+    def to_svg_string(self, dpu: int):
+        action_str = SegmentShape.to_string(self.action)
+        if self.action is SegmentShape.CLOSE_PATH:
+            return "{}".format(action_str)
+        elif self.action in [SegmentShape.MOVE_TO, SegmentShape.LINE_TO, SegmentShape.FLUID_BEZIER] :
+            return "{} {}".format(action_str, self.pt.to_svg_string(dpu))
+        elif self.action in [ SegmentShape.SMOOTH_BEZIER, SegmentShape.QUADRATIC_BEZIER]:
+            return "{} {} {}".format(action_str, self.pt1.to_svg_string(dpu), self.pt.to_svg_string(dpu))
+        elif self.action is SegmentShape.CUBIC_BEZIER:
+            return "{} {} {} {}".format(action_str, self.pt1.to_svg_string(dpu), self.pt2.to_svg_string(dpu), self.pt.to_svg_string(dpu))
+        else:
+            return "E"
 
-    def __str__(self):
-        return self.to_dalmatian_string()
-    
-    def __repr__(self):
-        return self.to_dalmatian_string()
 
 class VPath:
     def __init__(self, segments: List[VSegment]):
@@ -318,3 +331,6 @@ class VPath:
 
     def to_core_svg_string(self, dpu: int):
         return " ".join(["L {}".format(point.to_svg_string(dpu)) for point in self.core_points()]).replace("L", "M", 1) + " Z"
+
+    def to_svg_string(self, dpu: int):
+        return " ".join([segment.to_svg_string(dpu) for segment in self.segments])
