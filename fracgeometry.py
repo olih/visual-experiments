@@ -334,3 +334,17 @@ class VPath:
 
     def to_svg_string(self, dpu: int):
         return " ".join([segment.to_svg_string(dpu) for segment in self.segments])
+
+    def action_frequency(self):
+        actions = [segment.action for segment in self.segments]
+        return {
+            "M": actions.count(SegmentShape.MOVE_TO),
+            "L": actions.count(SegmentShape.LINE_TO),
+            "C": actions.count(SegmentShape.CUBIC_BEZIER),
+            "S": actions.count(SegmentShape.SMOOTH_BEZIER),
+            "Q": actions.count(SegmentShape.QUADRATIC_BEZIER),
+            "T": actions.count(SegmentShape.FLUID_BEZIER),
+            "Z": actions.count(SegmentShape.CLOSE_PATH),
+            "E": actions.count(SegmentShape.NOT_SUPPORTED),
+            "Total": len(actions)
+        }
