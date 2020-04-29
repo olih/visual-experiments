@@ -83,13 +83,17 @@ class V2dList:
     def to_dalmatian_list(self):
         return [ value.to_dalmatian_string() for value in self.values]
 
-    def to_dalmatian_string(self):
-        return " ".join(self.to_dalmatian_list())
+    def to_dalmatian_string(self, sep=" "):
+        return sep.join(self.to_dalmatian_list())
 
     @classmethod
-    def from_dalmatian_string(cls, somestr: str):
-        fractions = [Fraction(value) for value in somestr.strip().split(" ")]
-        return cls([V2d(fractions[2*i], fractions[2*i+1]) for i in range(len(fractions)//2)])
+    def from_dalmatian_string(cls, somestr: str, sep=" "):
+        if sep is " ":
+            fractions = [Fraction(value) for value in somestr.strip().split(" ")]
+            return cls([V2d(fractions[2*i], fractions[2*i+1]) for i in range(len(fractions)//2)])
+        else:
+            print(somestr)
+            return cls([V2d.from_string(strv2d) for strv2d in somestr.strip().split(sep)])
 
     @classmethod
     def from_dalmatian_list(cls, listOfV2d: List[str]):

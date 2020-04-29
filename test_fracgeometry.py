@@ -54,6 +54,7 @@ class TestV2dList(unittest.TestCase):
     def test_to_from_dalmatian_string(self):
         self.assertEqual(listABCDE.to_dalmatian_string(), "1/4 1/3 1/5 1/6 1/7 -1/9 -1/13 -1/23 1/17 4/5")
         self.assertEqual(V2dList.from_dalmatian_string(listABCDE.to_dalmatian_string()),listABCDE)
+        self.assertEqual(V2dList.from_dalmatian_string(listABCDE.to_dalmatian_string(";"), ";"),listABCDE)
     
     def test_to_dalmatian_list(self):
         self.assertEqual(listABCDE.to_dalmatian_list(), ["1/4 1/3","1/5 1/6","1/7 -1/9","-1/13 -1/23", "1/17 4/5"])
