@@ -172,10 +172,10 @@ class FractionList:
     def signed_choice(self):
         return choice(self.values)*choice([1, -1])
 
-    def signed_sample(self, count = 2, sep=" "):
+    def signed_sample(self, count = 2, sep=" ")->str:
         return sep.join([str(self.signed_choice()) for _ in range(count)])
     
-    def signed_sample_list(self, listcount = 3, count = 2, sep=" "):
+    def signed_sample_list(self, listcount = 3, count = 2, sep=" ")->List[str]:
         return [self.signed_sample(count, sep) for _ in range(listcount) ]
        
     @classmethod

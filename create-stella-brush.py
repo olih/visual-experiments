@@ -39,7 +39,7 @@ def chooseVariable(variables):
     return choice([choice(duos), choice(trios)])
 
 
-def applyRulesToChain(rules, start, iterations):
+def applyRulesToChain(rules, start, iterations)->str:
     chain = start
     for i in range(iterations):
         for rule in rules:
@@ -48,56 +48,40 @@ def applyRulesToChain(rules, start, iterations):
             chain = chain.replace(rule["s"].lower(), rule["r"])
     return chain
 
-def normChain(chain, length):
+def normChain(chain, length)->str:
     usable = [c for c in chain if c in ["L","T", "C", "S", "Q"]]
     newchain =  usable
     while len(newchain)<length:
         newchain = newchain + usable
     return newchain[:length]
 
-def actionToSegment(action, ptStart, ptEnd, fxWeight, tweaks):
-    oneThird = oneThirdPoint(ptStart, ptEnd)
-    twoThird = twoThirdPoint(ptStart, ptEnd)
-    halfway = midPoint(ptStart, ptEnd)
+def actionToSegment(action, ptStart, ptEnd, fxWeight, tweaks) -> VSegment:
+    # not fully sure the calculations are what we really expect
+    oneThird = ptStart + ((ptEnd-ptStart)*Fraction("1/3")) 
+    twoThird = ptStart + ((ptEnd-ptStart)*Fraction("2/3"))
+    halfway = ptStart + ((ptEnd-ptStart)*Fraction("1/2"))
     if action is "L":
-        return "l {}".format(ptEnd)
+        return VSegment.from_line_to(ptEnd)
     if action is "T":
-        return "t {}".format(ptEnd)
+        return VSegment.from_fluid_bezier(ptEnd)
     if action is "C":
-        startCtlPt = addPoint(oneThird, multiplyPoint(fxWeight,tweaks[0] + " " +tweaks[1]))
-        endCtlPt = addPoint(twoThird, multiplyPoint(fxWeight,tweaks[2] + " " +tweaks[3]))
-        return "c {} {} {}".format(startCtlPt, endCtlPt, ptEnd)
+        startCtlPt = oneThird + (V2d(tweaks[0], tweaks[1])* fxWeight)
+        endCtlPt = twoThird + (V2d(tweaks[2], tweaks[3])* fxWeight)
+        return VSegment.from_cubic_bezier(ptEnd, startCtlPt, endCtlPt)
     if action is "S":
-        ctlPt = addPoint(halfway, multiplyPoint(fxWeight,tweaks[0] + " " +tweaks[1]))
-        return "s {} {}".format(ctlPt, ptEnd)
+        ctlPt = halfway + (V2d(tweaks[0], tweaks[1])* fxWeight)
+        return VSegment.from_smooth_bezier(ptEnd, ctlPt)
     if action is "Q":
-        ctlPt = addPoint(halfway, multiplyPoint(fxWeight,tweaks[0] + " " +tweaks[1]))
-        return "q {} {}".format(ctlPt, ptEnd)
+        ctlPt = halfway + (V2d(tweaks[0], tweaks[1])* fxWeight)
+        return VSegment.from_quadratic_bezier(ptEnd, ctlPt)
     
 
-def toBrush(chain, points, fxWeight, tweaks):
-    firstPoint = "M {},".format(points[0])
+def toBrush(chain, points, fxWeight, tweaks)-> VPath:
+    firstPoint = VSegment.from_move_to(points[0])
     otherlength = len(points)-1
     usableChain = normChain(chain, otherlength)
-    shapes = ",".join([ actionToSegment(usableChain[i], points[i], points[i+1], fxWeight, tweaks[i+1].split(" ")) for i in range(otherlength)])
-    brush = "[ " +firstPoint + shapes + " ]"
-    return brush
-
-def getYSign(idx):
-    return 1 if idx % 2 is 0 else -1
-
-def segmentToSvg(segment, width):
-    prefix = segment.strip()[0]
-    values = segment.strip()[1:].strip().split(" ")
-    length = len(values)
-    fvalues = " ".join(["{:.3f}".format(getYSign(i)*float(Fraction(values[i])*width)) for i in range(length)])
-    return prefix + " " + fvalues
-
-def brushToSvg(brush, width):
-    segments =  brush.replace("[","").replace("]", "").strip().split(",")   
-    svgPath = " ".join([ segmentToSvg(segment, width) for segment in segments])
-    return "{} Z".format(svgPath)
-
+    segments = [firstPoint] + [ actionToSegment(usableChain[i], points[i], points[i+1], fxWeight, FractionList.from_string(tweaks[i+1])) for i in range(otherlength)]
+    return VPath(segments)
 
 def getFilename(filename):
     return os.path.basename(filename)
@@ -164,57 +148,37 @@ class Experimenting:
         counter = counter + 1
         self.content["general"]["counter"] = counter
         return counter
-
-    def createPoint(self):
-        x = Fraction(choice(self.fractions))*choice([1, -1])
-        y = Fraction(choice(self.fractions))*choice([1, -1])
-        return str(x)+ " "+ str(y)
-
-    def createTweak(self):
-        a = Fraction(choice(self.fractions))*choice([1, -1])
-        b = Fraction(choice(self.fractions))*choice([1, -1])
-        c =  Fraction(choice(self.fractions))*choice([1, -1])
-        d =  Fraction(choice(self.fractions))*choice([1, -1])
-        e =  Fraction(choice(self.fractions))*choice([1, -1])
-        return " ".join([str(a), str(b), str(c), str(d), str(e)])
-
-    def createPoints(self, count):
-        return [self.createPoint() for i in range(count)]
     
-    def createTweaks(self, count):
-        return [self.createTweak() for i in range(count)]
-
     def createRule(self):
         rv = choice(self.pool["rules"]) + chooseVariable(self.variables)
         vr = chooseVariable(self.variables) + choice(self.pool["rules"])
         return choice([rv, vr])
 
     def createSpecimen(self):
-        stake = V2dList.from_dalmatian_string(choice(self.pool["stakes"]).split(","))
+        stake = V2dList.from_dalmatian_string(choice(self.pool["stakes"]), sep=",")
         iterations = self.init["iterations"]
         fxWeight = FractionList.from_string(self.pool["fx-weights"]).choice()
-        deltas = self.createPoints(len(stake))
-        tweaks = self.createTweaks(len(stake))
-        points = addWeightedPoints(stake, deltas, fxWeight)
+        deltas = V2dList.from_dalmatian_string(self.fractionList.signed_sample_list(len(stake), 2))
+        tweaks = self.fractionList.signed_sample_list(len(stake), 5)
+        points = stake + (deltas*fxWeight)
         rules = [ {"s": i, "r":self.createRule() } for i in self.variables]
         start = self.createRule()
         chain = applyRulesToChain(rules, start, iterations)
         brush = toBrush(chain, points, fxWeight, tweaks)
-        brushSvg = brushToSvg(brush, BRUSH_WIDTH)
         summary = "Brush based on a stake of {} points, a weight of {} and the following rules {} starting with {}".format(len(stake), fxWeight, ", ".join([r["s"] + "->" + r["r"] for r in rules]), start)
         return {    
                 "id": self.incId(),  
                 "iterations": iterations,
                 "fx-weight": fxWeight,
-                "stake": stake,
-                "deltas": deltas,
+                "stake": stake.to_dalmatian_list(),
+                "deltas": deltas.to_dalmatian_list(),
                 "tweaks": tweaks,
-                "points": points,
+                "points": points.to_dalmatian_list(),
                 "rules": rules,
                 "start": start,
                 "chain": chain,
-                "brush": brush,
-                "brush-svg": brushSvg,
+                "brush": brush.to_dalmatian_string(),
+                "brush-svg": brush.to_svg_string(BRUSH_WIDTH),
                 "summary": summary,
                 "tags": ""
         }
