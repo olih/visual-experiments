@@ -166,6 +166,9 @@ class FractionList:
     def __eq__(self, other):
         return self.values == other.values
 
+    def __getitem__(self, index):
+        return self.values[index]
+
     def choice(self):
         return choice(self.values)
 

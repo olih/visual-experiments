@@ -158,7 +158,7 @@ class Experimenting:
         stake = V2dList.from_dalmatian_string(choice(self.pool["stakes"]), sep=",")
         iterations = self.init["iterations"]
         fxWeight = FractionList.from_string(self.pool["fx-weights"]).choice()
-        deltas = V2dList.from_dalmatian_string(self.fractionList.signed_sample_list(len(stake), 2))
+        deltas = V2dList.from_dalmatian_list(self.fractionList.signed_sample_list(len(stake), 2))
         tweaks = self.fractionList.signed_sample_list(len(stake), 5)
         points = stake + (deltas*fxWeight)
         rules = [ {"s": i, "r":self.createRule() } for i in self.variables]
@@ -169,7 +169,7 @@ class Experimenting:
         return {    
                 "id": self.incId(),  
                 "iterations": iterations,
-                "fx-weight": fxWeight,
+                "fx-weight": str(fxWeight),
                 "stake": stake.to_dalmatian_list(),
                 "deltas": deltas.to_dalmatian_list(),
                 "tweaks": tweaks,
