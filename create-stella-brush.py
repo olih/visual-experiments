@@ -57,9 +57,10 @@ def actionToSegment(action, ptStart, ptEnd, fxWeight, tweaks) -> VSegment:
     
 
 def toBrush(corechain, points, fxWeight, tweaks)-> VPath:
-    firstPoint = VSegment.from_move_to(points[0])
+    firstSegment = VSegment.from_move_to(points[0])
+    lastSegment = actionToSegment(corechain[-1], points[-1], points[0], fxWeight, FractionList.from_string(tweaks[0]))
     otherlength = len(points)-1
-    segments = [firstPoint] + [ actionToSegment(corechain[i], points[i], points[i+1], fxWeight, FractionList.from_string(tweaks[i+1])) for i in range(otherlength)]
+    segments = [firstSegment] + [ actionToSegment(corechain[i], points[i], points[i+1], fxWeight, FractionList.from_string(tweaks[i+1])) for i in range(otherlength)] + [lastSegment]
     return VPath(segments)
 
 def getFilename(filename):
