@@ -27,7 +27,7 @@ def hideChar(somechar):
     return chr(ord(somechar[0])+1000)
 
 def chooseVariableCombi(vars: str, levels: int):
-    variables = vars.split("")
+    variables = [char for char in vars]
     two = choice([i+j for i in variables for j in variables])
     three = choice([i+j+k for i in variables for j in variables for k in variables])
     four = choice([i+j+k+l for i in variables for j in variables for k in variables for l in variables])
@@ -49,51 +49,49 @@ def createRuleValue(vars: str, levels: int, keyrules: List[str]):
 
 class ProductionGame:
     def __init__(self, chainlength = 50):
-        self.constants = "L"
-        self.variables = "IJK"
         self.rules = []
         self.start = ""
-        self.iterations = 3
+        self.iterations = 0
         self.chain = ""
         self.chainlength = chainlength
 
-    def setVars(self, variables: str):
+    def set_vars(self, variables: str):
         self.variables = variables
+        self.variables_list = [char for char in variables]
         return self
 
-    def setConstants(self, constants: str):
+    def set_constants(self, constants: str):
         self.constants = constants
+        self.constants_list = [char for char in constants]
         return self
 
-    def setIterations(self, iterations: int):
-        self.iterations = iterations
-        return self
-
-    def setStart(self, start: str):
+    def set_start(self, start: str):
         self.start = start
         return self
 
-    def setRules(self, rules: List[ProductionRule]):
-        self.rules = rules
-        return self
-
-    def randomRules(self, levels: int, keyrules: List[str]):
+    def init_with_random_rules(self, levels: int, keyrules: List[str]):
         self.start = createRuleValue(self.variables, levels, keyrules)
-        self.rules = [ {"s": i, "r": createRuleValue(self.variables, levels, keyrules) } for i in self.variables.split("")]
+        self.rules = [ ProductionRule(i, createRuleValue(self.variables, levels, keyrules)) for i in self.variables_list]
 
     def produce(self)->str:
         chain = self.start
-        for i in range(self.iterations):
+        length = 0
+        i = 0
+        more = True
+        while more:
+            i = i + 1
             for rule in self.rules:
-                chain = chain.replace(rule["s"], hideChar(rule["s"]))
+                chain = chain.replace(rule.search, hideChar(rule.search))
             for rule in self.rules:
-                chain = chain.replace(hideChar(rule["s"]), rule["r"])
+                chain = chain.replace(hideChar(rule.search), rule.replace)
+            length = len([c for c in chain if c in self.constants_list]) # only usable chars
+            more = i < 100 and length < self.chainlength
         self.chain = chain
+        self.iterations = i
         return chain
 
     def core_chain(self):
-        keepchars = self.constants.split("")
-        usable = [c for c in self.chain if c in keepchars]
+        usable = [c for c in self.chain if c in self.constants_list]
         newchain =  usable
         while len(newchain)<self.chainlength:
             newchain = newchain + usable
