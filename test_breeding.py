@@ -1,6 +1,6 @@
 import unittest
 
-from breeding import ProductionRule, ProductionGame
+from breeding import ProductionGame
 
 class TestProductionGame(unittest.TestCase):
 
@@ -8,7 +8,6 @@ class TestProductionGame(unittest.TestCase):
         product = ProductionGame(chainlength = 60)
         product.set_constants("LQC").set_vars("IJK")
         product.init_with_random_rules(levels = 2, keyrules = ["L", "QQ", "C"])
-        product.set_start("MI")
         product.produce()
         result = product.to_obj()
         self.assertEqual(len(result["rules"]), 3)

@@ -9,6 +9,7 @@ import re
 import glob
 from random import sample, choice
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
+from breeding import ProductionGame
 
 localDir = os.environ['OLI_LOCAL_DIR']
 BRUSH_WIDTH=34
@@ -33,27 +34,6 @@ parser.add_argument("-f", "--file", help="the file containing the experiments.",
 parser.add_argument("-t", "--template", help="the template for visualizing the brush", default = "template-one")
 args = parser.parse_args()
 
-def chooseVariable(variables):
-    duos = [i+j for i in variables for j in variables]
-    trios = [i+j+k for i in variables for j in variables for k in variables]
-    return choice([choice(duos), choice(trios)])
-
-
-def applyRulesToChain(rules, start, iterations)->str:
-    chain = start
-    for i in range(iterations):
-        for rule in rules:
-            chain = chain.replace(rule["s"], rule["s"].lower())
-        for rule in rules:
-            chain = chain.replace(rule["s"].lower(), rule["r"])
-    return chain
-
-def normChain(chain, length)->str:
-    usable = [c for c in chain if c in ["L","T", "C", "S", "Q"]]
-    newchain =  usable
-    while len(newchain)<length:
-        newchain = newchain + usable
-    return newchain[:length]
 
 def actionToSegment(action, ptStart, ptEnd, fxWeight, tweaks) -> VSegment:
     # not fully sure the calculations are what we really expect
@@ -76,11 +56,10 @@ def actionToSegment(action, ptStart, ptEnd, fxWeight, tweaks) -> VSegment:
         return VSegment.from_quadratic_bezier(ptEnd, ctlPt)
     
 
-def toBrush(chain, points, fxWeight, tweaks)-> VPath:
+def toBrush(corechain, points, fxWeight, tweaks)-> VPath:
     firstPoint = VSegment.from_move_to(points[0])
     otherlength = len(points)-1
-    usableChain = normChain(chain, otherlength)
-    segments = [firstPoint] + [ actionToSegment(usableChain[i], points[i], points[i+1], fxWeight, FractionList.from_string(tweaks[i+1])) for i in range(otherlength)]
+    segments = [firstPoint] + [ actionToSegment(corechain[i], points[i], points[i+1], fxWeight, FractionList.from_string(tweaks[i+1])) for i in range(otherlength)]
     return VPath(segments)
 
 def getFilename(filename):
@@ -149,34 +128,27 @@ class Experimenting:
         self.content["general"]["counter"] = counter
         return counter
     
-    def createRule(self):
-        rv = choice(self.pool["rules"]) + chooseVariable(self.variables)
-        vr = chooseVariable(self.variables) + choice(self.pool["rules"])
-        return choice([rv, vr])
-
     def createSpecimen(self):
         stake = V2dList.from_dalmatian_string(choice(self.pool["stakes"]), sep=",")
-        iterations = self.init["iterations"]
         fxWeight = FractionList.from_string(self.pool["fx-weights"]).choice()
         deltas = V2dList.from_dalmatian_list(self.fractionList.signed_sample_list(len(stake), 2))
         tweaks = self.fractionList.signed_sample_list(len(stake), 5)
         points = stake + (deltas*fxWeight)
-        rules = [ {"s": i, "r":self.createRule() } for i in self.variables]
-        start = self.createRule()
-        chain = applyRulesToChain(rules, start, iterations)
-        brush = toBrush(chain, points, fxWeight, tweaks)
-        summary = "Brush based on a stake of {} points, a weight of {} and the following rules {} starting with {}".format(len(stake), fxWeight, ", ".join([r["s"] + "->" + r["r"] for r in rules]), start)
+        product = ProductionGame(chainlength = len(points) -1)
+        product.set_constants("ZMLCQST").set_vars("IJK")
+        product.init_with_random_rules(levels = 2, keyrules = self.pool["rules"])
+        product.produce()
+        product_obj = product.to_obj()
+        brush = toBrush(product.core_chain(), points, fxWeight, tweaks)
+        summary = "Brush based on a stake of {} points, a weight of {} and the following rules {} starting with {}".format(len(stake), fxWeight, ", ".join([r["s"] + "->" + r["r"] for r in product_obj["rules"]]), product_obj["start"])
         return {    
                 "id": self.incId(),  
-                "iterations": iterations,
                 "fx-weight": str(fxWeight),
                 "stake": stake.to_dalmatian_list(),
                 "deltas": deltas.to_dalmatian_list(),
                 "tweaks": tweaks,
                 "points": points.to_dalmatian_list(),
-                "rules": rules,
-                "start": start,
-                "chain": chain,
+                "product": product_obj,
                 "brush": brush.to_dalmatian_string(),
                 "brush-svg": brush.to_svg_string(BRUSH_WIDTH),
                 "summary": summary,
