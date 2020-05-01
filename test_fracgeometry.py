@@ -43,6 +43,11 @@ class TestV2d(unittest.TestCase):
         self.assertEqual(str(ptA*Fraction("1/3")), "1/12 1/9")
         self.assertEqual((ptA*Fraction("2/3")).square_magnitude(), ptA.square_magnitude()*Fraction("4/9"))
 
+    def test_rotate(self):
+        self.assertEqual(ptA.rotate(Fraction("1/2")), - ptA)
+        self.assertEqual(ptA.rotate(Fraction("1/4")), V2d.from_string("-1/3 1/4"))
+        self.assertEqual(ptA.rotate(Fraction("-1/4")), V2d.from_string("1/3 -1/4"))
+ 
 class TestV2dList(unittest.TestCase):
 
     def test_create(self):

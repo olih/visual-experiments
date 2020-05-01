@@ -2,6 +2,15 @@ from fractions import Fraction
 from typing import List, Tuple
 from enum import Enum, auto
 from random import sample, choice
+from math import pi, radians, cos, sin
+
+def cosFract(fract):
+    numerator = int(1000*cos(radians(360*fract)))
+    return Fraction("{}/1000".format(numerator))
+
+def sinFract(fract):
+    numerator = int(1000*sin(radians(360*fract)))
+    return Fraction("{}/1000".format(numerator))
 
 class V2d:
     def __init__(self, x: Fraction, y: Fraction):
@@ -54,6 +63,12 @@ class V2d:
 
     def square_magnitude(self):
         return self.x**2 + self.y**2
+
+    def rotate(self, angle: Fraction):
+        xnew = self.x*cosFract(angle) - self.y*sinFract(angle)
+        ynew = self.x*sinFract(angle) + self.y*cosFract(angle)
+        return V2d(xnew, ynew)
+
 
 class V2dList:
     
