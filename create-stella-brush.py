@@ -140,7 +140,9 @@ class Experimenting:
         product.produce()
         product_obj = product.to_obj()
         brush = toBrush(product.core_chain(), points, fxWeight, tweaks)
-        summary = "Brush based on a stake of {} points, a weight of {} and the following rules {} starting with {}".format(len(stake), fxWeight, ", ".join([r["s"] + "->" + r["r"] for r in product_obj["rules"]]), product_obj["start"])
+        frequency_info = ", ".join(["{}:{}".format(k,v) for k, v in brush.action_frequency().items()])
+        ruleInfo = ", ".join([r["s"] + "->" + r["r"] for r in product_obj["rules"]])
+        summary = "Brush based on a stake of {} points, a weight of {} and the following rules {} starting with {} resulting in frequency {}".format(len(stake), fxWeight, ruleInfo , product_obj["start"], frequency_info)
         return {    
                 "id": self.incId(),  
                 "fx-weight": str(fxWeight),
@@ -151,6 +153,7 @@ class Experimenting:
                 "product": product_obj,
                 "brush": brush.to_dalmatian_string(),
                 "brush-svg": brush.to_svg_string(BRUSH_WIDTH),
+                "brush-cartesian": brush.to_core_cartesian_string(BRUSH_WIDTH),
                 "summary": summary,
                 "tags": ""
         }

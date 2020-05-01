@@ -105,5 +105,5 @@ class ProductionGame:
             "rules": ProductionRule.to_list(self.rules),
             "start": self.start,
             "chain": self.chain,
-            "core-chain": self.core_chain()
+            "core-chain": "".join(self.core_chain())
         }
