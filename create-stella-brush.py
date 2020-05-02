@@ -7,7 +7,7 @@ from hashids import Hashids
 import json
 import re
 import glob
-from random import sample, choice
+from random import sample, choice, randint
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
 from breeding import ProductionGame
 
@@ -84,6 +84,26 @@ def extractIdWithTags():
     withTags = { tagInfo["id"]: tagInfo["tags"] for tagInfo in  tagInfoLines if len(tagInfo["tags"])>0 }
     return withTags
 
+def messup_stake(stake: V2dList):
+    if randint(1, 7) is 1:
+        return stake
+    newstake = stake.clone()
+    if randint(1, 4) is 1:
+        newstake = newstake.reverse()
+    if randint(1, 10) is 1:
+        newstake = newstake.mirror()
+
+    length = len(stake)
+    endslice = randint(4, length)
+    inc = randint(1, 4)
+    newstake = V2dList(newstake[:endslice:inc])
+    
+    if len(newstake)<5:
+        return messup_stake(stake)
+    else:
+        return newstake
+
+
 class Experimenting:
     def __init__(self, name, templateName):
         self.name = name
@@ -130,7 +150,7 @@ class Experimenting:
         return counter
     
     def createSpecimen(self):
-        stake = V2dList.from_dalmatian_string(choice(self.pool["stakes"]), sep=",")
+        stake = messup_stake(V2dList.from_dalmatian_string(choice(self.pool["stakes"]), sep=","))
         fxWeight = FractionList.from_string(self.pool["fx-weights"]).choice()
         deltas = V2dList.from_dalmatian_list(self.fractionList.signed_sample_list(len(stake), 2))
         tweaks = self.fractionList.signed_sample_list(len(stake), 5)
