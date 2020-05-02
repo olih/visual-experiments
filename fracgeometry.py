@@ -81,27 +81,6 @@ class V2dList:
     def __repr__(self):
         return ", ".join([str(value) for value in self.values])
 
-    def length(self):
-        return len(self.values)
-    
-    def __len__(self):
-        return len(self.values)
-    
-    def __eq__(self, other):
-        return self.values == other.values
-
-    def to_cartesian_string(self, dpu: int, sep=""):
-        return sep.join([ value.to_cartesian_string(dpu) for value in self.values])
-
-    def to_svg_string(self, dpu: int, sep=" "):
-        return sep.join([ value.to_svg_string(dpu) for value in self.values])
-
-    def to_dalmatian_list(self):
-        return [ value.to_dalmatian_string() for value in self.values]
-
-    def to_dalmatian_string(self, sep=" "):
-        return sep.join(self.to_dalmatian_list())
-
     @classmethod
     def from_dalmatian_string(cls, somestr: str, sep=" "):
         if sep is " ":
@@ -121,17 +100,20 @@ class V2dList:
             values.append(filler)
         return cls(values)
     
+    def length(self):
+        return len(self.values)
+    
+    def __len__(self):
+        return len(self.values)
+    
+    def __eq__(self, other):
+        return self.values == other.values
+
     def __getitem__(self, index):
         return self.values[index]
     
     def __neg__(self):
         return V2dList([- value.clone() for value in self.values])
-
-    def neg_x(self):
-        return V2dList([value.clone().neg_x() for value in self.values])
-
-    def neg_y(self):
-        return V2dList([value.clone().neg_y() for value in self.values])
 
     def __add__(self, b):
         maxlength = max(self.length(), b.length())
@@ -148,6 +130,27 @@ class V2dList:
     def __mul__(self, scalar: Fraction):
        return V2dList([value.clone() * scalar for value in self.values])
 
+    def clone(self):
+        return V2dList(self.values.copy())
+
+    def to_cartesian_string(self, dpu: int, sep=""):
+        return sep.join([ value.to_cartesian_string(dpu) for value in self.values])
+
+    def to_svg_string(self, dpu: int, sep=" "):
+        return sep.join([ value.to_svg_string(dpu) for value in self.values])
+
+    def to_dalmatian_list(self):
+        return [ value.to_dalmatian_string() for value in self.values]
+
+    def to_dalmatian_string(self, sep=" "):
+        return sep.join(self.to_dalmatian_list())
+    
+    def neg_x(self):
+        return V2dList([value.clone().neg_x() for value in self.values])
+
+    def neg_y(self):
+        return V2dList([value.clone().neg_y() for value in self.values])
+
     def extend(self, other):
        return V2dList(self.values.copy()+other.values.copy())
 
@@ -156,11 +159,18 @@ class V2dList:
         newvalues.append(value)
         return V2dList(newvalues)
 
-    def circular(self):
-        return self.append(self.values[0])
-
     def to_bigram(self)->List[Tuple[V2d, V2d]]:
         return [(self.values[i], self.values[i+1]) for i in range(len(self.values)-1)]
+
+    def reverse(self):
+        cloned = self.values.copy()
+        cloned.reverse()
+        return V2dList(cloned)
+
+    def mirror(self):
+        cloned = self.values.copy()
+        cloned.reverse()
+        return V2dList(self.values.copy()+cloned)
 
 class FractionList:
     def __init__(self, values: List[Fraction] ):

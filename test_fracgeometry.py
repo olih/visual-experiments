@@ -90,12 +90,19 @@ class TestV2dList(unittest.TestCase):
         self.assertEqual(listCDE.neg_x().neg_y(), - listCDE)
         self.assertEqual(str(listCDE.neg_x()), "-1/7 -1/9, 1/13 -1/23, -1/17 4/5")
 
-    def test_circular(self):
-        self.assertEqual(listCDE.circular()[-1], ptC)
-        self.assertEqual(listCDE.circular(), listCDE.extend(V2dList([ptC])))
+    def test_slice(self):
+        self.assertEqual(listCDE[0], ptC)
+        self.assertEqual(listCDE[-1], ptE)
+        self.assertEqual(listCDE[0:2], [ptC, ptD])
+        self.assertEqual(listABCDE[:4:2], [ptA, ptC])
 
     def test_to_bigram(self):
         self.assertEqual(listCDE.to_bigram(), [(ptC, ptD), (ptD, ptE)])
+
+    def test_mirror(self):
+        self.assertEqual(listCDE.clone(), listCDE)
+        self.assertEqual(listCDE.reverse(),V2dList([ptE, ptD, ptC]))
+        self.assertEqual(listCDE.mirror(), V2dList([ptC, ptD, ptE, ptE, ptD, ptC]))
 
 class TestVSegment(unittest.TestCase):
 
