@@ -56,7 +56,7 @@ def actionToSegment(action, ptStart, ptEnd, fxWeight, tweaks) -> VSegment:
         return VSegment.from_quadratic_bezier(ptEnd, ctlPt)
     
 def offsetActionToSegment(action, ptStart:V2d, ptEnd:V2d, fxWeight, tweaks: FractionList) -> VSegment:
-    offset = (ptEnd - ptStart).rotate(Fraction("1/4"))*Fraction("1/7")*tweaks[4]
+    offset = (ptEnd - ptStart).rotate(Fraction("1/4"))*Fraction("1/5")*tweaks[4]
     newStart =  ptStart + offset # slightly inconsistent but should impact control points
     newEnd = ptEnd + offset
     return actionToSegment(action, newStart, newEnd, fxWeight, tweaks)
