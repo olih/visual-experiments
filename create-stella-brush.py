@@ -55,12 +55,24 @@ def actionToSegment(action, ptStart, ptEnd, fxWeight, tweaks) -> VSegment:
         ctlPt = halfway + (V2d(tweaks[0], tweaks[1])* fxWeight)
         return VSegment.from_quadratic_bezier(ptEnd, ctlPt)
     
+def offsetActionToSegment(action, ptStart:V2d, ptEnd:V2d, fxWeight, tweaks: FractionList) -> VSegment:
+    offset = (ptEnd - ptStart).rotate(Fraction("1/4"))*Fraction("1/7")*tweaks[4]
+    newStart =  ptStart + offset # slightly inconsistent but should impact control points
+    newEnd = ptEnd + offset
+    return actionToSegment(action, newStart, newEnd, fxWeight, tweaks)
 
-def toBrush(corechain, points, fxWeight, tweaks)-> VPath:
+def toBrush(corechain, points, fxWeight, tweaks, spaghetti: bool)-> VPath:
     firstSegment = VSegment.from_move_to(points[0])
     lastSegment = actionToSegment(corechain[-1], points[-1], points[0], fxWeight, FractionList.from_string(tweaks[0]))
     otherlength = len(points)-1
-    segments = [firstSegment] + [ actionToSegment(corechain[i], points[i], points[i+1], fxWeight, FractionList.from_string(tweaks[i+1])) for i in range(otherlength)] + [lastSegment]
+    segments = []
+    if spaghetti:
+        forwardsegments = [firstSegment] + [ actionToSegment(corechain[i], points[i], points[i+1], fxWeight, FractionList.from_string(tweaks[i+1])) for i in range(otherlength)]
+        backwardsegments = [ offsetActionToSegment(corechain[i], points[i], points[i+1], fxWeight, FractionList.from_string(tweaks[i+1])) for i in range(otherlength-1, 0, -1)]
+        segments = forwardsegments + backwardsegments
+    else:
+        segments = [firstSegment] + [ actionToSegment(corechain[i], points[i], points[i+1], fxWeight, FractionList.from_string(tweaks[i+1])) for i in range(otherlength)] + [lastSegment]
+
     return VPath(segments)
 
 def getFilename(filename):
@@ -151,6 +163,7 @@ class Experimenting:
     
     def createSpecimen(self):
         stake = messup_stake(V2dList.from_dalmatian_string(choice(self.pool["stakes"]), sep=","))
+        spaghetti = randint(1, 2) is 1
         fxWeight = FractionList.from_string(self.pool["fx-weights"]).choice()
         deltas = V2dList.from_dalmatian_list(self.fractionList.signed_sample_list(len(stake), 2))
         tweaks = self.fractionList.signed_sample_list(len(stake), 5)
@@ -160,7 +173,7 @@ class Experimenting:
         product.init_with_random_rules(levels = 2, keyrules = self.pool["rules"])
         product.produce()
         product_obj = product.to_obj()
-        brush = toBrush(product.core_chain(), points, fxWeight, tweaks)
+        brush = toBrush(product.core_chain(), points, fxWeight, tweaks, spaghetti)
         frequency_info = ", ".join(["{}:{}".format(k,v) for k, v in brush.action_frequency().items()])
         ruleInfo = ", ".join([r["s"] + "->" + r["r"] for r in product_obj["rules"]])
         summary = "Brush based on a stake of {} points, a weight of {} and the following rules {} starting with {} resulting in frequency {}".format(len(stake), fxWeight, ruleInfo , product_obj["start"], frequency_info)
@@ -168,6 +181,7 @@ class Experimenting:
                 "id": self.incId(),  
                 "fx-weight": str(fxWeight),
                 "stake": stake.to_dalmatian_list(),
+                "spaghetti": spaghetti,
                 "deltas": deltas.to_dalmatian_list(),
                 "tweaks": tweaks,
                 "points": points.to_dalmatian_list(),
