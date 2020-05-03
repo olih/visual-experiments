@@ -199,14 +199,16 @@ class Experimenting:
             specimenId = specimen["id"]
             if specimenId in idWithTags:
                 specimen["tags"] = idWithTags[specimenId]
+                print('Saved', specimen["summary"])
         bestspecimens = [specimen for specimen in specimens if len(specimen["tags"])> 0 ]
+        print("Total saved {}".format(len(bestspecimens)))
         self.content['specimens'] = bestspecimens
             
     def createNewPopulation(self):
         population = self.init["population"]
         newspecimens = [ self.createSpecimen() for _ in range(population) ]
         self.content['specimens'] = self.content['specimens'] + newspecimens
- 
+    
     def start(self):
         self.applyTags()
         self.createNewPopulation()
@@ -220,7 +222,7 @@ class Experimenting:
             brushSvg = specimen["brush-svg"]
             filename = "eval-{}".format(specimen["id"])
             self.saveSpecimenSvg(filename, brushSvg)
-            print(specimen["summary"])
+            print('New', specimen["summary"])
     
     def saveEverything(self):
         self.saveSvg()
