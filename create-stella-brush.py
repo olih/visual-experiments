@@ -10,9 +10,15 @@ import glob
 from random import sample, choice, randint
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
 from breeding import ProductionGame
+from datetime import date
+
+today = date.today()
 
 localDir = os.environ['OLI_LOCAL_DIR']
 BRUSH_WIDTH=34
+
+brushBaseURL = "https://olih.github.io/brush/"
+authorURL = "https://olih.github.io/brush/profile.html"
 
 if not (sys.version_info.major == 3 and sys.version_info.minor >= 5):
     print("This script requires Python 3.5 or higher!")
@@ -26,14 +32,24 @@ def loadConfAsJson():
 jsonConf = loadConfAsJson()
 
 evalDir = jsonConf["brushes"]["evaluation-directory"]
+publishingDir = jsonConf["brushes"]["publishing-directory"]
 
 brushesHashids = Hashids(salt=jsonConf["brushes"]["salt"], min_length=jsonConf["brushes"]["id-length"])
 
 parser = argparse.ArgumentParser(description = 'Create brushes')
 parser.add_argument("-f", "--file", help="the file containing the experiments.", required = True)
 parser.add_argument("-t", "--template", help="the template for visualizing the brush", default = "template-one")
+parser.add_argument("-p", "--publish", help="publish the preserved brushes", default = "No")
 args = parser.parse_args()
 
+def createBrushId():
+    counterFilename = '{}/brush/brushes-count.txt'.format(localDir)
+    with open(counterFilename, 'r') as file:
+        data = file.read().replace('\n', '')
+        counter = int(data)+1
+        with open(counterFilename, 'w') as wfile:
+            wfile.write(str(counter))
+            return brushesHashids.encode(counter)
 
 def actionToSegment(action, ptStart, ptEnd, fxWeight, tweaks) -> VSegment:
     # not fully sure the calculations are what we really expect
@@ -115,6 +131,44 @@ def messup_stake(stake: V2dList):
     else:
         return newstake
 
+def addHidToSpecimen(specimen):
+    if not "hid" in specimen:
+        specimen["hid"] = createBrushId()
+    return specimen
+
+def publishableSpecimen(specimen):
+    hid = specimen["hid"]
+    name = "brush-{}".format(hid)
+    brush = specimen["brush"]
+    summary = specimen["summary"]
+    return {
+            "content-url json en": "{}{}.json".format(brushBaseURL, name),
+            "name": name,
+            "@type": "ImageObject",
+            "title en": "Brush {}".format(name),
+            "description en": summary,
+            "author-url html en": authorURL,
+            "author en": "Olivier Huin",
+            "copyright-year": today.strftime("%Y"),
+            "license en": "Attribution 4.0 International",
+            "license-url html en": "https://creativecommons.org/licenses/by/4.0/legalcode",
+            "attribution-name en" : "Olivier Huin",
+            "homepage-url,markdown,en: https://github.com/owner/project#readme"
+            "brush": brush,
+            "brush-ratio": "1/1",
+            "brush-coordinate-system": "system cartesian right-dir + up-dir - origin-x 1/2 origin-y 1/2"
+    }
+
+def savePublishableSpecimen(name, specimenData):
+        with open('{}/{}.json'.format(publishingDir, name), 'w') as outfile:  
+            json.dump(specimenData, outfile, indent=2)
+
+def publishSpecimens(specimens):
+    for specimen in specimens:
+        if not "hid" in specimen:
+            continue
+        publishable = publishableSpecimen(specimen)
+        savePublishableSpecimen(publishable["name"], publishable)
 
 class Experimenting:
     def __init__(self, name, templateName):
@@ -201,6 +255,8 @@ class Experimenting:
                 specimen["tags"] = idWithTags[specimenId]
                 print('Saved', specimen["summary"])
         bestspecimens = [specimen for specimen in specimens if len(specimen["tags"])> 0 ]
+        if "yes" in args.publish.lower():
+            bestspecimens = [addHidToSpecimen(specimen) for specimen in self.content['specimens'] if "preserve" in specimen["tags"] ]
         print("Total saved {}".format(len(bestspecimens)))
         self.content['specimens'] = bestspecimens
             
@@ -228,8 +284,14 @@ class Experimenting:
         self.saveSvg()
         self.save()
 
+    def publish(self):
+        print("Publishing to {}".format(publishingDir))
+        publishSpecimens(self.content['specimens'])
+
 experimenting = Experimenting(args.file, args.template)
 experimenting.load()
 experimenting.start()
 experimenting.saveEverything()
+if "yes" in args.publish.lower():
+    experimenting.publish()
 
