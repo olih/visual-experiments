@@ -153,12 +153,23 @@ def publishableSpecimen(specimen):
             "license en": "Attribution 4.0 International",
             "license-url html en": "https://creativecommons.org/licenses/by/4.0/legalcode",
             "attribution-name en" : "Olivier Huin",
-            "homepage-url,markdown,en: https://github.com/owner/project#readme"
+            "homepage-url markdown en:": "https://github.com/olih/brush/blob/master/README.md",
             "brush": brush,
             "brush-ratio": "1/1",
             "brush-coordinate-system": "system cartesian right-dir + up-dir - origin-x 1/2 origin-y 1/2"
     }
 
+def lightPublishableSpecimen(specimen):
+    hid = specimen["hid"]
+    name = "brush-{}".format(hid)
+    brush = specimen["brush"]
+    return {
+            "content-url json en": "{}{}.json".format(brushBaseURL, name),
+            "name": name,
+            "title en": "Brush {}".format(name),
+            "copyright-year": today.strftime("%Y"),
+            "brush": brush,
+    }
 def savePublishableSpecimen(name, specimenData):
         with open('{}/{}.json'.format(publishingDir, name), 'w') as outfile:  
             json.dump(specimenData, outfile, indent=2)
@@ -169,6 +180,24 @@ def publishSpecimens(specimens):
             continue
         publishable = publishableSpecimen(specimen)
         savePublishableSpecimen(publishable["name"], publishable)
+
+def publishCurrentCollection(collname, specimens):
+    publishables = [lightPublishableSpecimen(specimen) for specimen in specimens if "hid" in specimen]
+    collections = {
+            "name": collname,
+            "author-url html en": authorURL,
+            "author en": "Olivier Huin",
+            "license en": "Attribution 4.0 International",
+            "license-url html en": "https://creativecommons.org/licenses/by/4.0/legalcode",
+            "attribution-name en" : "Olivier Huin",
+            "homepage-url markdown en:": "https://github.com/olih/brush/blob/master/README.md",
+            "brush-ratio": "1/1",
+            "brush-coordinate-system": "system cartesian right-dir + up-dir - origin-x 1/2 origin-y 1/2",
+            "brushes": publishables
+    }
+    with open('{}/coll-{}.json'.format(publishingDir, collname), 'w') as outfile:  
+            json.dump(collections, outfile, indent=2)  
+        
 
 class Experimenting:
     def __init__(self, name, templateName):
@@ -287,6 +316,7 @@ class Experimenting:
     def publish(self):
         print("Publishing to {}".format(publishingDir))
         publishSpecimens(self.content['specimens'])
+        publishCurrentCollection(self.name, self.content['specimens'])
 
 experimenting = Experimenting(args.file, args.template)
 experimenting.load()
