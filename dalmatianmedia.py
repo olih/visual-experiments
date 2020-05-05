@@ -71,3 +71,25 @@ class DlmtTagDescription:
     
     def __repr__(self):
         return "tag {} lang {} same-as {} -> {}".format(self.id, self.lang, toDlmtArray(self.same_as, sep=", "), self.description)
+
+# brush i:1 ext-id brushes:abc3F path [ M -1/3 1/3, l 2/3 0/1, l 0/1 2/3, l -2/3 0/1 ]
+class DlmtBrush:
+    def __init__(self, id: str, ext_id:str, vpath: VPath):
+        self.id = id
+        self.ext_id = ext_id
+        self.vpath = vpath
+    
+    @classmethod
+    def from_string(cls, line: str):
+        cmd, brushId, extIdKey, extId, pathKey, other = line.split(" ", 5 )
+        assert cmd == "brush", line
+        assert extIdKey == "ext-id", line
+        assert pathKey == "path", line
+        
+        return cls(id = brushId, ext_id = extId, vpath = VPath.from_dalmatian_string(other))
+
+    def __str__(self):
+        return "brush {} ext-id {} path {}".format(self.id, self.ext_id, self.vpath.to_dalmatian_string())
+    
+    def __repr__(self):
+        return "brush {} ext-id {} path {}".format(self.id, self.ext_id, self.vpath.to_dalmatian_string())

@@ -1,7 +1,7 @@
 import unittest
 from fractions import Fraction
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
-from dalmatianmedia import DlmtView, DlmtTagDescription
+from dalmatianmedia import DlmtView, DlmtTagDescription, DlmtBrush
 
 pt0 = V2d.from_string("0/1 0/1")
 ptA = V2d.from_string("1/4 1/3")
@@ -21,3 +21,9 @@ class TestDlmtTagDescription(unittest.TestCase):
     def test_convert(self):
         line = "tag i:1 lang en-gb same-as [ geospecies:bioclasses/P632y, geospecies:bioclasses/P631y ] -> part of head"
         self.assertEqual(str(DlmtTagDescription.from_string(line)), line)
+
+class TestDlmtBrush(unittest.TestCase):
+
+    def test_convert(self):
+        line = "brush i:1 ext-id brushes:abc3F path [ M -1/3 1/3,L 2/3 1/4,L 1/4 2/3,L -2/3 1/2 ]"
+        self.assertEqual(str(DlmtBrush.from_string(line)), line)
