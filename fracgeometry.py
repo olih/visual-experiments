@@ -83,7 +83,7 @@ class V2dList:
 
     @classmethod
     def from_dalmatian_string(cls, somestr: str, sep=" "):
-        if sep is " ":
+        if sep == " ":
             fractions = [Fraction(value) for value in somestr.strip().split(" ")]
             return cls([V2d(fractions[2*i], fractions[2*i+1]) for i in range(len(fractions)//2)])
         else:
@@ -222,57 +222,57 @@ class SegmentShape(Enum):
     
     @classmethod
     def from_string(cls, value: str):
-        if value is "Z":
+        if value == "Z":
             return SegmentShape.CLOSE_PATH
-        elif value is "M":
+        elif value == "M":
             return SegmentShape.MOVE_TO
-        elif value is "L":
+        elif value == "L":
             return SegmentShape.LINE_TO
-        elif value is "C":
+        elif value == "C":
             return SegmentShape.CUBIC_BEZIER
-        elif value is "S":
+        elif value == "S":
             return SegmentShape.SMOOTH_BEZIER
-        elif value is "Q":
+        elif value == "Q":
             return SegmentShape.QUADRATIC_BEZIER
-        elif value is "T":
+        elif value == "T":
             return SegmentShape.FLUID_BEZIER
         else:
             return SegmentShape.NOT_SUPPORTED
     
     @classmethod
     def to_string(cls, value):
-        if value is SegmentShape.CLOSE_PATH:
+        if value == SegmentShape.CLOSE_PATH:
             return "Z"
-        elif value is SegmentShape.MOVE_TO:
+        elif value == SegmentShape.MOVE_TO:
             return "M"
-        elif value is SegmentShape.LINE_TO:
+        elif value == SegmentShape.LINE_TO:
             return "L"
-        elif value is SegmentShape.CUBIC_BEZIER:
+        elif value == SegmentShape.CUBIC_BEZIER:
             return "C"
-        elif value is SegmentShape.SMOOTH_BEZIER:
+        elif value == SegmentShape.SMOOTH_BEZIER:
             return "S"
-        elif value is SegmentShape.QUADRATIC_BEZIER:
+        elif value == SegmentShape.QUADRATIC_BEZIER:
             return "Q"
-        elif value is SegmentShape.FLUID_BEZIER:
+        elif value == SegmentShape.FLUID_BEZIER:
             return "T"
         else:
             return "E"
 
     @classmethod
     def count_of_points(cls, value):
-        if value is SegmentShape.CLOSE_PATH:
+        if value == SegmentShape.CLOSE_PATH:
             return 0
-        elif value is SegmentShape.MOVE_TO:
+        elif value == SegmentShape.MOVE_TO:
             return 1
-        elif value is SegmentShape.LINE_TO:
+        elif value == SegmentShape.LINE_TO:
             return 1
-        elif value is SegmentShape.CUBIC_BEZIER:
+        elif value == SegmentShape.CUBIC_BEZIER:
             return 3
-        elif value is SegmentShape.SMOOTH_BEZIER:
+        elif value == SegmentShape.SMOOTH_BEZIER:
             return 2
-        elif value is SegmentShape.QUADRATIC_BEZIER:
+        elif value == SegmentShape.QUADRATIC_BEZIER:
             return 2
-        elif value is SegmentShape.FLUID_BEZIER:
+        elif value == SegmentShape.FLUID_BEZIER:
             return 1
         else:
             return 0
@@ -321,48 +321,48 @@ class VSegment:
 
     def to_dalmatian_string(self):
         action_str = SegmentShape.to_string(self.action)
-        if self.action is SegmentShape.CLOSE_PATH:
+        if self.action == SegmentShape.CLOSE_PATH:
             return "{}".format(action_str)
         elif self.action in [SegmentShape.MOVE_TO, SegmentShape.LINE_TO, SegmentShape.FLUID_BEZIER] :
             return "{} {}".format(action_str, self.pt.to_dalmatian_string())
         elif self.action in [ SegmentShape.SMOOTH_BEZIER, SegmentShape.QUADRATIC_BEZIER]:
             return "{} {} {}".format(action_str, self.pt1.to_dalmatian_string(), self.pt.to_dalmatian_string())
-        elif self.action is SegmentShape.CUBIC_BEZIER:
+        elif self.action == SegmentShape.CUBIC_BEZIER:
             return "{} {} {} {}".format(action_str, self.pt1.to_dalmatian_string(), self.pt2.to_dalmatian_string(), self.pt.to_dalmatian_string())
         else:
             return "E"
     
     @classmethod
     def from_dalmatian_string(cls, dstr):
-        if dstr is "Z":
+        if dstr == "Z":
             return VSegment.from_close()
         action = SegmentShape.from_string(dstr.strip()[0])
         points = V2dList.from_dalmatian_string(dstr.strip()[1:])
         length = len(points)
-        if action is SegmentShape.MOVE_TO and length is 1 :
+        if action == SegmentShape.MOVE_TO and length == 1 :
             return VSegment.from_move_to(points[0])
-        elif action is SegmentShape.LINE_TO and length is 1 :
+        elif action == SegmentShape.LINE_TO and length == 1 :
             return VSegment.from_line_to(points[0])
-        elif action is SegmentShape.FLUID_BEZIER and length is 1 :
+        elif action == SegmentShape.FLUID_BEZIER and length == 1 :
             return VSegment.from_fluid_bezier(points[0])
-        elif action is SegmentShape.SMOOTH_BEZIER and length is 2:
+        elif action == SegmentShape.SMOOTH_BEZIER and length == 2:
             return VSegment.from_smooth_bezier(points[1], points[0])
-        elif action is SegmentShape.QUADRATIC_BEZIER and length is 2:
+        elif action == SegmentShape.QUADRATIC_BEZIER and length == 2:
             return VSegment.from_quadratic_bezier(points[1], points[0])
-        elif action is SegmentShape.CUBIC_BEZIER and length is 3:
+        elif action == SegmentShape.CUBIC_BEZIER and length == 3:
             return VSegment.from_cubic_bezier(points[2], points[0], points[1])
         else:
             return VSegment()
 
     def to_svg_string(self, dpu: int):
         action_str = SegmentShape.to_string(self.action)
-        if self.action is SegmentShape.CLOSE_PATH:
+        if self.action == SegmentShape.CLOSE_PATH:
             return "{}".format(action_str)
         elif self.action in [SegmentShape.MOVE_TO, SegmentShape.LINE_TO, SegmentShape.FLUID_BEZIER] :
             return "{} {}".format(action_str, self.pt.to_svg_string(dpu))
         elif self.action in [ SegmentShape.SMOOTH_BEZIER, SegmentShape.QUADRATIC_BEZIER]:
             return "{} {} {}".format(action_str, self.pt1.to_svg_string(dpu), self.pt.to_svg_string(dpu))
-        elif self.action is SegmentShape.CUBIC_BEZIER:
+        elif self.action == SegmentShape.CUBIC_BEZIER:
             return "{} {} {} {}".format(action_str, self.pt1.to_svg_string(dpu), self.pt2.to_svg_string(dpu), self.pt.to_svg_string(dpu))
         else:
             return "E"
