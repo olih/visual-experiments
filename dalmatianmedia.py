@@ -93,3 +93,29 @@ class DlmtBrush:
     
     def __repr__(self):
         return "brush {} ext-id {} path {}".format(self.id, self.ext_id, self.vpath.to_dalmatian_string())
+
+# brushstroke i:1 xy 1/15 1/100 scale 1/10 angle 0/1 tags [ i:1 ]
+class DlmtBrushstroke:
+    def __init__(self, id: str, xy: V2d, scale: Fraction, angle: Fraction, tags: List[str] = []):
+        self.id = id
+        self.xy = xy
+        self.scale = scale
+        self.angle = angle
+        self.tags = tags
+    
+    @classmethod
+    def from_string(cls, line: str):
+        cmd, brushId, xyKey, x, y, scaleKey, scale, angleKey, angle, tagsKey, tagsInfo = line.split(" ", 10 )
+        assert cmd == "brushstroke", line
+        assert xyKey == "xy", line
+        assert scaleKey == "scale", line
+        assert angleKey == "angle", line
+        assert tagsKey == "tags", line
+        
+        return cls(id = brushId, xy = V2d.from_string(x + " " + y), scale = Fraction(scale), angle = Fraction(angle), tags = parseDlmtArray(tagsInfo))
+
+    def __str__(self):
+        return "brushstroke {} xy {} scale {} angle {} tags {}".format(self.id, self.xy, self.scale, self.angle, toDlmtArray(self.tags, sep=", "))
+    
+    def __repr__(self):
+        return "brushstroke {} xy {} scale {} angle {} tags {}".format(self.id, self.xy, self.scale, self.angle, toDlmtArray(self.tags, sep=", "))

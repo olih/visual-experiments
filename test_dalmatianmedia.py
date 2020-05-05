@@ -1,7 +1,7 @@
 import unittest
 from fractions import Fraction
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
-from dalmatianmedia import DlmtView, DlmtTagDescription, DlmtBrush
+from dalmatianmedia import DlmtView, DlmtTagDescription, DlmtBrush, DlmtBrushstroke
 
 pt0 = V2d.from_string("0/1 0/1")
 ptA = V2d.from_string("1/4 1/3")
@@ -27,3 +27,9 @@ class TestDlmtBrush(unittest.TestCase):
     def test_convert(self):
         line = "brush i:1 ext-id brushes:abc3F path [ M -1/3 1/3,L 2/3 1/4,L 1/4 2/3,L -2/3 1/2 ]"
         self.assertEqual(str(DlmtBrush.from_string(line)), line)
+
+class TestDlmtBrushstroke(unittest.TestCase):
+
+    def test_convert(self):
+        line = "brushstroke i:1 xy 1/15 1/100 scale 1/10 angle 1/4 tags [ i:1 ]"
+        self.assertEqual(str(DlmtBrushstroke.from_string(line)), line)
