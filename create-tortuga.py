@@ -187,7 +187,7 @@ class Experimenting:
         tweaks = self.fractionList.signed_sample_list(len(stake), 5)
         points = stake + (deltas*fxWeight)
         product = ProductionGame(chainlength = len(points) -1)
-        product.set_constants("ZMLCQST").set_vars("IJK")
+        product.set_constants("ABLPZ-<>[]").set_vars("IJK")
         product.init_with_random_rules(levels = 2, keyrules = self.pool["rules"])
         product.produce()
         product_obj = product.to_obj()
