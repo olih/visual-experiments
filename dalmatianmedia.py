@@ -200,7 +200,10 @@ class DlmtCoordinateSystem:
     
     def __repr__(self):
        return "system {} right-dir {} up-dir {} origin-x {} origin-y {}".format(CoordinateType.to_string(self.coordinate_type), AxisDir.to_string(self.right_dir), AxisDir.to_string(self.up_dir), self.origin_x, self.origin_y)
- 
+
+    def __eq__(self, other):
+        return self.right_dir == other.right_dir and self.up_dir == other.up_dir and self.origin_x == other.origin_x and self.origin_y == other.origin_y and self.coordinate_type == other.coordinate_type
+
 class DlmtHeaders:
     def __init__(self):
         self.id_urn = ""
@@ -222,9 +225,15 @@ class DlmtHeaders:
         self.page_coordinate_system = value
         return self
 
+    def set_page_coordinate_system_string(self, value: str):
+        return self.set_page_coordinate_system(DlmtCoordinateSystem.from_string(value))
+
     def set_brush_coordinate_system(self, value: DlmtCoordinateSystem):
         self.brush_coordinate_system = value
         return self
+
+    def set_brush_coordinate_system_string(self, value: str):
+        return self.set_brush_coordinate_system(DlmtCoordinateSystem.from_string(value))
 
     def set_page_ratio(self, value: Fraction):
         self.page_ratio = value
@@ -247,11 +256,11 @@ class DlmtHeaders:
         return self
 
     def set_url(self, name: str, media_type: str, lang: str, url: str):
-        self.url_refs[(name.strip(), media_type.strip(), lang.strip())] = url
+        self.url_refs[(name.strip(), media_type.strip(), lang.strip())] = url.strip()
         return self
 
     def set_text(self, name: str,lang: str, text: str):
-        self.text_refs[(name, lang)] = text
+        self.text_refs[(name.strip(), lang.strip())] = text.strip()
         return self
 
     @classmethod
@@ -272,22 +281,23 @@ class DlmtHeaders:
             elif key == "brush-page-ratio":
                 result.set_brush_page_ratio(Fraction(value))
             elif key == "id-urn":
-                result.set_id_urn(Fraction(value))
+                result.set_id_urn(value)
             elif key == "prefixes":
                 result.set_prefixes(parseDlmtDict(value))
             elif key == "require-sections":
                 result.set_require_sections(parseDlmtDict(value))
-            elif key.count(" ") == 2:
+            elif key.count(" ") == 1:
                 name, lang = key.split()
                 if name in ["license", "attribution-name", "brushes-license", "brushes-attribution-name", "title", "description"]:
                     result.set_text(name, lang, value)
-            elif key.count(" ") == 3:
+            elif key.count(" ") == 2:
                 name, media_type, lang = key.split()
-                supported_media = ["html", "json", "rdf", "markdown"]
+                supported_media = ["html", "json", "rdf", "markdown", "nt", "ttl", "json-ld", "csv"]
                 if name in ["license-url", "attribution-url", "brushes-license-url", "brushes-attribution-url", "metadata-url", "homepage-url"] and media_type in supported_media:
                     result.set_url(name, media_type, lang, value)
             else:
                 raise Exception("Header key [{}] is not supported".format(key))
+        return result
     
     def to_string_list(self)->List[str]:
         results = []
@@ -299,6 +309,26 @@ class DlmtHeaders:
         results.append("page-ratio: {}".format(self.page_ratio))
         results.append("brush-ratio: {}".format(self.brush_ratio))
         results.append("brush-page-ratio: {}".format(self.brush_page_ratio))
+        for keydata, value in self.text_refs.items():
+            results.append("{} {}: {}".format(keydata[0], keydata[1], value))
+        for keydata, value in self.url_refs.items():
+            results.append("{} {} {}: {}".format(keydata[0], keydata[1], keydata[2], value))
+        return results
+
+    def to_string(self)->str:
+        return "\n".join(self.to_string_list())
+
+    def __str__(self):
+        return self.to_string()
+    
+    def __repr__(self):
+        return self.to_string()
+    
+    def __eq__(self, other):
+        thisone = (self.id_urn, self.brush_ratio, self.page_ratio, self.brush_page_ratio, self.page_coordinate_system, self.brush_coordinate_system, self.prefixes, self.require_sections, self.url_refs, self.text_refs)
+        otherone = (other.id_urn, other.brush_ratio, other.page_ratio, other.brush_page_ratio, other.page_coordinate_system, other.brush_coordinate_system, other.prefixes, other.require_sections, other.url_refs, other.text_refs)
+        return thisone == otherone
+
 
 
 class DalmatianMedia:

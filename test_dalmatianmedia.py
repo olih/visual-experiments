@@ -43,5 +43,17 @@ class TestDlmtCoordinateSystem(unittest.TestCase):
 class TestDlmtHeaders(unittest.TestCase):
 
     def test_convert(self):
-        line = "system cartesian right-dir + up-dir - origin-x 1/2 origin-y 1/4"
-        self.assertEqual(str(DlmtHeaders.from_string(line)), line)
+        headers = DlmtHeaders()
+        headers.set_page_coordinate_system_string("system cartesian right-dir + up-dir - origin-x 1/2 origin-y 1/4")
+        headers.set_brush_coordinate_system_string("system cartesian right-dir - up-dir + origin-x 1/4 origin-y 1/5")
+        headers.set_page_ratio(Fraction("1/4"))
+        headers.set_brush_ratio(Fraction("1/5"))
+        headers.set_brush_page_ratio(Fraction("1/30"))
+        headers.set_prefixes({ "prefix1": "http://domain1.com", "prefix2": "http://domain2.com"})
+        headers.set_text("license", "en", "Creative Commons")
+        headers.set_text("license", "fr", "Creative Communs")
+        headers.set_text("title", "en", "Some english title")
+        headers.set_text("title", "fr", "Titre en francais")
+        headers.set_url("license-url", "html", "en", "https://creativecommons.org/licenses/by-sa/4.0/legalcode")
+        headers.set_url("brushes-license-url", "json", "en", "https://creativecommons.org/licenses/by/4.0/legalcode")
+        self.assertEqual(DlmtHeaders.from_string_list(headers.to_string_list()), headers)
