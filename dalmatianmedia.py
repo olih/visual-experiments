@@ -12,20 +12,20 @@ if not (sys.version_info.major == 3 and sys.version_info.minor >= 5):
     print("You are using Python {}.{}.".format(sys.version_info.major, sys.version_info.minor))
     sys.exit(1)
 
-def stripStringArray(rawlines: str, sep=",")->List[str]:
+def strip_string_array(rawlines: str, sep=",")->List[str]:
     return [line.strip() for line in rawlines.split(sep) if line.strip() != ""]
 
-def parseDlmtArray(line: str)-> List[str]:
-    return stripStringArray(line.replace("[", "").replace("]", ""), sep=",")
+def parse_dlmt_array(line: str)-> List[str]:
+    return strip_string_array(line.replace("[", "").replace("]", ""), sep=",")
 
-def parseDlmtDict(line: str)-> Dict[str, str]:
-    return { part.split(" ")[0]:part.split(" ")[1] for part in parseDlmtArray(line) }
+def parse_dlmt_dict(line: str)-> Dict[str, str]:
+    return { part.split(" ")[0]:part.split(" ")[1] for part in parse_dlmt_array(line) }
 
-def toDlmtArray(items: List[str], sep=",")->str:
+def to_dlmt_array(items: List[str], sep=",")->str:
     return "[ {} ]".format(sep.join(items))
 
-def toDlmtDict(keyvalues: Dict[str, str], sep=",")->str:
-    return toDlmtArray(["{} {}".format(key, value) for key, value in keyvalues.items()], sep)
+def to_dlmt_dict(keyvalues: Dict[str, str], sep=",")->str:
+    return to_dlmt_array(["{} {}".format(key, value) for key, value in keyvalues.items()], sep)
 
 def strip_unknown(expected, lines):
     return [line for line in lines if expected in line]
@@ -83,10 +83,10 @@ class DlmtTagDescription:
         assert langKey == "lang", line
         assert sameAsKey == "same-as", line
         
-        return cls(id = descId, same_as= parseDlmtArray(sameAsInfo), lang = langId, description= description.strip())
+        return cls(id = descId, same_as= parse_dlmt_array(sameAsInfo), lang = langId, description= description.strip())
 
     def to_string(self):
-        return "tag {} lang {} same-as {} -> {}".format(self.id, self.lang, toDlmtArray(self.same_as, sep=", "), self.description)
+        return "tag {} lang {} same-as {} -> {}".format(self.id, self.lang, to_dlmt_array(self.same_as, sep=", "), self.description)
     
     def __str__(self):
         return self.to_string()
@@ -143,10 +143,10 @@ class DlmtBrushstroke:
         assert angleKey == "angle", line
         assert tagsKey == "tags", line
         
-        return cls(id = brushId, xy = V2d.from_string(x + " " + y), scale = Fraction(scale), angle = Fraction(angle), tags = parseDlmtArray(tagsInfo))
+        return cls(id = brushId, xy = V2d.from_string(x + " " + y), scale = Fraction(scale), angle = Fraction(angle), tags = parse_dlmt_array(tagsInfo))
 
     def to_string(self):
-        return "brushstroke {} xy {} scale {} angle {} tags {}".format(self.id, self.xy, self.scale, self.angle, toDlmtArray(self.tags, sep=", "))
+        return "brushstroke {} xy {} scale {} angle {} tags {}".format(self.id, self.xy, self.scale, self.angle, to_dlmt_array(self.tags, sep=", "))
 
     def __str__(self):
         return self.to_string()
@@ -312,9 +312,9 @@ class DlmtHeaders:
             elif key == "id-urn":
                 result.set_id_urn(value)
             elif key == "prefixes":
-                result.set_prefixes(parseDlmtDict(value))
+                result.set_prefixes(parse_dlmt_dict(value))
             elif key == "require-sections":
-                result.set_require_sections(parseDlmtDict(value))
+                result.set_require_sections(parse_dlmt_dict(value))
             elif key.count(" ") == 1:
                 name, lang = key.split()
                 if name in ["license", "attribution-name", "brushes-license", "brushes-attribution-name", "title", "description"]:
@@ -331,8 +331,8 @@ class DlmtHeaders:
     def to_string_list(self)->List[str]:
         results = []
         results.append("id-urn: {}".format(self.id_urn))
-        results.append("require-sections: {}".format(toDlmtDict(self.require_sections)))
-        results.append("prefixes: {}".format(toDlmtDict(self.prefixes)))
+        results.append("require-sections: {}".format(to_dlmt_dict(self.require_sections)))
+        results.append("prefixes: {}".format(to_dlmt_dict(self.prefixes)))
         results.append("page-coordinate-system: {}".format(self.page_coordinate_system))
         results.append("brush-coordinate-system: {}".format(self.brush_coordinate_system))
         results.append("page-ratio: {}".format(self.page_ratio))
