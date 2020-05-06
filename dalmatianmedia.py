@@ -49,11 +49,17 @@ class DlmtView:
         
         return cls(id = viewId, xy = V2d.from_string(x + " " + y), width = Fraction(width), height = Fraction(height), lang = langId, description= description.strip())
 
-    def __str__(self):
+    def to_string(self):
         return "view {} lang {} xy {} width {} height {} -> {}".format(self.id, self.lang, self.xy, self.width, self.height, self.description)
     
+    def __str__(self):
+        return self.to_string()
+    
     def __repr__(self):
-        return "view {} lang {} xy {} width {} height {} -> {}".format(self.id, self.lang, self.xy, self.width, self.height, self.description)
+        return self.to_string()
+
+    def __eq__(self, other):
+        return self.to_string() == str(other)
 
 # tag i:1 lang en-gb same-as [ geospecies:bioclasses/P632y ] -> part of head
 class DlmtTagDescription:
@@ -73,11 +79,17 @@ class DlmtTagDescription:
         
         return cls(id = descId, same_as= parseDlmtArray(sameAsInfo), lang = langId, description= description.strip())
 
-    def __str__(self):
+    def to_string(self):
         return "tag {} lang {} same-as {} -> {}".format(self.id, self.lang, toDlmtArray(self.same_as, sep=", "), self.description)
     
+    def __str__(self):
+        return self.to_string()
+    
     def __repr__(self):
-        return "tag {} lang {} same-as {} -> {}".format(self.id, self.lang, toDlmtArray(self.same_as, sep=", "), self.description)
+        return self.to_string()
+
+    def __eq__(self, other):
+        return self.to_string() == str(other)
 
 # brush i:1 ext-id brushes:abc3F path [ M -1/3 1/3, l 2/3 0/1, l 0/1 2/3, l -2/3 0/1 ]
 class DlmtBrush:
@@ -95,11 +107,17 @@ class DlmtBrush:
         
         return cls(id = brushId, ext_id = extId, vpath = VPath.from_dalmatian_string(other))
 
-    def __str__(self):
+    def to_string(self):
         return "brush {} ext-id {} path {}".format(self.id, self.ext_id, self.vpath.to_dalmatian_string())
     
+    def __str__(self):
+        return self.to_string()
+    
     def __repr__(self):
-        return "brush {} ext-id {} path {}".format(self.id, self.ext_id, self.vpath.to_dalmatian_string())
+        return self.to_string()
+
+    def __eq__(self, other):
+        return self.to_string() == str(other)
 
 # brushstroke i:1 xy 1/15 1/100 scale 1/10 angle 0/1 tags [ i:1 ]
 class DlmtBrushstroke:
@@ -121,12 +139,17 @@ class DlmtBrushstroke:
         
         return cls(id = brushId, xy = V2d.from_string(x + " " + y), scale = Fraction(scale), angle = Fraction(angle), tags = parseDlmtArray(tagsInfo))
 
-    def __str__(self):
-        return "brushstroke {} xy {} scale {} angle {} tags {}".format(self.id, self.xy, self.scale, self.angle, toDlmtArray(self.tags, sep=", "))
-    
-    def __repr__(self):
+    def to_string(self):
         return "brushstroke {} xy {} scale {} angle {} tags {}".format(self.id, self.xy, self.scale, self.angle, toDlmtArray(self.tags, sep=", "))
 
+    def __str__(self):
+        return self.to_string()
+    
+    def __repr__(self):
+        return self.to_string()
+        
+    def __eq__(self, other):
+        return self.to_string() == str(other)
 
 class AxisDir(Enum):
     POSITIVE = auto()
@@ -333,10 +356,86 @@ class DlmtHeaders:
 
 class DalmatianMedia:
     
-    def __init__(self, headers: DlmtHeaders, views: List[DlmtView], tag_descriptions: List[DlmtTagDescription], brushes: List[DlmtBrush], brushstrokes: List[DlmtBrushstroke]):
+    def __init__(self, headers: DlmtHeaders):
         self.headers = headers
+        self.views = []
+        self.tag_descriptions = []
+        self.brushes = []
+        self.brushstrokes = []
+    
+    def to_string(self)->str:
+        return "id: {}, views:{}, tags:{}, brushes:{}, brushstrokes:{}".format(self.headers.id_urn, len(self.views), len(self.tag_descriptions), len(self.brushes), len(self.brushstrokes))
+    
+    def __str__(self):
+        return self.to_string()
+    
+    def __repr__(self):
+        return self.to_string()
+    
+    def __eq__(self, other):
+        thisone = (self.headers, self.views, self.tag_descriptions, self.brushes, self.brushstrokes)
+        otherone = (other.headers, other.views, other.tag_descriptions, other.brushes, other.brushstrokes)
+        return thisone == otherone
+
+    def set_views(self, views: List[DlmtView]):
         self.views = views
+        return self
+    
+    def add_view(self, view: DlmtView):
+        self.views.append(view)
+        return self
+
+    def add_view_string(self, view: str):
+        return self.add_view(DlmtView.from_string(view))
+
+    def set_tag_descriptions(self, tag_descriptions: List[DlmtTagDescription]):
         self.tag_descriptions = tag_descriptions
+        return self
+
+    def add_tag_description(self, tag_description: DlmtTagDescription):
+        self.tag_descriptions.append(tag_description)
+        return self
+
+    def add_tag_description_string(self, tag_description: str):
+        return self.add_tag_description(DlmtTagDescription.from_string(tag_description))
+
+    def set_brushes(self, brushes: List[DlmtBrush]):
         self.brushes = brushes
+        return self
+
+    def add_brush(self, brush: DlmtBrush):
+        self.brushes.append(brush)
+        return self
+
+    def add_brush_string(self, brush: str):
+        return self.add_brush(DlmtBrush.from_string(brush))
+
+    def set_brushstrokes(self, brushstrokes: List[DlmtBrushstroke]):
         self.brushstrokes = brushstrokes
-   
+        return self
+
+    def add_brushstroke(self, brushstroke: DlmtBrushstroke):
+        self.brushstrokes.append(brushstroke)
+        return self
+
+    def add_brushstroke_string(self, brushstroke: str):
+        return self.add_brushstroke(DlmtBrushstroke.from_string(brushstroke))
+
+    def to_obj(self):
+        return {
+            "headers": self.headers.to_string_list(),
+            "views": [str(view) for view in self.views],
+            "tag-descriptions": [str(tag_desc) for tag_desc in self.tag_descriptions],
+            "brushes": [str(brush) for brush in self.brushes],
+            "brushstrokes": [str(brushstroke) for brushstroke in self.brushstrokes]
+        }
+    
+    @classmethod
+    def from_obj(cls, mediaobj):
+        headers = DlmtHeaders.from_string_list(mediaobj["headers"])
+        views = [DlmtView.from_string(view) for view in mediaobj["views"]]
+        tag_descriptions = [DlmtTagDescription.from_string(tagdesc) for tagdesc in mediaobj["tag-descriptions"]]
+        brushes = [DlmtBrush.from_string(brush) for brush in mediaobj["brushes"]]
+        brushstrokes = [DlmtBrushstroke.from_string(brushstroke) for brushstroke in mediaobj["brushstrokes"]]
+        return cls(headers).set_views(views).set_tag_descriptions(tag_descriptions).set_brushes(brushes).set_brushstrokes(brushstrokes)
+  
