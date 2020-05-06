@@ -27,6 +27,12 @@ def toDlmtArray(items: List[str], sep=",")->str:
 def toDlmtDict(keyvalues: Dict[str, str], sep=",")->str:
     return toDlmtArray(["{} {}".format(key, value) for key, value in keyvalues.items()], sep)
 
+def strip_unknown(expected, lines):
+    return [line for line in lines if expected in line]
+
+def strip_empty(lines):
+    return [line.strip() for line in lines if len(line.strip())>0]
+
 # view i:1 lang en-gb xy -1/2 -1/2 width 1/1 height 1/1 -> everything
 class DlmtView:
     def __init__(self, id: str, xy: V2d, width: Fraction, height: Fraction, lang: str = "en", description: str = "" ):
@@ -362,16 +368,10 @@ class DalmatianMedia:
         self.tag_descriptions = []
         self.brushes = []
         self.brushstrokes = []
-    
-    def to_string(self)->str:
-        return "id: {}, views:{}, tags:{}, brushes:{}, brushstrokes:{}".format(self.headers.id_urn, len(self.views), len(self.tag_descriptions), len(self.brushes), len(self.brushstrokes))
-    
-    def __str__(self):
-        return self.to_string()
-    
+        
     def __repr__(self):
-        return self.to_string()
-    
+        return "id: {}, views:{}, tags:{}, brushes:{}, brushstrokes:{}".format(self.headers.id_urn, len(self.views), len(self.tag_descriptions), len(self.brushes), len(self.brushstrokes))
+   
     def __eq__(self, other):
         thisone = (self.headers, self.views, self.tag_descriptions, self.brushes, self.brushstrokes)
         otherone = (other.headers, other.views, other.tag_descriptions, other.brushes, other.brushstrokes)
@@ -429,6 +429,29 @@ class DalmatianMedia:
             "brushes": [str(brush) for brush in self.brushes],
             "brushstrokes": [str(brushstroke) for brushstroke in self.brushstrokes]
         }
+
+    def to_string_list(self):
+        lines = ["section header"]
+        lines += self.headers.to_string_list()
+        lines += ["--------"]
+        lines += ["section views"]
+        lines += [str(view) for view in self.views]
+        lines += ["--------"]
+        lines += ["section tag-descriptions"]
+        lines += [str(tag_desc) for tag_desc in self.tag_descriptions]
+        lines += ["--------"]
+        lines += ["section brushes"]
+        lines += [str(brush) for brush in self.brushes]
+        lines += ["--------"]
+        lines += ["section brushstrokes"]
+        lines += [str(brushstroke) for brushstroke in self.brushstrokes]
+        return lines
+    
+    def to_string(self)->str:
+        return "\n".join(self.to_string_list())
+    
+    def __str__(self):
+        return self.to_string()
     
     @classmethod
     def from_obj(cls, mediaobj):
@@ -438,4 +461,23 @@ class DalmatianMedia:
         brushes = [DlmtBrush.from_string(brush) for brush in mediaobj["brushes"]]
         brushstrokes = [DlmtBrushstroke.from_string(brushstroke) for brushstroke in mediaobj["brushstrokes"]]
         return cls(headers).set_views(views).set_tag_descriptions(tag_descriptions).set_brushes(brushes).set_brushstrokes(brushstrokes)
-  
+
+    @classmethod
+    def from_string(cls, content):
+        headersStr, viewsStr, tagDescriptionsStr, brushesStr, brushstrokesStr = content.split('--------')
+        headers = strip_empty(headersStr.splitlines())
+        views = strip_empty(viewsStr.splitlines())
+        tagDescriptions = strip_empty(tagDescriptionsStr.splitlines())
+        brushes = strip_empty(brushesStr.splitlines())
+        brushstrokes = strip_empty(brushstrokesStr.splitlines())
+        assert headers[0] == "section header", headers[0]
+        assert views[0] == "section views", views[0]
+        assert tagDescriptions[0] == "section tag-descriptions", tagDescriptions[0]
+        assert brushes[0] == "section brushes", brushes[0]
+        assert brushstrokes[0] == "section brushstrokes", brushstrokes[0]
+        dlmtheaders = DlmtHeaders.from_string_list(strip_unknown(":", headers[1:]))
+        dlmtviews = [DlmtView.from_string(view) for view in strip_unknown("view ", views[1:])]
+        dlmttag_descriptions = [DlmtTagDescription.from_string(tagdesc) for tagdesc in strip_unknown("tag ", tagDescriptions[1:])]
+        dlmtbrushes = [DlmtBrush.from_string(brush) for brush in strip_unknown("brush ", brushes[1:])]
+        dlmtbrushstrokes = [DlmtBrushstroke.from_string(brushstroke) for brushstroke in strip_unknown("brushstroke ", brushstrokes[1:])]
+        return cls(dlmtheaders).set_views(dlmtviews).set_tag_descriptions(dlmttag_descriptions).set_brushes(dlmtbrushes).set_brushstrokes(dlmtbrushstrokes)

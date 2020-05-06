@@ -86,3 +86,4 @@ class TestDalmatianMedia(unittest.TestCase):
         media.add_brushstroke_string("brushstroke i:1 xy 3/15 3/100 scale 3/10 angle 0/1 tags [ i:1 ]")
         media.add_brushstroke_string("brushstroke i:2 xy 4/15 5/100 scale 5/10 angle 0/1 tags [ i:1, i:2 ]")
         self.assertEqual(DalmatianMedia.from_obj(media.to_obj()), media)
+        self.assertEqual(DalmatianMedia.from_string(str(media)), media)
