@@ -130,8 +130,8 @@ class DlmtBrush:
 
 # brushstroke i:1 xy 1/15 1/100 scale 1/10 angle 0/1 tags [ i:1 ]
 class DlmtBrushstroke:
-    def __init__(self, id: str, xy: V2d, scale: Fraction, angle: Fraction, tags: List[str] = []):
-        self.id = id
+    def __init__(self, brushid: str, xy: V2d, scale: Fraction, angle: Fraction, tags: List[str] = []):
+        self.brushid = brushid
         self.xy = xy
         self.scale = scale
         self.angle = angle
@@ -146,10 +146,10 @@ class DlmtBrushstroke:
         assert angleKey == "angle", line
         assert tagsKey == "tags", line
         
-        return cls(id = brushId, xy = V2d.from_string(x + " " + y), scale = Fraction(scale), angle = Fraction(angle), tags = parse_dlmt_array(tagsInfo))
+        return cls(brushid = brushId, xy = V2d.from_string(x + " " + y), scale = Fraction(scale), angle = Fraction(angle), tags = parse_dlmt_array(tagsInfo))
 
     def to_string(self):
-        return "brushstroke {} xy {} scale {} angle {} tags {}".format(self.id, self.xy, self.scale, self.angle, to_dlmt_array(self.tags, sep=", "))
+        return "brushstroke {} xy {} scale {} angle {} tags {}".format(self.brushid, self.xy, self.scale, self.angle, to_dlmt_array(self.tags, sep=", "))
 
     def __str__(self):
         return self.to_string()
@@ -493,10 +493,37 @@ class DalmatianMedia:
     def get_brush_ids(self)->Set[str]:
         return set([brush.id for brush in self.brushes])
 
-    def check_same_as_in_tags(self):
-        prefixes = set(([get_prefix(same_as) for tag_desc in self.tag_descriptions for same_as in tag_desc.same_as]))
-        if prefixes.issubset(self.headers.get_short_prefixes()):
-            return []
-        else:
-            return ["Prefixes in tags are not supported: {}".format(list(prefixes.difference(self.headers.get_short_prefixes())))]
+    def get_view_ids(self)->Set[str]:
+        return set([view.id for view in self.views])
     
+    def get_used_brush_ids(self)->Set[str]:
+        return set([brushstroke.brushid for brushstroke in self.brushstrokes])
+
+    def get_used_tag_ids(self)->Set[str]:
+        return set([tagid for brushstroke in self.brushstrokes for tagid in brushstroke.tags])
+
+    def get_used_short_prefixes(self)->Set[str]:
+        return set(([get_prefix(same_as) for tag_desc in self.tag_descriptions for same_as in tag_desc.same_as]))
+    
+    def get_undeclared_short_prefixes(self)->Set[str]:
+        return self.get_used_short_prefixes().difference(self.headers.get_short_prefixes())
+
+    def get_undeclared_brush_ids(self)->Set[str]:
+        return self.get_used_brush_ids().difference(self.get_brush_ids())
+
+    def get_undeclared_tag_ids(self)->Set[str]:
+        return self.get_used_tag_ids().difference(self.get_tag_ids())
+
+    def check_references(self):
+        missing_prefixes = self.get_undeclared_short_prefixes()
+        missing_brushids = self.get_undeclared_brush_ids()
+        missing_tagids = self.get_undeclared_tag_ids()
+        results = []
+        if len(missing_prefixes) > 0 :
+            results.append("Prefixes in tags are not declared: {}".format(list(missing_prefixes)))
+        if len(missing_brushids) > 0 :
+            results.append("Brush ids in brushstrokes are not declared: {}".format(list(missing_brushids)))
+        if len(missing_tagids) > 0 :
+            results.append("Tag ids in brushstrokes are not declared: {}".format(list(missing_tagids)))
+        return results
+        
