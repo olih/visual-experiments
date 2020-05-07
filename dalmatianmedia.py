@@ -2,7 +2,7 @@ import os
 import sys
 import argparse
 from fractions import Fraction
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Set
 from enum import Enum, auto
 
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
@@ -32,6 +32,9 @@ def strip_unknown(expected, lines):
 
 def strip_empty(lines):
     return [line.strip() for line in lines if len(line.strip())>0]
+
+def get_prefix(value:str)->str:
+    return value.split(":", 2)[0]
 
 # view i:1 lang en-gb xy -1/2 -1/2 width 1/1 height 1/1 -> everything
 class DlmtView:
@@ -96,7 +99,7 @@ class DlmtTagDescription:
 
     def __eq__(self, other):
         return self.to_string() == str(other)
-
+        
 # brush i:1 ext-id brushes:abc3F path [ M -1/3 1/3, l 2/3 0/1, l 0/1 2/3, l -2/3 0/1 ]
 class DlmtBrush:
     def __init__(self, id: str, ext_id:str, vpath: VPath):
@@ -358,6 +361,8 @@ class DlmtHeaders:
         otherone = (other.id_urn, other.brush_ratio, other.page_ratio, other.brush_page_ratio, other.page_coordinate_system, other.brush_coordinate_system, other.prefixes, other.require_sections, other.url_refs, other.text_refs)
         return thisone == otherone
 
+    def get_short_prefixes(self)->Set[str]:
+        return set([key for key, _ in self.prefixes.items()])
 
 
 class DalmatianMedia:
@@ -481,3 +486,17 @@ class DalmatianMedia:
         dlmtbrushes = [DlmtBrush.from_string(brush) for brush in strip_unknown("brush ", brushes[1:])]
         dlmtbrushstrokes = [DlmtBrushstroke.from_string(brushstroke) for brushstroke in strip_unknown("brushstroke ", brushstrokes[1:])]
         return cls(dlmtheaders).set_views(dlmtviews).set_tag_descriptions(dlmttag_descriptions).set_brushes(dlmtbrushes).set_brushstrokes(dlmtbrushstrokes)
+
+    def get_tag_ids(self)->Set[str]:
+        return set([tag.id for tag in self.tag_descriptions])
+
+    def get_brush_ids(self)->Set[str]:
+        return set([brush.id for brush in self.brushes])
+
+    def check_same_as_in_tags(self):
+        prefixes = set(([get_prefix(same_as) for tag_desc in self.tag_descriptions for same_as in tag_desc.same_as]))
+        if prefixes.issubset(self.headers.get_short_prefixes()):
+            return []
+        else:
+            return ["Prefixes in tags are not supported: {}".format(list(prefixes.difference(self.headers.get_short_prefixes())))]
+    
