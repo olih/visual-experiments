@@ -380,13 +380,17 @@ class PagePixelCoordinate:
     def __init__(self, headers: DlmtHeaders, view: DlmtView, view_pixel_width: int):
         self.headers = headers
         self.view = view
-        self.vpw = Fraction(view_pixel_width)
-        self.vph = self.vpw
+        self.view_pixel_width = Fraction(view_pixel_width)
+        self.zoomk = Fraction(1) / view.width # normalise view width to 1
+        self.view_pixel_height = self.zoomk * view.height
 
-    def toPixelXY(self, brushstroke: DlmtBrushstroke)->str:
-        """ Returns the pixel position xy
-
-        """
+    def to_svg_xy_string(self, brushstroke: DlmtBrushstroke)->str:
+        compensation = V2d.from_string("0/1 0/1") # should be based on rotation and scale
+        xy_in_view = (brushstroke.xy - self.view.xy) + compensation
+        scaled_xy = xy_in_view * self.zoomk
+        svg_origin = V2d(Fraction(0), self.view_pixel_height)
+        svg_xy = svg_origin + scaled_xy.neg_y()
+        return svg_xy.neg_y().to_svg_string(self.view_pixel_width)
 
 
 

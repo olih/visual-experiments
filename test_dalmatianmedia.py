@@ -1,7 +1,7 @@
 import unittest
 from fractions import Fraction
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
-from dalmatianmedia import DlmtView, DlmtTagDescription, DlmtBrush, DlmtBrushstroke, DlmtCoordinateSystem, DlmtBrushCoordinateSystem, DlmtHeaders, DalmatianMedia
+from dalmatianmedia import DlmtView, DlmtTagDescription, DlmtBrush, DlmtBrushstroke, DlmtCoordinateSystem, DlmtBrushCoordinateSystem, DlmtHeaders, DalmatianMedia, PagePixelCoordinate
 
 pt0 = V2d.from_string("0/1 0/1")
 ptA = V2d.from_string("1/4 1/3")
@@ -61,6 +61,19 @@ class TestDlmtHeaders(unittest.TestCase):
         headers.set_url("license-url", "html", "en", "https://creativecommons.org/licenses/by-sa/4.0/legalcode")
         headers.set_url("brushes-license-url", "json", "en", "https://creativecommons.org/licenses/by/4.0/legalcode")
         self.assertEqual(DlmtHeaders.from_string_list(headers.to_string_list()), headers)
+
+class TestPagePixelCoordinate(unittest.TestCase):
+
+    def test_to_svg_xy_string(self):
+        headers = DlmtHeaders()
+        headers.set_page_coordinate_system_string("system cartesian right-dir + up-dir -")
+        headers.set_brush_page_ratio(Fraction("1/50"))
+        view = DlmtView.from_string("view i:1 lang en-gb xy 20/100 20/100 width 40/100 height 30/100 -> test")
+        pagePixelCoord = PagePixelCoordinate(headers, view, 400)
+        self.assertEqual(pagePixelCoord.to_svg_xy_string(DlmtBrushstroke.from_string("brushstroke i:1 xy 20/100 20/100 scale 1/1 angle 1/1 tags [ i:1 ]")), "0.000 300.000")
+        self.assertEqual(pagePixelCoord.to_svg_xy_string(DlmtBrushstroke.from_string("brushstroke i:1 xy 60/100 50/100 scale 1/1 angle 1/1 tags [ i:1 ]")), "400.000 0.000")
+        self.assertEqual(pagePixelCoord.to_svg_xy_string(DlmtBrushstroke.from_string("brushstroke i:1 xy 40/100 35/100 scale 1/1 angle 1/1 tags [ i:1 ]")), "200.000 150.000")
+        self.assertEqual(pagePixelCoord.to_svg_xy_string(DlmtBrushstroke.from_string("brushstroke i:1 xy 30/100 30/100 scale 1/1 angle 1/1 tags [ i:1 ]")), "100.000 200.000")
 
 class TestDalmatianMedia(unittest.TestCase):
 
