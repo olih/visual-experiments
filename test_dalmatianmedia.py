@@ -1,7 +1,7 @@
 import unittest
 from fractions import Fraction
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
-from dalmatianmedia import DlmtView, DlmtTagDescription, DlmtBrush, DlmtBrushstroke, DlmtCoordinateSystem, DlmtHeaders, DalmatianMedia
+from dalmatianmedia import DlmtView, DlmtTagDescription, DlmtBrush, DlmtBrushstroke, DlmtCoordinateSystem, DlmtBrushCoordinateSystem, DlmtHeaders, DalmatianMedia
 
 pt0 = V2d.from_string("0/1 0/1")
 ptA = V2d.from_string("1/4 1/3")
@@ -37,14 +37,20 @@ class TestDlmtBrushstroke(unittest.TestCase):
 class TestDlmtCoordinateSystem(unittest.TestCase):
 
     def test_convert(self):
-        line = "system cartesian right-dir + up-dir - origin-x 1/2 origin-y 1/4"
+        line = "system cartesian right-dir + up-dir -"
         self.assertEqual(str(DlmtCoordinateSystem.from_string(line)), line)
+
+class TestDlmtBrushCoordinateSystem(unittest.TestCase):
+
+    def test_convert(self):
+        line = "system cartesian right-dir + up-dir - origin-x -1/2 origin-y 1/4"
+        self.assertEqual(str(DlmtBrushCoordinateSystem.from_string(line)), line)
 
 class TestDlmtHeaders(unittest.TestCase):
 
     def test_convert(self):
         headers = DlmtHeaders()
-        headers.set_page_coordinate_system_string("system cartesian right-dir + up-dir - origin-x 1/2 origin-y 1/4")
+        headers.set_page_coordinate_system_string("system cartesian right-dir + up-dir -")
         headers.set_brush_coordinate_system_string("system cartesian right-dir - up-dir + origin-x 1/4 origin-y 1/5")
         headers.set_page_ratio(Fraction("1/4"))
         headers.set_brush_ratio(Fraction("1/5"))
@@ -62,7 +68,7 @@ class TestDalmatianMedia(unittest.TestCase):
 
     def test_convert(self):
         headers = DlmtHeaders()
-        headers.set_page_coordinate_system_string("system cartesian right-dir + up-dir - origin-x 1/2 origin-y 1/4")
+        headers.set_page_coordinate_system_string("system cartesian right-dir + up-dir -")
         headers.set_brush_coordinate_system_string("system cartesian right-dir - up-dir + origin-x 1/4 origin-y 1/5")
         headers.set_page_ratio(Fraction("1/4"))
         headers.set_brush_ratio(Fraction("1/5"))

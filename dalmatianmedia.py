@@ -206,8 +206,34 @@ class CoordinateType(Enum):
         else:
             return "E"
 
-# system cartesian right-dir + up-dir - origin-x 1/2 origin-y 1/2
+# system cartesian right-dir + up-dir -
 class DlmtCoordinateSystem:
+    def __init__(self, right_dir: AxisDir, up_dir: AxisDir, coordinate_type: CoordinateType):
+        self.right_dir = right_dir
+        self.up_dir = up_dir
+        self.coordinate_type = coordinate_type
+    
+    @classmethod
+    def from_string(cls, line: str):
+        systemKey, cartesianKey, rightDirKey, rightDir, upDirKey, upDir = line.split()
+        assert systemKey == "system", line
+        assert cartesianKey == "cartesian", line
+        assert rightDirKey == "right-dir", line
+        assert upDirKey == "up-dir", line
+        
+        return cls(right_dir = AxisDir.from_string(rightDir), up_dir = AxisDir.from_string(upDir), coordinate_type = CoordinateType.from_string(cartesianKey))
+
+    def __str__(self):
+        return "system {} right-dir {} up-dir {}".format(CoordinateType.to_string(self.coordinate_type), AxisDir.to_string(self.right_dir), AxisDir.to_string(self.up_dir))
+    
+    def __repr__(self):
+       return "system {} right-dir {} up-dir {}".format(CoordinateType.to_string(self.coordinate_type), AxisDir.to_string(self.right_dir), AxisDir.to_string(self.up_dir))
+
+    def __eq__(self, other):
+        return self.right_dir == other.right_dir and self.up_dir == other.up_dir and self.coordinate_type == other.coordinate_type
+
+# system cartesian right-dir + up-dir - origin-x 1/2 origin-y 1/2
+class DlmtBrushCoordinateSystem:
     def __init__(self, right_dir: AxisDir, up_dir: AxisDir, origin_x: Fraction, origin_y: Fraction, coordinate_type: CoordinateType):
         self.right_dir = right_dir
         self.up_dir = up_dir
@@ -242,8 +268,8 @@ class DlmtHeaders:
         self.brush_ratio = Fraction("1/1")
         self.page_ratio = Fraction("1/1")
         self.brush_page_ratio = Fraction("1/50")
-        self.page_coordinate_system = DlmtCoordinateSystem.from_string("system cartesian right-dir + up-dir - origin-x 1/2 origin-y 1/2")
-        self.brush_coordinate_system = DlmtCoordinateSystem.from_string("system cartesian right-dir + up-dir - origin-x 1/2 origin-y 1/2")
+        self.page_coordinate_system = DlmtCoordinateSystem.from_string("system cartesian right-dir + up-dir -")
+        self.brush_coordinate_system = DlmtBrushCoordinateSystem.from_string("system cartesian right-dir + up-dir - origin-x 1/2 origin-y 1/2")
         self.prefixes = { "github": "https://github.com/" }
         self.require_sections  = {i: "0.5" for i in ["header", "views", "tag-descriptions", "brushes", "brushstrokes"]}
         self.url_refs = { }
@@ -260,12 +286,12 @@ class DlmtHeaders:
     def set_page_coordinate_system_string(self, value: str):
         return self.set_page_coordinate_system(DlmtCoordinateSystem.from_string(value))
 
-    def set_brush_coordinate_system(self, value: DlmtCoordinateSystem):
+    def set_brush_coordinate_system(self, value: DlmtBrushCoordinateSystem):
         self.brush_coordinate_system = value
         return self
 
     def set_brush_coordinate_system_string(self, value: str):
-        return self.set_brush_coordinate_system(DlmtCoordinateSystem.from_string(value))
+        return self.set_brush_coordinate_system(DlmtBrushCoordinateSystem.from_string(value))
 
     def set_page_ratio(self, value: Fraction):
         self.page_ratio = value
@@ -305,7 +331,7 @@ class DlmtHeaders:
             if key == "page-coordinate-system":
                 result.set_page_coordinate_system(DlmtCoordinateSystem.from_string(value))
             elif key == "brush-coordinate-system":
-                result.set_brush_coordinate_system(DlmtCoordinateSystem.from_string(value))
+                result.set_brush_coordinate_system(DlmtBrushCoordinateSystem.from_string(value))
             elif key == "page-ratio":
                 result.set_page_ratio(Fraction(value))
             elif key == "brush-ratio":
@@ -371,7 +397,7 @@ class PagePixelCoordinate:
         self.headers = headers
         self.view = view
         self.vpw = Fraction(view_pixel_width)
-        self.vph = ???
+        self.vph = self.vpw
 
     def toPixelXY(self, brushstroke: DlmtBrushstroke)->str:
         """ Returns the pixel position xy
