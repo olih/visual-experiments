@@ -37,6 +37,9 @@ class V2d:
     def to_svg_string(self, dpu: int):
         return "{:.3f} {:.3f}".format(float(self.x*dpu), float(self.y*dpu*-1))
 
+    def to_float_string(self):
+        return "{:.3f} {:.3f}".format(float(self.x), float(self.y))
+
     def __repr__(self):
         return "{} {}".format(self.x, self.y)
 
