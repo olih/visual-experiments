@@ -71,6 +71,8 @@ class TestPagePixelCoordinate(unittest.TestCase):
         view = DlmtView.from_string("view i:1 lang en-gb xy 20/100 20/100 width 40/100 height 30/100 -> test")
         pagePixelCoord = PagePixelCoordinate(headers, view, 400)
         self.assertEqual(pagePixelCoord.to_page_view_box(), "0 0 400.000 300.000")
+        self.assertEqual(pagePixelCoord.to_brush_view_box(), "-10.000 -10.000 20.000 20.000")
+        self.assertEqual(pagePixelCoord.brush_width, 20.0)
         self.assertEqual(pagePixelCoord.to_svg_xy_string(DlmtBrushstroke.from_string("brushstroke i:1 xy 20/100 20/100 scale 1/1 angle 1/1 tags [ i:1 ]")), "0.000 300.000")
         self.assertEqual(pagePixelCoord.to_svg_xy_string(DlmtBrushstroke.from_string("brushstroke i:1 xy 60/100 50/100 scale 1/1 angle 1/1 tags [ i:1 ]")), "400.000 0.000")
         self.assertEqual(pagePixelCoord.to_svg_xy_string(DlmtBrushstroke.from_string("brushstroke i:1 xy 40/100 35/100 scale 1/1 angle 1/1 tags [ i:1 ]")), "200.000 150.000")

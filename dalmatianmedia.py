@@ -383,6 +383,7 @@ class PagePixelCoordinate:
         self.view_pixel_width = Fraction(view_pixel_width)
         self.zoomk = Fraction(1) / view.width # normalise view width to 1
         self.view_pixel_height = self.zoomk * view.height * self.view_pixel_width
+        self.brush_width = self.zoomk * headers.brush_page_ratio * self.view_pixel_width
 
     def to_svg_xy_string(self, brushstroke: DlmtBrushstroke)->str:
         compensation = V2d.from_string("0/1 0/1") # should be based on rotation and scale
@@ -394,6 +395,9 @@ class PagePixelCoordinate:
 
     def to_page_view_box(self):
         return "0 0 {}".format(V2d(self.view_pixel_width, self.view_pixel_height).to_float_string())
+
+    def to_brush_view_box(self):
+        return "{} {}".format(V2d(-self.brush_width/2, -self.brush_width/2).to_float_string(), V2d(self.brush_width, self.brush_width).to_float_string())
 
 class DalmatianMedia:
     
