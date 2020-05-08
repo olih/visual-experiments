@@ -265,8 +265,6 @@ class DlmtBrushCoordinateSystem:
 class DlmtHeaders:
     def __init__(self):
         self.id_urn = ""
-        self.brush_ratio = Fraction("1/1")
-        self.page_ratio = Fraction("1/1")
         self.brush_page_ratio = Fraction("1/50")
         self.page_coordinate_system = DlmtCoordinateSystem.from_string("system cartesian right-dir + up-dir -")
         self.brush_coordinate_system = DlmtBrushCoordinateSystem.from_string("system cartesian right-dir + up-dir - origin-x 1/2 origin-y 1/2")
@@ -292,14 +290,6 @@ class DlmtHeaders:
 
     def set_brush_coordinate_system_string(self, value: str):
         return self.set_brush_coordinate_system(DlmtBrushCoordinateSystem.from_string(value))
-
-    def set_page_ratio(self, value: Fraction):
-        self.page_ratio = value
-        return self
-
-    def set_brush_ratio(self, value: Fraction):
-        self.brush_ratio = value
-        return self 
 
     def set_brush_page_ratio(self, value: Fraction):
         self.brush_page_ratio = value
@@ -332,10 +322,6 @@ class DlmtHeaders:
                 result.set_page_coordinate_system(DlmtCoordinateSystem.from_string(value))
             elif key == "brush-coordinate-system":
                 result.set_brush_coordinate_system(DlmtBrushCoordinateSystem.from_string(value))
-            elif key == "page-ratio":
-                result.set_page_ratio(Fraction(value))
-            elif key == "brush-ratio":
-                result.set_brush_ratio(Fraction(value))
             elif key == "brush-page-ratio":
                 result.set_brush_page_ratio(Fraction(value))
             elif key == "id-urn":
@@ -364,8 +350,6 @@ class DlmtHeaders:
         results.append("prefixes: {}".format(to_dlmt_dict(self.prefixes)))
         results.append("page-coordinate-system: {}".format(self.page_coordinate_system))
         results.append("brush-coordinate-system: {}".format(self.brush_coordinate_system))
-        results.append("page-ratio: {}".format(self.page_ratio))
-        results.append("brush-ratio: {}".format(self.brush_ratio))
         results.append("brush-page-ratio: {}".format(self.brush_page_ratio))
         for keydata, value in self.text_refs.items():
             results.append("{} {}: {}".format(keydata[0], keydata[1], value))
@@ -383,8 +367,8 @@ class DlmtHeaders:
         return self.to_string()
     
     def __eq__(self, other):
-        thisone = (self.id_urn, self.brush_ratio, self.page_ratio, self.brush_page_ratio, self.page_coordinate_system, self.brush_coordinate_system, self.prefixes, self.require_sections, self.url_refs, self.text_refs)
-        otherone = (other.id_urn, other.brush_ratio, other.page_ratio, other.brush_page_ratio, other.page_coordinate_system, other.brush_coordinate_system, other.prefixes, other.require_sections, other.url_refs, other.text_refs)
+        thisone = (self.id_urn, self.brush_page_ratio, self.page_coordinate_system, self.brush_coordinate_system, self.prefixes, self.require_sections, self.url_refs, self.text_refs)
+        otherone = (other.id_urn, other.brush_page_ratio, other.page_coordinate_system, other.brush_coordinate_system, other.prefixes, other.require_sections, other.url_refs, other.text_refs)
         return thisone == otherone
 
     def get_short_prefixes(self)->Set[str]:
