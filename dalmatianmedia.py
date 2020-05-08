@@ -365,6 +365,21 @@ class DlmtHeaders:
         return set([key for key, _ in self.prefixes.items()])
 
 
+class PagePixelCoordinate:
+    
+    def __init__(self, headers: DlmtHeaders, view: DlmtView, view_pixel_width: int):
+        self.headers = headers
+        self.view = view
+        self.vpw = Fraction(view_pixel_width)
+        self.vph = ???
+
+    def toPixelXY(self, brushstroke: DlmtBrushstroke)->str:
+        """ Returns the pixel position xy
+
+        """
+
+
+
 class DalmatianMedia:
     
     def __init__(self, headers: DlmtHeaders):
