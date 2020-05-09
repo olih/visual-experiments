@@ -432,7 +432,7 @@ def brush_to_xml_svg(brush: DlmtBrush, pagePixelCoord: PagePixelCoordinate):
     return symbol
 
 def brushstroke_to_xml_svg(brushstroke: DlmtBrushstroke, pagePixelCoord: PagePixelCoordinate):
-    translation = pagePixelCoord.to_svg_xy_string(DlmtBrushstroke)
+    translation = pagePixelCoord.to_svg_xy_string(brushstroke)
     element = ET.Element('g', attrib = {"transform": "rotate ({}) scale ({}) translate({})".format( brushstroke.get_degree_angle_string(), brushstroke.get_scale_string(), translation)})
     ET.SubElement(element, 'use', attrib = { "fill": "black", "xlink:href": '#brush-'+ brushstroke.get_neat_brush_id()})
     return element
@@ -598,7 +598,10 @@ class DalmatianMedia:
         if len(missing_tagids) > 0 :
             results.append("Tag ids in brushstrokes are not declared: {}".format(list(missing_tagids)))
         return results
-        
+    
+    def create_page_pixel_coordinate(self, viewid: str, view_pixel_width: int)->PagePixelCoordinate:
+        return PagePixelCoordinate(self.headers, self.views[0], view_pixel_width) # TODO used viewid
+
     def to_xml_svg(self, pagePixelCoord: PagePixelCoordinate)->ElementTree:
         svg = ET.Element('svg', attrib = { "xmlns": "http://www.w3.org/2000/svg", "xmlns:xlink": "http://www.w3.org/1999/xlink", "viewBox": pagePixelCoord.to_page_view_box()})
         for brush in self.brushes:
