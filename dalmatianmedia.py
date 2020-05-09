@@ -1,9 +1,12 @@
 import os
 import sys
 import argparse
+import re
 from fractions import Fraction
 from typing import List, Tuple, Dict, Set
 from enum import Enum, auto
+import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import ElementTree
 
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
 
@@ -11,6 +14,9 @@ if not (sys.version_info.major == 3 and sys.version_info.minor >= 5):
     print("This script requires Python 3.5 or higher!")
     print("You are using Python {}.{}.".format(sys.version_info.major, sys.version_info.minor))
     sys.exit(1)
+
+ET.register_namespace('', "http://www.w3.org/2000/svg")
+ET.register_namespace('xlink', "http://www.w3.org/1999/xlink")
 
 def strip_string_array(rawlines: str, sep=",")->List[str]:
     return [line.strip() for line in rawlines.split(sep) if line.strip() != ""]
@@ -35,6 +41,14 @@ def strip_empty(lines):
 
 def get_prefix(value:str)->str:
     return value.split(":", 2)[0]
+
+PATTERN_NON_ALPHANUM = re.compile('[^a-z0-9_-]')
+
+def as_tidy_name(value: str):
+    return PATTERN_NON_ALPHANUM.sub('-', value.lower())
+
+def as_float_string(value):
+    return "{:.3f}".format(float(value))
 
 # view i:1 lang en-gb xy -1/2 -1/2 width 1/1 height 1/1 -> everything
 class DlmtView:
@@ -128,6 +142,9 @@ class DlmtBrush:
     def __eq__(self, other):
         return self.to_string() == str(other)
 
+    def get_neat_id(self):
+        return as_tidy_name(self.id)
+
 # brushstroke i:1 xy 1/15 1/100 scale 1/10 angle 0/1 tags [ i:1 ]
 class DlmtBrushstroke:
     def __init__(self, brushid: str, xy: V2d, scale: Fraction, angle: Fraction, tags: List[str] = []):
@@ -159,6 +176,16 @@ class DlmtBrushstroke:
         
     def __eq__(self, other):
         return self.to_string() == str(other)
+
+    def get_degree_angle_string(self):
+        return as_float_string(self.angle*360)
+
+    def get_scale_string(self):
+        return as_float_string(self.scale)
+
+    def get_neat_brush_id(self):
+        return as_tidy_name(self.brushid)
+
 
 class AxisDir(Enum):
     POSITIVE = auto()
@@ -399,6 +426,17 @@ class PagePixelCoordinate:
     def to_brush_view_box(self):
         return "{} {}".format(V2d(-self.brush_width/2, -self.brush_width/2).to_float_string(), V2d(self.brush_width, self.brush_width).to_float_string())
 
+def brush_to_xml_svg(brush: DlmtBrush, pagePixelCoord: PagePixelCoordinate):
+    symbol = ET.Element('symbol', attrib = {"id": "brush-{}".format(brush.get_neat_id()), "viewBox": pagePixelCoord.to_brush_view_box() })
+    ET.SubElement(symbol, 'path', attrib = { "d": brush.vpath.to_svg_string(float(pagePixelCoord.brush_width)) })
+    return symbol
+
+def brushstroke_to_xml_svg(brushstroke: DlmtBrushstroke, pagePixelCoord: PagePixelCoordinate):
+    translation = pagePixelCoord.to_svg_xy_string(DlmtBrushstroke)
+    element = ET.Element('g', attrib = {"transform": "rotate ({}) scale ({}) translate({})".format( brushstroke.get_degree_angle_string(), brushstroke.get_scale_string(), translation)})
+    ET.SubElement(element, 'use', attrib = { "fill": "black", "xlink:href": '#brush-'+ brushstroke.get_neat_brush_id()})
+    return element
+
 class DalmatianMedia:
     
     def __init__(self, headers: DlmtHeaders):
@@ -561,3 +599,13 @@ class DalmatianMedia:
             results.append("Tag ids in brushstrokes are not declared: {}".format(list(missing_tagids)))
         return results
         
+    def to_xml_svg(self, pagePixelCoord: PagePixelCoordinate)->ElementTree:
+        svg = ET.Element('svg', attrib = { "xmlns": "http://www.w3.org/2000/svg", "xmlns:xlink": "http://www.w3.org/1999/xlink", "viewBox": pagePixelCoord.to_page_view_box()})
+        for brush in self.brushes:
+            svg.append(brush_to_xml_svg(brush, pagePixelCoord))
+        for brushstroke in self.brushstrokes:
+           svg.append(brushstroke_to_xml_svg(brushstroke, pagePixelCoord))
+        return ElementTree(svg)
+
+    def to_xml_svg_file(self, pagePixelCoord: PagePixelCoordinate , file_or_filename):
+        self.to_xml_svg(pagePixelCoord).write(file_or_filename, encoding='UTF-8')

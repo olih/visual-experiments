@@ -31,10 +31,10 @@ class V2d:
     def to_dalmatian_string(self):
         return "{} {}".format(self.x, self.y)
     
-    def to_cartesian_string(self, dpu: int):
+    def to_cartesian_string(self, dpu: float):
         return "({:.3f},{:.3f})".format(float(self.x*dpu), float(self.y*dpu))
 
-    def to_svg_string(self, dpu: int):
+    def to_svg_string(self, dpu: float):
         return "{:.3f} {:.3f}".format(float(self.x*dpu), float(self.y*dpu*-1))
 
     def to_float_string(self):
@@ -136,10 +136,10 @@ class V2dList:
     def clone(self):
         return V2dList(self.values.copy())
 
-    def to_cartesian_string(self, dpu: int, sep=""):
+    def to_cartesian_string(self, dpu: float, sep=""):
         return sep.join([ value.to_cartesian_string(dpu) for value in self.values])
 
-    def to_svg_string(self, dpu: int, sep=" "):
+    def to_svg_string(self, dpu: float, sep=" "):
         return sep.join([ value.to_svg_string(dpu) for value in self.values])
 
     def to_dalmatian_list(self):
@@ -357,7 +357,7 @@ class VSegment:
         else:
             return VSegment()
 
-    def to_svg_string(self, dpu: int):
+    def to_svg_string(self, dpu: float):
         action_str = SegmentShape.to_string(self.action)
         if self.action == SegmentShape.CLOSE_PATH:
             return "{}".format(action_str)
@@ -403,13 +403,13 @@ class VPath:
     def core_points(self):
         return [segment.pt for segment in self.segments if SegmentShape.count_of_points(segment.action)>0]
 
-    def to_core_cartesian_string(self, dpu: int, sep=""):
+    def to_core_cartesian_string(self, dpu: float, sep=""):
         return sep.join([point.to_cartesian_string(dpu) for point in self.core_points()])
 
-    def to_core_svg_string(self, dpu: int):
+    def to_core_svg_string(self, dpu: float):
         return " ".join(["L {}".format(point.to_svg_string(dpu)) for point in self.core_points()]).replace("L", "M", 1) + " Z"
 
-    def to_svg_string(self, dpu: int):
+    def to_svg_string(self, dpu: float):
         return " ".join([segment.to_svg_string(dpu) for segment in self.segments])
 
     def action_frequency(self):
