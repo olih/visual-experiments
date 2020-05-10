@@ -138,6 +138,11 @@ class TestVSegment(unittest.TestCase):
         self.assertEqual(VSegment.from_line_to(ptA).rotate(r90).to_dalmatian_string(), "L -1/3 1/4")
         self.assertEqual(VSegment.from_cubic_bezier(ptE, ptC, ptD).rotate(r90).to_dalmatian_string(), "C 1/9 1/7 1/23 -1/13 -4/5 1/17")
 
+    def test_translate(self):
+        self.assertEqual(VSegment.from_close().translate(ptE), VSegment.from_close())
+        self.assertEqual(VSegment.from_line_to(ptA).translate(ptB).to_dalmatian_string(), "L 9/20 1/2")
+        self.assertEqual(VSegment.from_cubic_bezier(ptE, ptC, ptD).translate(ptB).to_dalmatian_string(), "C 12/35 1/18 8/65 17/138 22/85 29/30")
+
 class TestFractionList(unittest.TestCase):
 
     def test_create(self):
@@ -180,6 +185,10 @@ class TestVPath(unittest.TestCase):
         self.assertEqual(vpath.rotate(r90).rotate(r90).rotate(r90).rotate(r90), vpath)
         self.assertEqual(vpath.rotate(r90).rotate(r90), vpath.rotate(r180))
         self.assertEqual(vpath.rotate(r180).to_dalmatian_string(), "[ M 1/7 1/9,L -1/7 1/9,L -1/7 1/11,Q -1/4 -1/115 -1/2 -2/115,T -1/4 -1/111,C -1/4 -1/117 -1/2 -2/117 -3/4 -1/39,S -1/4 -1/113 -1/2 -2/113,Z ]")
+
+    def test_translate(self):
+        vpath = VPath.from_dalmatian_string("[ M -1/7 -1/9,L 1/7 -1/9, L 1/7 -1/11, Q 1/4 1/115 1/2 2/115,T 1/4 1/111,C 1/4 1/117 1/2 2/117 3/4 1/39,S 1/4 1/113 1/2 2/113,Z ]")
+        self.assertEqual(vpath.translate(ptE).translate(-ptE), vpath)
 
 if __name__ == '__main__':
     unittest.main()

@@ -68,6 +68,8 @@ class V2d:
         return self.x**2 + self.y**2
 
     def rotate(self, angle: Fraction):
+        if angle == Fraction(0):
+            return self
         xnew = self.x*cosFract(angle) - self.y*sinFract(angle)
         ynew = self.x*sinFract(angle) + self.y*cosFract(angle)
         return V2d(xnew, ynew)
@@ -374,6 +376,8 @@ class VSegment:
             return "E"
 
     def rotate(self, angle: Fraction):
+        if angle == Fraction(0):
+            return self
         pt = self.pt
         pt1 = self.pt1
         pt2 = self.pt2
@@ -384,6 +388,19 @@ class VSegment:
         if pt2 is not None:
             pt2 = pt2.rotate(angle)
         return VSegment(action = self.action, pt = pt, pt1 = pt1, pt2 = pt2 )
+    
+    def translate(self, offset: V2d):
+        pt = self.pt
+        pt1 = self.pt1
+        pt2 = self.pt2
+        if pt is not None:
+            pt = pt + offset
+        if pt1 is not None:
+            pt1 = pt1 + offset
+        if pt2 is not None:
+            pt2 = pt2 + offset
+        return VSegment(action = self.action, pt = pt, pt1 = pt1, pt2 = pt2 )
+
 
 
 class VPath:
@@ -443,4 +460,8 @@ class VPath:
 
     def rotate(self, angle: Fraction):
         newsegments = [segment.rotate(angle) for segment in self.segments]
+        return VPath(newsegments)
+
+    def translate(self, offset: V2d):
+        newsegments = [segment.translate(offset) for segment in self.segments]
         return VPath(newsegments)

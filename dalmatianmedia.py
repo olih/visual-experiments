@@ -413,8 +413,7 @@ class PagePixelCoordinate:
         self.brush_width = self.zoomk * headers.brush_page_ratio * self.view_pixel_width
 
     def to_svg_xy_string(self, brushstroke: DlmtBrushstroke)->str:
-        compensation = V2d.from_string("0/1 0/1") # should be based on rotation and scale
-        xy_in_view = (brushstroke.xy - self.view.xy) + compensation
+        xy_in_view = (brushstroke.xy - self.view.xy)
         scaled_xy = xy_in_view * self.zoomk * self.view_pixel_width
         svg_origin = V2d(Fraction(0), self.view_pixel_height)
         svg_xy = svg_origin + scaled_xy.neg_y()
@@ -441,7 +440,7 @@ def brushstroke_to_xml_svg(brushstroke: DlmtBrushstroke, pagePixelCoord: PagePix
     return element
 
 def expand_brushstroke_to_xml_svg(brushstroke: DlmtBrushstroke, brush: DlmtBrush, pagePixelCoord: PagePixelCoordinate):
-    vpath = brush.vpath.rotate("1/4")
+    vpath = brush.vpath.rotate(brushstroke.angle)
     # TODO
 
 class DalmatianMedia:
