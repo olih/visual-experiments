@@ -197,5 +197,11 @@ class TestVPath(unittest.TestCase):
         vpath = VPath.from_dalmatian_string("[ M -1/7 -1/9,L 1/7 -1/9, L 1/7 -1/11, Q 1/4 1/115 1/2 2/115,T 1/4 1/111,C 1/4 1/117 1/2 2/117 3/4 1/39,S 1/4 1/113 1/2 2/113,Z ]")
         self.assertEqual(vpath.translate(ptE).translate(-ptE), vpath)
 
+    def test_scale(self):
+        threetimes = Fraction("3/1")
+        onethird = Fraction("1/3")
+        vpath = VPath.from_dalmatian_string("[ M -1/7 -1/9,L 1/7 -1/9, L 1/7 -1/11, Q 1/4 1/115 1/2 2/115,T 1/4 1/111,C 1/4 1/117 1/2 2/117 3/4 1/39,S 1/4 1/113 1/2 2/113,Z ]")
+        self.assertEqual(vpath.scale(threetimes).scale(onethird), vpath)
+
 if __name__ == '__main__':
     unittest.main()

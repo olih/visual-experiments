@@ -476,3 +476,7 @@ class VPath:
     def translate(self, offset: V2d):
         newsegments = [segment.translate(offset) for segment in self.segments]
         return VPath(newsegments)
+
+    def scale(self, scalefactor: Fraction):
+        newsegments = [segment.scale(scalefactor) for segment in self.segments]
+        return VPath(newsegments)
