@@ -428,6 +428,27 @@ class PagePixelCoordinate:
     def get_brush_width_string(self):
         return as_float_string(self.brush_width)
 
+class PageBrushstroke:
+    def __init__(self, vpath: VPath):
+        self.vpath = vpath
+    
+    def to_string(self):
+        return "pbs path {}".format(self.vpath.to_dalmatian_string())
+    
+    def __str__(self):
+        return self.to_string()
+    
+    def __repr__(self):
+        return self.to_string()
+
+    def __eq__(self, other):
+        return self.vpath == self.vpath
+
+    def to_xml_svg(self, pagePixelCoord: PagePixelCoordinate):
+        element = ET.Element('path', attrib = { "d": self.vpath.to_svg_string(float(pagePixelCoord.brush_width)) })
+        return element
+
+
 def brush_to_xml_svg(brush: DlmtBrush, pagePixelCoord: PagePixelCoordinate):
     symbol = ET.Element('symbol', attrib = {"id": "brush-{}".format(brush.get_neat_id()), "viewBox": pagePixelCoord.to_brush_view_box(), "width": pagePixelCoord.get_brush_width_string(), "height": pagePixelCoord.get_brush_width_string() })
     ET.SubElement(symbol, 'path', attrib = { "d": brush.vpath.to_svg_string(float(pagePixelCoord.brush_width)) })
@@ -439,10 +460,6 @@ def brushstroke_to_xml_svg(brushstroke: DlmtBrushstroke, pagePixelCoord: PagePix
     ET.SubElement(element, 'use', attrib = { "fill": "black", "xlink:href": '#brush-'+ brushstroke.get_neat_brush_id()})
     return element
 
-def expand_brushstroke_to_xml_svg(brushstroke: DlmtBrushstroke, brush: DlmtBrush, pagePixelCoord: PagePixelCoordinate):
-    vpath = brush.vpath.rotate(brushstroke.angle)
-    # TODO
-
 class DalmatianMedia:
     
     def __init__(self, headers: DlmtHeaders):
@@ -451,6 +468,7 @@ class DalmatianMedia:
         self.tag_descriptions = []
         self.brushes = []
         self.brushstrokes = []
+        self.brushes_dict = {}
         
     def __repr__(self):
         return "id: {}, views:{}, tags:{}, brushes:{}, brushstrokes:{}".format(self.headers.id_urn, len(self.views), len(self.tag_descriptions), len(self.brushes), len(self.brushstrokes))
@@ -484,10 +502,12 @@ class DalmatianMedia:
 
     def set_brushes(self, brushes: List[DlmtBrush]):
         self.brushes = brushes
+        self.brushes_dict = {brush.id:brush for brush in brushes }
         return self
 
     def add_brush(self, brush: DlmtBrush):
         self.brushes.append(brush)
+        self.brushes_dict[brush.id] = brush
         return self
 
     def add_brush_string(self, brush: str):
@@ -503,6 +523,9 @@ class DalmatianMedia:
 
     def add_brushstroke_string(self, brushstroke: str):
         return self.add_brushstroke(DlmtBrushstroke.from_string(brushstroke))
+
+    def get_brush_by_id(self, brushid: str):
+        return self.brushes_dict.get(brushid)
 
     def to_obj(self):
         return {
@@ -607,6 +630,11 @@ class DalmatianMedia:
     
     def create_page_pixel_coordinate(self, viewid: str, view_pixel_width: int)->PagePixelCoordinate:
         return PagePixelCoordinate(self.headers, self.views[0], view_pixel_width) # TODO used viewid
+
+
+    def to_page_brushstroke_list(self)-> List[PageBrushstroke]:
+        return [ PageBrushstroke(self.get_brush_by_id(bs.brushid).vpath.rotate(bs.angle).scale(bs.scale).translate(bs.xy)) for bs in self.brushstrokes]
+            
 
     def to_xml_svg(self, pagePixelCoord: PagePixelCoordinate)->ElementTree:
         svg = ET.Element('svg', attrib = { "xmlns": "http://www.w3.org/2000/svg", "xmlns:xlink": "http://www.w3.org/1999/xlink", "viewBox": pagePixelCoord.to_page_view_box()})
