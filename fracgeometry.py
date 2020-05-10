@@ -401,6 +401,17 @@ class VSegment:
             pt2 = pt2 + offset
         return VSegment(action = self.action, pt = pt, pt1 = pt1, pt2 = pt2 )
 
+    def scale(self, scalefactor: Fraction):
+        pt = self.pt
+        pt1 = self.pt1
+        pt2 = self.pt2
+        if pt is not None:
+            pt = pt * scalefactor
+        if pt1 is not None:
+            pt1 = pt1 * scalefactor
+        if pt2 is not None:
+            pt2 = pt2 * scalefactor
+        return VSegment(action = self.action, pt = pt, pt1 = pt1, pt2 = pt2 )
 
 
 class VPath:

@@ -143,6 +143,13 @@ class TestVSegment(unittest.TestCase):
         self.assertEqual(VSegment.from_line_to(ptA).translate(ptB).to_dalmatian_string(), "L 9/20 1/2")
         self.assertEqual(VSegment.from_cubic_bezier(ptE, ptC, ptD).translate(ptB).to_dalmatian_string(), "C 12/35 1/18 8/65 17/138 22/85 29/30")
 
+    def test_scale(self):
+        double = Fraction("2/1")
+        half = Fraction("1/2")
+        self.assertEqual(VSegment.from_close().scale(double), VSegment.from_close())
+        self.assertEqual(VSegment.from_line_to(ptA).scale(double).to_dalmatian_string(), "L 1/2 2/3")
+        self.assertEqual(VSegment.from_cubic_bezier(ptE, ptC, ptD).scale(half).to_dalmatian_string(), "C 1/14 -1/18 -1/26 -1/46 1/34 2/5")
+
 class TestFractionList(unittest.TestCase):
 
     def test_create(self):
