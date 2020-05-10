@@ -131,6 +131,12 @@ class TestVSegment(unittest.TestCase):
         self.assertEqual(VSegment.from_cubic_bezier(ptE, ptC, ptD).to_svg_string(dpu), "C 14.286 11.111 -7.692 4.348 5.882 -80.000")
         self.assertEqual(VSegment.from_smooth_bezier(ptE, ptC).to_svg_string(dpu), "S 14.286 11.111 5.882 -80.000")
         self.assertEqual(VSegment.from_quadratic_bezier(ptE, ptC).to_svg_string(dpu), "Q 14.286 11.111 5.882 -80.000")
+    
+    def test_rotate(self):
+        r90 = Fraction("1/4")
+        self.assertEqual(VSegment.from_close().rotate(r90), VSegment.from_close())
+        self.assertEqual(VSegment.from_line_to(ptA).rotate(r90).to_dalmatian_string(), "L -1/3 1/4")
+        self.assertEqual(VSegment.from_cubic_bezier(ptE, ptC, ptD).rotate(r90).to_dalmatian_string(), "C 1/9 1/7 1/23 -1/13 -4/5 1/17")
 
 class TestFractionList(unittest.TestCase):
 

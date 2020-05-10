@@ -440,6 +440,10 @@ def brushstroke_to_xml_svg(brushstroke: DlmtBrushstroke, pagePixelCoord: PagePix
     ET.SubElement(element, 'use', attrib = { "fill": "black", "xlink:href": '#brush-'+ brushstroke.get_neat_brush_id()})
     return element
 
+def expand_brushstroke_to_xml_svg(brushstroke: DlmtBrushstroke, brush: DlmtBrush, pagePixelCoord: PagePixelCoordinate):
+    vpath = brush.vpath.rotate("1/4")
+    # TODO
+
 class DalmatianMedia:
     
     def __init__(self, headers: DlmtHeaders):

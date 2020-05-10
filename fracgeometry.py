@@ -294,6 +294,9 @@ class VSegment:
     def __repr__(self):
         return self.to_dalmatian_string()
 
+    def __eq__(self, other):
+        return self.action == other.action and self.pt == other.pt and self.pt1 == other.pt1 and self.pt2 == other.pt2
+
     @classmethod
     def from_close(cls):
         return cls(SegmentShape.CLOSE_PATH)    
@@ -369,6 +372,18 @@ class VSegment:
             return "{} {} {} {}".format(action_str, self.pt1.to_svg_string(dpu), self.pt2.to_svg_string(dpu), self.pt.to_svg_string(dpu))
         else:
             return "E"
+
+    def rotate(self, angle: Fraction):
+        pt = self.pt
+        pt1 = self.pt1
+        pt2 = self.pt2
+        if pt is not None:
+            pt = pt.rotate(angle)
+        if pt1 is not None:
+            pt1 = pt1.rotate(angle)
+        if pt2 is not None:
+            pt2 = pt2.rotate(angle)
+        return VSegment(action = self.action, pt = pt, pt1 = pt1, pt2 = pt2 )
 
 
 class VPath:
