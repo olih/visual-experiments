@@ -426,8 +426,11 @@ class PagePixelCoordinate:
     def to_brush_view_box(self):
         return "{} {}".format(V2d(-self.brush_width/2, -self.brush_width/2).to_float_string(), V2d(self.brush_width, self.brush_width).to_float_string())
 
+    def get_brush_width_string(self):
+        return as_float_string(self.brush_width)
+
 def brush_to_xml_svg(brush: DlmtBrush, pagePixelCoord: PagePixelCoordinate):
-    symbol = ET.Element('symbol', attrib = {"id": "brush-{}".format(brush.get_neat_id()), "viewBox": pagePixelCoord.to_brush_view_box() })
+    symbol = ET.Element('symbol', attrib = {"id": "brush-{}".format(brush.get_neat_id()), "viewBox": pagePixelCoord.to_brush_view_box(), "width": pagePixelCoord.get_brush_width_string(), "height": pagePixelCoord.get_brush_width_string() })
     ET.SubElement(symbol, 'path', attrib = { "d": brush.vpath.to_svg_string(float(pagePixelCoord.brush_width)) })
     return symbol
 

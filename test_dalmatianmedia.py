@@ -118,6 +118,9 @@ class TestDalmatianMedia(unittest.TestCase):
         media.add_view_string("view i:1 lang en-gb xy 0 0 width 1/1 height 1/1 -> everything")
         media.add_tag_description_string("tag i:1 lang en-gb same-as [] -> default tag")
         media.add_brush_string("brush i:1 ext-id brushes:abc3F path [ M -1/3 1/3, L 1/3 1/3, L 1/3 -1/3, L -1/3 -1/3 ]")
+        # for i in range(10, 80, 10):
+        #     media.add_brushstroke_string("brushstroke i:1 xy {}/1 1/1 scale 1/100 angle 0/1 tags [ i:1 ]".format(i))
         for i in range(10, 80, 10):
-            media.add_brushstroke_string("brushstroke i:1 xy {}/100 50/100 scale 1/1 angle 1/1 tags [ i:1 ]".format(i))
-        media.to_xml_svg_file(media.create_page_pixel_coordinate("i:1", 1000), "examples/one.svg")
+            media.add_brushstroke_string("brushstroke i:1 xy {}/1 1/1 scale {}/100 angle 0/1 tags [ i:1 ]".format(i, i//10))
+
+        media.to_xml_svg_file(media.create_page_pixel_coordinate("i:1", 100), "examples/one.svg")
