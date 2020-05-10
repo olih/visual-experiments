@@ -173,5 +173,13 @@ class TestVPath(unittest.TestCase):
         vpath = VPath.from_dalmatian_string("[ M -1/7 -1/9,L 1/7 -1/9, L 1/7 -1/11, Q 1/4 1/115 1/2 2/115,T 1/4 1/111,C 1/4 1/117 1/2 2/117 3/4 1/39,S 1/4 1/113 1/2 2/113,Z ]")
         self.assertEqual(vpath.action_frequency(), { "M": 1, "L": 2, "Q": 1, "T": 1, "C": 1, "S": 1, "Z": 1, "E": 0, "Total": 8})
 
+    def test_rotate(self):
+        r90 = Fraction("1/4")
+        r180 = Fraction("1/2")
+        vpath = VPath.from_dalmatian_string("[ M -1/7 -1/9,L 1/7 -1/9, L 1/7 -1/11, Q 1/4 1/115 1/2 2/115,T 1/4 1/111,C 1/4 1/117 1/2 2/117 3/4 1/39,S 1/4 1/113 1/2 2/113,Z ]")
+        self.assertEqual(vpath.rotate(r90).rotate(r90).rotate(r90).rotate(r90), vpath)
+        self.assertEqual(vpath.rotate(r90).rotate(r90), vpath.rotate(r180))
+        self.assertEqual(vpath.rotate(r180).to_dalmatian_string(), "[ M 1/7 1/9,L -1/7 1/9,L -1/7 1/11,Q -1/4 -1/115 -1/2 -2/115,T -1/4 -1/111,C -1/4 -1/117 -1/2 -2/117 -3/4 -1/39,S -1/4 -1/113 -1/2 -2/113,Z ]")
+
 if __name__ == '__main__':
     unittest.main()

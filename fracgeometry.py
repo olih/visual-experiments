@@ -440,3 +440,7 @@ class VPath:
             "E": actions.count(SegmentShape.NOT_SUPPORTED),
             "Total": len(actions)
         }
+
+    def rotate(self, angle: Fraction):
+        newsegments = [segment.rotate(angle) for segment in self.segments]
+        return VPath(newsegments)
