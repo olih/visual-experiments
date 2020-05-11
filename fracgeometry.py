@@ -74,6 +74,8 @@ class V2d:
         ynew = self.x*sinFract(angle) + self.y*cosFract(angle)
         return V2d(xnew, ynew)
 
+    def is_inside_rect(self, xy, width: Fraction, height: Fraction):
+        return self.x >= xy.x and self.x <= xy.x + width and self.y >= xy.y and self.y <= xy.y + height
 
 class V2dList:
     

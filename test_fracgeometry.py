@@ -47,7 +47,15 @@ class TestV2d(unittest.TestCase):
         self.assertEqual(ptA.rotate(Fraction("1/2")), - ptA)
         self.assertEqual(ptA.rotate(Fraction("1/4")), V2d.from_string("-1/3 1/4"))
         self.assertEqual(ptA.rotate(Fraction("-1/4")), V2d.from_string("1/3 -1/4"))
- 
+
+    def test_is_inside_rect(self):
+        width = Fraction("1/2")
+        delta = V2d.from_string("1/10 1/10")
+        self.assertEqual(ptA.is_inside_rect(ptA, width, width), True)
+        self.assertEqual((ptA+delta).is_inside_rect(ptA, width, width), True)
+        self.assertEqual((ptA-delta).is_inside_rect(ptA, width, width), False)
+        self.assertEqual((ptA+delta.neg_y()).is_inside_rect(ptA, width, width), False)
+
 class TestV2dList(unittest.TestCase):
 
     def test_create(self):
