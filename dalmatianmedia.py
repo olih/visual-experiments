@@ -509,12 +509,18 @@ class DalmatianMedia:
     def get_brush_by_id(self, brushid: str):
         return self.brushes_dict.get(brushid)
 
+    def get_sorted_brushes(self):
+        return sorted([brush for _, brush in self.brushes_dict.items()], key = lambda br: br.id)
+
+    def get_sorted_views(self):
+        return sorted([view for _, view in self.views_dict.items()], key = lambda v: v.id)
+
     def to_obj(self):
         return {
             "headers": self.headers.to_string_list(),
-            "views": [str(view) for _, view in self.views_dict.items()],
+            "views": [str(view) for view in self.get_sorted_views()],
             "tag-descriptions": [str(tag_desc) for tag_desc in self.tag_descriptions],
-            "brushes": [str(brush) for _, brush in self.brushes_dict.items()],
+            "brushes": [str(brush) for brush in self.get_sorted_brushes()],
             "brushstrokes": [str(brushstroke) for brushstroke in self.brushstrokes]
         }
 
@@ -523,13 +529,13 @@ class DalmatianMedia:
         lines += self.headers.to_string_list()
         lines += ["--------"]
         lines += ["section views"]
-        lines += [str(view) for _, view in self.views_dict.items()]
+        lines += [str(view) for view in self.get_sorted_views()]
         lines += ["--------"]
         lines += ["section tag-descriptions"]
         lines += [str(tag_desc) for tag_desc in self.tag_descriptions]
         lines += ["--------"]
         lines += ["section brushes"]
-        lines += [str(brush) for _, brush in self.brushes_dict.items()]
+        lines += [str(brush) for brush in self.get_sorted_brushes()]
         lines += ["--------"]
         lines += ["section brushstrokes"]
         lines += [str(brushstroke) for brushstroke in self.brushstrokes]
