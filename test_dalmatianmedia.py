@@ -143,5 +143,11 @@ class TestDalmatianMedia(unittest.TestCase):
         media.add_brush_string(homeBrush)
         for i in range(0, 90, 10):
             media.add_brushstroke_string("brushstroke i:1 xy {}/100 10/100 scale 1 angle 0/1 tags [ i:1 ]".format(i))
+        
+        for i in range(0, 90, 10):
+            media.add_brushstroke_string("brushstroke i:1 xy {}/100 30/100 scale {}/10 angle 0/1 tags [ i:1 ]".format(i, i + 1))
+
+        for i in range(0, 90, 10):
+            media.add_brushstroke_string("brushstroke i:1 xy {}/100 50/100 scale 3 angle {}/90 tags [ i:1 ]".format(i, i))
 
         media.to_xml_svg_file(media.create_page_pixel_coordinate("i:1", 100), "examples/one.svg")
