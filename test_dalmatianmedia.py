@@ -16,6 +16,14 @@ class TestDlmtView(unittest.TestCase):
         line = "view i:1 lang en-gb xy 1/2 -1/3 width 1 height 1/2 flags OC tags all but [ i:1, i:2 ] -> everything"
         self.assertEqual(str(DlmtView.from_string(line)), line)
 
+    def test_accept(self):
+        common = "view i:1 lang en-gb xy 1/2 -1/3 width 1 height 1/2 flags OC "
+        self.assertTrue(DlmtView.from_string(common + "tags all but [ i:1, i:2 ] ->").accept_tags(set(["i:3", "i:4"])))
+        self.assertFalse(DlmtView.from_string(common + "tags all but [ i:1, i:2 ] ->").accept_tags(set(["i:3","i:2"])))
+        self.assertTrue(DlmtView.from_string(common + "tags none but [ i:3 ] ->").accept_tags(set(["i:3", "i:2"])))
+        self.assertFalse(DlmtView.from_string(common + "tags none but [ i:3 ] ->").accept_tags(set(["i:4", "i:5"])))
+
+
 class TestDlmtTagDescription(unittest.TestCase):
 
     def test_convert(self):

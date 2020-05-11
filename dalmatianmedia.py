@@ -62,6 +62,7 @@ class DlmtView:
         self.flags = flags
         self.everything = everything
         self.tags = tags
+        self.tags_set = set(tags)
     
     @classmethod
     def from_string(cls, line: str):
@@ -90,6 +91,15 @@ class DlmtView:
 
     def __eq__(self, other):
         return self.to_string() == str(other)
+
+    def accept_point(self, xy: V2d)->bool:
+        return xy.is_inside_rect(xy = self.xy, width = self.width, height = self.height)
+
+    def accept_tags(self, tags: Set[str])->bool:
+        if self.everything == True:
+            return len(tags.intersection(self.tags_set)) == 0
+        else:
+            return len(tags.intersection(self.tags_set)) > 0
 
 # tag i:1 lang en-gb same-as [ geospecies:bioclasses/P632y ] -> part of head
 class DlmtTagDescription:
