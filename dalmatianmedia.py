@@ -449,26 +449,25 @@ class DalmatianMedia:
     
     def __init__(self, headers: DlmtHeaders):
         self.headers = headers
-        self.views = []
+        self.views_dict = {}
         self.tag_descriptions = []
-        self.brushes = []
         self.brushstrokes = []
         self.brushes_dict = {}
         
     def __repr__(self):
-        return "id: {}, views:{}, tags:{}, brushes:{}, brushstrokes:{}".format(self.headers.id_urn, len(self.views), len(self.tag_descriptions), len(self.brushes), len(self.brushstrokes))
+        return "id: {}, views:{}, tags:{}, brushes:{}, brushstrokes:{}".format(self.headers.id_urn, len(self.views_dict), len(self.tag_descriptions), len(self.brushes_dict), len(self.brushstrokes))
    
     def __eq__(self, other):
-        thisone = (self.headers, self.views, self.tag_descriptions, self.brushes, self.brushstrokes)
-        otherone = (other.headers, other.views, other.tag_descriptions, other.brushes, other.brushstrokes)
+        thisone = (self.headers, self.views_dict, self.tag_descriptions, self.brushes_dict, self.brushstrokes)
+        otherone = (other.headers, other.views_dict, other.tag_descriptions, other.brushes_dict, other.brushstrokes)
         return thisone == otherone
 
     def set_views(self, views: List[DlmtView]):
-        self.views = views
+        self.views_dict = {view.id:view for view in views }
         return self
     
     def add_view(self, view: DlmtView):
-        self.views.append(view)
+        self.views_dict[view.id] = view
         return self
 
     def add_view_string(self, view: str):
@@ -486,12 +485,10 @@ class DalmatianMedia:
         return self.add_tag_description(DlmtTagDescription.from_string(tag_description))
 
     def set_brushes(self, brushes: List[DlmtBrush]):
-        self.brushes = brushes
         self.brushes_dict = {brush.id:brush for brush in brushes }
         return self
 
     def add_brush(self, brush: DlmtBrush):
-        self.brushes.append(brush)
         self.brushes_dict[brush.id] = brush
         return self
 
@@ -515,9 +512,9 @@ class DalmatianMedia:
     def to_obj(self):
         return {
             "headers": self.headers.to_string_list(),
-            "views": [str(view) for view in self.views],
+            "views": [str(view) for _, view in self.views_dict.items()],
             "tag-descriptions": [str(tag_desc) for tag_desc in self.tag_descriptions],
-            "brushes": [str(brush) for brush in self.brushes],
+            "brushes": [str(brush) for _, brush in self.brushes_dict.items()],
             "brushstrokes": [str(brushstroke) for brushstroke in self.brushstrokes]
         }
 
@@ -526,13 +523,13 @@ class DalmatianMedia:
         lines += self.headers.to_string_list()
         lines += ["--------"]
         lines += ["section views"]
-        lines += [str(view) for view in self.views]
+        lines += [str(view) for _, view in self.views_dict.items()]
         lines += ["--------"]
         lines += ["section tag-descriptions"]
         lines += [str(tag_desc) for tag_desc in self.tag_descriptions]
         lines += ["--------"]
         lines += ["section brushes"]
-        lines += [str(brush) for brush in self.brushes]
+        lines += [str(brush) for _, brush in self.brushes_dict.items()]
         lines += ["--------"]
         lines += ["section brushstrokes"]
         lines += [str(brushstroke) for brushstroke in self.brushstrokes]
@@ -577,10 +574,10 @@ class DalmatianMedia:
         return set([tag.id for tag in self.tag_descriptions])
 
     def get_brush_ids(self)->Set[str]:
-        return set([brush.id for brush in self.brushes])
+        return set([brush.id for _, brush in self.brushes_dict.items()])
 
     def get_view_ids(self)->Set[str]:
-        return set([view.id for view in self.views])
+        return set([view.id for _, view in self.views_dict.items()])
     
     def get_used_brush_ids(self)->Set[str]:
         return set([brushstroke.brushid for brushstroke in self.brushstrokes])
@@ -614,7 +611,7 @@ class DalmatianMedia:
         return results
     
     def create_page_pixel_coordinate(self, viewid: str, view_pixel_width: int)->PagePixelCoordinate:
-        return PagePixelCoordinate(self.headers, self.views[0], view_pixel_width) # TODO used viewid
+        return PagePixelCoordinate(self.headers, self.views_dict[viewid], view_pixel_width)
 
 
     def to_page_brushstroke_list(self)-> List[PageBrushstroke]:
