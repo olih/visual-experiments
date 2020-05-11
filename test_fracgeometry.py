@@ -20,7 +20,7 @@ class TestV2d(unittest.TestCase):
         self.assertEqual(ptA.to_cartesian_string(100), "(25.000,33.333)")
     
     def test_to_svg_string(self):
-        self.assertEqual(ptA.to_svg_string(100), "25.000 -33.333")
+        self.assertEqual(ptA.to_svg_string(100, 0), "25.000 -33.333")
 
     def test_add(self):
         self.assertEqual(str(pt0 + ptA), "1/4 1/3")
@@ -66,7 +66,7 @@ class TestV2dList(unittest.TestCase):
         self.assertEqual(V2dList.from_dalmatian_list(listABCDE.to_dalmatian_list()), listABCDE)
 
     def test_to_svg_string(self):
-        self.assertEqual(listABCDE.to_svg_string(100), "25.000 -33.333 20.000 -16.667 14.286 11.111 -7.692 4.348 5.882 -80.000")
+        self.assertEqual(listABCDE.to_svg_string(100, 0), "25.000 -33.333 20.000 -16.667 14.286 11.111 -7.692 4.348 5.882 -80.000")
 
     def test_add(self):
         sumOfList = listABCDE+listCDE
@@ -125,12 +125,12 @@ class TestVSegment(unittest.TestCase):
 
     def test_to_svg_string(self):
         dpu = 100
-        self.assertEqual(VSegment.from_line_to(ptC).to_svg_string(dpu), "L 14.286 11.111")
-        self.assertEqual(VSegment.from_move_to(ptA).to_svg_string(dpu), "M 25.000 -33.333")
-        self.assertEqual(VSegment.from_close().to_svg_string(dpu), "Z")
-        self.assertEqual(VSegment.from_cubic_bezier(ptE, ptC, ptD).to_svg_string(dpu), "C 14.286 11.111 -7.692 4.348 5.882 -80.000")
-        self.assertEqual(VSegment.from_smooth_bezier(ptE, ptC).to_svg_string(dpu), "S 14.286 11.111 5.882 -80.000")
-        self.assertEqual(VSegment.from_quadratic_bezier(ptE, ptC).to_svg_string(dpu), "Q 14.286 11.111 5.882 -80.000")
+        self.assertEqual(VSegment.from_line_to(ptC).to_svg_string(dpu, 0), "L 14.286 11.111")
+        self.assertEqual(VSegment.from_move_to(ptA).to_svg_string(dpu, 0), "M 25.000 -33.333")
+        self.assertEqual(VSegment.from_close().to_svg_string(dpu, 0), "Z")
+        self.assertEqual(VSegment.from_cubic_bezier(ptE, ptC, ptD).to_svg_string(dpu, 0), "C 14.286 11.111 -7.692 4.348 5.882 -80.000")
+        self.assertEqual(VSegment.from_smooth_bezier(ptE, ptC).to_svg_string(dpu, 0), "S 14.286 11.111 5.882 -80.000")
+        self.assertEqual(VSegment.from_quadratic_bezier(ptE, ptC).to_svg_string(dpu, 0), "Q 14.286 11.111 5.882 -80.000")
     
     def test_rotate(self):
         r90 = Fraction("1/4")
@@ -175,11 +175,11 @@ class TestVPath(unittest.TestCase):
 
     def test_to_core_svg_string(self):
         vpath = VPath.from_dalmatian_string("[ M -1/7 -1/9,L 1/7 -1/9,Q 1/4 1/115 1/2 2/115,T 1/4 1/111,C 1/4 1/117 1/2 2/117 3/4 1/39,S 1/4 1/113 1/2 2/113,Z ]")
-        self.assertEqual(vpath.to_core_svg_string(100), "M -14.286 11.111 L 14.286 11.111 L 50.000 -1.739 L 25.000 -0.901 L 75.000 -2.564 L 50.000 -1.770 Z")
+        self.assertEqual(vpath.to_core_svg_string(100, 0), "M -14.286 11.111 L 14.286 11.111 L 50.000 -1.739 L 25.000 -0.901 L 75.000 -2.564 L 50.000 -1.770 Z")
 
     def test_to_svg_string(self):
         vpath = VPath.from_dalmatian_string("[ M -1/7 -1/9,L 1/7 -1/9,Q 1/4 1/115 1/2 2/115,T 1/4 1/111,C 1/4 1/117 1/2 2/117 3/4 1/39,S 1/4 1/113 1/2 2/113,Z ]")
-        self.assertEqual(vpath.to_svg_string(100), "M -14.286 11.111 L 14.286 11.111 Q 25.000 -0.870 50.000 -1.739 T 25.000 -0.901 C 25.000 -0.855 50.000 -1.709 75.000 -2.564 S 25.000 -0.885 50.000 -1.770 Z")
+        self.assertEqual(vpath.to_svg_string(100, 0), "M -14.286 11.111 L 14.286 11.111 Q 25.000 -0.870 50.000 -1.739 T 25.000 -0.901 C 25.000 -0.855 50.000 -1.709 75.000 -2.564 S 25.000 -0.885 50.000 -1.770 Z")
 
     def test_action_frequency(self):
         vpath = VPath.from_dalmatian_string("[ M -1/7 -1/9,L 1/7 -1/9, L 1/7 -1/11, Q 1/4 1/115 1/2 2/115,T 1/4 1/111,C 1/4 1/117 1/2 2/117 3/4 1/39,S 1/4 1/113 1/2 2/113,Z ]")

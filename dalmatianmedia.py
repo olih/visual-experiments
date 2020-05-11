@@ -416,13 +416,6 @@ class PagePixelCoordinate:
         self.view_pixel_height = self.zoomk * view.height * self.view_pixel_width
         self.brush_width = self.zoomk * headers.brush_page_ratio * self.view_pixel_width
 
-    def to_svg_xy_string(self, brushstroke: DlmtBrushstroke)->str:
-        xy_in_view = (brushstroke.xy - self.view.xy)
-        scaled_xy = xy_in_view * self.zoomk * self.view_pixel_width
-        svg_origin = V2d(Fraction(0), self.view_pixel_height)
-        svg_xy = svg_origin + scaled_xy.neg_y()
-        return svg_xy.to_float_string()
-
     def to_page_view_box(self):
         return "0 0 {}".format(V2d(self.view_pixel_width, self.view_pixel_height).to_float_string())
 
@@ -449,20 +442,8 @@ class PageBrushstroke:
         return self.vpath == self.vpath
 
     def to_xml_svg(self, pagePixelCoord: PagePixelCoordinate):
-        element = ET.Element('path', attrib = { "d": self.vpath.to_svg_string(float(pagePixelCoord.brush_width)) })
+        element = ET.Element('path', attrib = { "d": self.vpath.to_svg_string(float(pagePixelCoord.view_pixel_width), float(pagePixelCoord.view_pixel_height) ) })
         return element
-
-
-def brush_to_xml_svg(brush: DlmtBrush, pagePixelCoord: PagePixelCoordinate):
-    symbol = ET.Element('symbol', attrib = {"id": "brush-{}".format(brush.get_neat_id()), "viewBox": pagePixelCoord.to_brush_view_box(), "width": pagePixelCoord.get_brush_width_string(), "height": pagePixelCoord.get_brush_width_string() })
-    ET.SubElement(symbol, 'path', attrib = { "d": brush.vpath.to_svg_string(float(pagePixelCoord.brush_width)) })
-    return symbol
-
-def brushstroke_to_xml_svg(brushstroke: DlmtBrushstroke, pagePixelCoord: PagePixelCoordinate):
-    translation = pagePixelCoord.to_svg_xy_string(brushstroke)
-    element = ET.Element('g', attrib = {"transform": "rotate ({}) scale ({}) translate({})".format( brushstroke.get_degree_angle_string(), brushstroke.get_scale_string(), translation)})
-    ET.SubElement(element, 'use', attrib = { "fill": "black", "xlink:href": '#brush-'+ brushstroke.get_neat_brush_id()})
-    return element
 
 class DalmatianMedia:
     
@@ -643,7 +624,7 @@ class DalmatianMedia:
     def to_xml_svg(self, pagePixelCoord: PagePixelCoordinate)->ElementTree:
         svg = ET.Element('svg', attrib = { "xmlns": "http://www.w3.org/2000/svg", "xmlns:xlink": "http://www.w3.org/1999/xlink", "viewBox": pagePixelCoord.to_page_view_box()})
         for pbs in self.to_page_brushstroke_list():
-            pbs
+            svg.append(pbs.to_xml_svg(pagePixelCoord))
         return ElementTree(svg)
 
     def to_xml_svg_file(self, pagePixelCoord: PagePixelCoordinate , file_or_filename):

@@ -34,8 +34,8 @@ class V2d:
     def to_cartesian_string(self, dpu: float):
         return "({:.3f},{:.3f})".format(float(self.x*dpu), float(self.y*dpu))
 
-    def to_svg_string(self, dpu: float):
-        return "{:.3f} {:.3f}".format(float(self.x*dpu), float(self.y*dpu*-1))
+    def to_svg_string(self, dpu: float, ypixoffset:float):
+        return "{:.3f} {:.3f}".format(float(self.x*dpu), ypixoffset + float(self.y*dpu*-1))
 
     def to_float_string(self):
         return "{:.3f} {:.3f}".format(float(self.x), float(self.y))
@@ -141,8 +141,8 @@ class V2dList:
     def to_cartesian_string(self, dpu: float, sep=""):
         return sep.join([ value.to_cartesian_string(dpu) for value in self.values])
 
-    def to_svg_string(self, dpu: float, sep=" "):
-        return sep.join([ value.to_svg_string(dpu) for value in self.values])
+    def to_svg_string(self, dpu: float, ypixoffset:float, sep=" "):
+        return sep.join([ value.to_svg_string(dpu, ypixoffset) for value in self.values])
 
     def to_dalmatian_list(self):
         return [ value.to_dalmatian_string() for value in self.values]
@@ -362,16 +362,16 @@ class VSegment:
         else:
             return VSegment()
 
-    def to_svg_string(self, dpu: float):
+    def to_svg_string(self, dpu: float, ypixoffset: float):
         action_str = SegmentShape.to_string(self.action)
         if self.action == SegmentShape.CLOSE_PATH:
             return "{}".format(action_str)
         elif self.action in [SegmentShape.MOVE_TO, SegmentShape.LINE_TO, SegmentShape.FLUID_BEZIER] :
-            return "{} {}".format(action_str, self.pt.to_svg_string(dpu))
+            return "{} {}".format(action_str, self.pt.to_svg_string(dpu, ypixoffset))
         elif self.action in [ SegmentShape.SMOOTH_BEZIER, SegmentShape.QUADRATIC_BEZIER]:
-            return "{} {} {}".format(action_str, self.pt1.to_svg_string(dpu), self.pt.to_svg_string(dpu))
+            return "{} {} {}".format(action_str, self.pt1.to_svg_string(dpu, ypixoffset), self.pt.to_svg_string(dpu, ypixoffset))
         elif self.action == SegmentShape.CUBIC_BEZIER:
-            return "{} {} {} {}".format(action_str, self.pt1.to_svg_string(dpu), self.pt2.to_svg_string(dpu), self.pt.to_svg_string(dpu))
+            return "{} {} {} {}".format(action_str, self.pt1.to_svg_string(dpu, ypixoffset), self.pt2.to_svg_string(dpu, ypixoffset), self.pt.to_svg_string(dpu, ypixoffset))
         else:
             return "E"
 
@@ -449,11 +449,11 @@ class VPath:
     def to_core_cartesian_string(self, dpu: float, sep=""):
         return sep.join([point.to_cartesian_string(dpu) for point in self.core_points()])
 
-    def to_core_svg_string(self, dpu: float):
-        return " ".join(["L {}".format(point.to_svg_string(dpu)) for point in self.core_points()]).replace("L", "M", 1) + " Z"
+    def to_core_svg_string(self, dpu: float, ypixoffset: float):
+        return " ".join(["L {}".format(point.to_svg_string(dpu, ypixoffset)) for point in self.core_points()]).replace("L", "M", 1) + " Z"
 
-    def to_svg_string(self, dpu: float):
-        return " ".join([segment.to_svg_string(dpu) for segment in self.segments])
+    def to_svg_string(self, dpu: float, ypixoffset: float):
+        return " ".join([segment.to_svg_string(dpu, ypixoffset) for segment in self.segments])
 
     def action_frequency(self):
         actions = [segment.action for segment in self.segments]
