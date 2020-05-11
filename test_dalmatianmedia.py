@@ -1,7 +1,7 @@
 import unittest
 from fractions import Fraction
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
-from dalmatianmedia import DlmtView, DlmtTagDescription, DlmtBrush, DlmtBrushstroke, DlmtCoordinateSystem, DlmtBrushCoordinateSystem, DlmtHeaders, DalmatianMedia, PagePixelCoordinate
+from dalmatianmedia import DlmtView, DlmtTagDescription, DlmtBrush, DlmtBrushstroke, DlmtCoordinateSystem, DlmtBrushCoordinateSystem, DlmtHeaders, DalmatianMedia, SvgRenderingConfig
 
 pt0 = V2d.from_string("0/1 0/1")
 ptA = V2d.from_string("1/4 1/3")
@@ -62,17 +62,17 @@ class TestDlmtHeaders(unittest.TestCase):
         headers.set_url("brushes-license-url", "json", "en", "https://creativecommons.org/licenses/by/4.0/legalcode")
         self.assertEqual(DlmtHeaders.from_string_list(headers.to_string_list()), headers)
 
-class TestPagePixelCoordinate(unittest.TestCase):
+class TestSvgRenderingConfig(unittest.TestCase):
 
     def test_to_svg_xy_string(self):
         headers = DlmtHeaders()
         headers.set_page_coordinate_system_string("system cartesian right-dir + up-dir -")
         headers.set_brush_page_ratio(Fraction("1/50"))
         view = DlmtView.from_string("view i:1 lang en-gb xy 20/100 20/100 width 40/100 height 30/100 -> test")
-        pagePixelCoord = PagePixelCoordinate(headers, view, 400)
-        self.assertEqual(pagePixelCoord.to_page_view_box(), "0 0 400.000 300.000")
-        self.assertEqual(pagePixelCoord.to_brush_view_box(), "-10.000 -10.000 20.000 20.000")
-        self.assertEqual(pagePixelCoord.brush_width, Fraction(20.0))
+        renderConfig = SvgRenderingConfig(headers, view, 400)
+        self.assertEqual(renderConfig.to_page_view_box(), "0 0 400.000 300.000")
+        self.assertEqual(renderConfig.to_brush_view_box(), "-10.000 -10.000 20.000 20.000")
+        self.assertEqual(renderConfig.brush_width, Fraction(20.0))
 
 homeBrush = "brush i:1 ext-id brushes:home path [ M -1/3 1/3,L 0 0, L 1/3 1/3,L 1/3 -1/3,L -1/3 -1/3 ]"
 

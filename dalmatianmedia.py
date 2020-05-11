@@ -409,7 +409,7 @@ class DlmtHeaders:
         return set([key for key, _ in self.prefixes.items()])
 
 
-class PagePixelCoordinate:
+class SvgRenderingConfig:
     
     def __init__(self, headers: DlmtHeaders, view: DlmtView, view_pixel_width: int):
         self.headers = headers
@@ -444,8 +444,8 @@ class PageBrushstroke:
     def __eq__(self, other):
         return self.vpath == self.vpath
 
-    def to_xml_svg(self, pagePixelCoord: PagePixelCoordinate):
-        element = ET.Element('path', attrib = { "d": self.vpath.to_svg_string(float(pagePixelCoord.view_pixel_width), float(pagePixelCoord.view_pixel_height) ) })
+    def to_xml_svg(self, renderConfig: SvgRenderingConfig):
+        element = ET.Element('path', attrib = { "d": self.vpath.to_svg_string(float(renderConfig.view_pixel_width), float(renderConfig.view_pixel_height) ) })
         return element
 
 class DalmatianMedia:
@@ -619,19 +619,19 @@ class DalmatianMedia:
             results.append("Tag ids in brushstrokes are not declared: {}".format(list(missing_tagids)))
         return results
     
-    def create_page_pixel_coordinate(self, viewid: str, view_pixel_width: int)->PagePixelCoordinate:
-        return PagePixelCoordinate(self.headers, self.views_dict[viewid], view_pixel_width)
+    def create_page_pixel_coordinate(self, viewid: str, view_pixel_width: int)->SvgRenderingConfig:
+        return SvgRenderingConfig(self.headers, self.views_dict[viewid], view_pixel_width)
 
 
     def to_page_brushstroke_list(self)-> List[PageBrushstroke]:
         return [ PageBrushstroke(self.get_brush_by_id(bs.brushid).vpath.rotate(bs.angle).scale(self.headers.brush_page_ratio).scale(bs.scale).translate(bs.xy)) for bs in self.brushstrokes]
             
 
-    def to_xml_svg(self, pagePixelCoord: PagePixelCoordinate)->ElementTree:
-        svg = ET.Element('svg', attrib = { "xmlns": "http://www.w3.org/2000/svg", "xmlns:xlink": "http://www.w3.org/1999/xlink", "viewBox": pagePixelCoord.to_page_view_box()})
+    def to_xml_svg(self, renderConfig: SvgRenderingConfig)->ElementTree:
+        svg = ET.Element('svg', attrib = { "xmlns": "http://www.w3.org/2000/svg", "xmlns:xlink": "http://www.w3.org/1999/xlink", "viewBox": renderConfig.to_page_view_box()})
         for pbs in self.to_page_brushstroke_list():
-            svg.append(pbs.to_xml_svg(pagePixelCoord))
+            svg.append(pbs.to_xml_svg(renderConfig))
         return ElementTree(svg)
 
-    def to_xml_svg_file(self, pagePixelCoord: PagePixelCoordinate , file_or_filename):
-        self.to_xml_svg(pagePixelCoord).write(file_or_filename, encoding='UTF-8')
+    def to_xml_svg_file(self, renderConfig: SvgRenderingConfig , file_or_filename):
+        self.to_xml_svg(renderConfig).write(file_or_filename, encoding='UTF-8')
