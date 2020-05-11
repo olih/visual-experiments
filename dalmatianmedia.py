@@ -186,6 +186,9 @@ class DlmtBrushstroke:
     def get_neat_brush_id(self):
         return as_tidy_name(self.brushid)
 
+    def get_tags_set(self):
+        return set(self.tags)
+
 
 class AxisDir(Enum):
     POSITIVE = auto()
