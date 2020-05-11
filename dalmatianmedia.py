@@ -50,30 +50,37 @@ def as_tidy_name(value: str):
 def as_float_string(value):
     return "{:.3f}".format(float(value))
 
-# view i:1 lang en-gb xy -1/2 -1/2 width 1/1 height 1/1 -> everything
+# view i:1 lang en-gb xy 1/2 -1/3 width 1 height 1/2 flags OC tags all but [ i:1,i:2 ] -> everything
 class DlmtView:
-    def __init__(self, id: str, xy: V2d, width: Fraction, height: Fraction, lang: str = "en", description: str = "" ):
+    def __init__(self, id: str, xy: V2d, width: Fraction, height: Fraction, everything: bool, tags: List[str], flags: str = "O", lang: str = "en", description: str = "" ):
         self.id = id
         self.xy = xy
         self.width = width
         self.height = height
         self.lang = lang
         self.description = description
+        self.flags = flags
+        self.everything = everything
+        self.tags = tags
     
     @classmethod
     def from_string(cls, line: str):
         other, description  = line.split("->")
-        cmd, viewId, langKey, langId, xyKey, x, y, widthKey, width, heightKey, height = other.split()
+        cmd, viewId, langKey, langId, xyKey, x, y, widthKey, width, heightKey, height, flagsKey, flags, tagsKey, everything, butKey, tagsInfo = other.split(" ", 16)
         assert cmd == "view", line
         assert langKey == "lang", line
         assert xyKey == "xy", line
         assert widthKey == "width", line
         assert heightKey == "height", line
+        assert flagsKey == "flags", line
+        assert tagsKey == "tags", line
+        assert butKey == "but", line
         
-        return cls(id = viewId, xy = V2d.from_string(x + " " + y), width = Fraction(width), height = Fraction(height), lang = langId, description= description.strip())
+        return cls(id = viewId, xy = V2d.from_string(x + " " + y), width = Fraction(width), height = Fraction(height), lang = langId, description= description.strip(), flags = flags, everything = everything == "all", tags = parse_dlmt_array(tagsInfo) )
 
     def to_string(self):
-        return "view {} lang {} xy {} width {} height {} -> {}".format(self.id, self.lang, self.xy, self.width, self.height, self.description)
+        everything = "all" if self.everything else "none"
+        return "view {} lang {} xy {} width {} height {} flags {} tags {} but {} -> {}".format(self.id, self.lang, self.xy, self.width, self.height, self.flags, everything, to_dlmt_array(self.tags, sep=", ") , self.description)
     
     def __str__(self):
         return self.to_string()

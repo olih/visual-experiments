@@ -13,7 +13,7 @@ ptE = V2d.from_string("1/17 4/5")
 class TestDlmtView(unittest.TestCase):
 
     def test_convert(self):
-        line = "view i:1 lang en-gb xy 1/2 -1/3 width 1 height 1/2 -> everything"
+        line = "view i:1 lang en-gb xy 1/2 -1/3 width 1 height 1/2 flags OC tags all but [ i:1, i:2 ] -> everything"
         self.assertEqual(str(DlmtView.from_string(line)), line)
 
 class TestDlmtTagDescription(unittest.TestCase):
@@ -68,7 +68,7 @@ class TestSvgRenderingConfig(unittest.TestCase):
         headers = DlmtHeaders()
         headers.set_page_coordinate_system_string("system cartesian right-dir + up-dir -")
         headers.set_brush_page_ratio(Fraction("1/50"))
-        view = DlmtView.from_string("view i:1 lang en-gb xy 20/100 20/100 width 40/100 height 30/100 -> test")
+        view = DlmtView.from_string("view i:1 lang en-gb xy 20/100 20/100 width 40/100 height 30/100 flags OC tags all but [ ]-> test")
         renderConfig = SvgRenderingConfig(headers, view, 400)
         self.assertEqual(renderConfig.to_page_view_box(), "0 0 400.000 300.000")
         self.assertEqual(renderConfig.to_brush_view_box(), "-10.000 -10.000 20.000 20.000")
@@ -91,7 +91,7 @@ class TestDalmatianMedia(unittest.TestCase):
         headers.set_url("license-url", "html", "en", "https://creativecommons.org/licenses/by-sa/4.0/legalcode")
         headers.set_url("brushes-license-url", "json", "en", "https://creativecommons.org/licenses/by/4.0/legalcode")
         media = DalmatianMedia(headers)
-        media.add_view_string("view i:1 lang en-gb xy -1/2 -1/2 width 1/1 height 1/1 -> everything")
+        media.add_view_string("view i:1 lang en-gb xy -1/2 -1/2 width 1/1 height 1/1 flags OC tags all but [ ] -> everything")
         media.add_tag_description_string("tag i:1 lang en-gb same-as [ geospecies:bioclasses/P632y ] -> part of head")
         media.add_tag_description_string("tag i:1 lang fr-fr same-as [] -> visage")
         media.add_tag_description_string("tag i:2 lang fr same-as [] -> pied")
@@ -113,7 +113,7 @@ class TestDalmatianMedia(unittest.TestCase):
     
     def test_to_page_brushstroke_list(self):
         media = DalmatianMedia(DlmtHeaders().set_brush_page_ratio(Fraction("1/100")))
-        media.add_view_string("view i:1 lang en-gb xy 0 0 width 1/1 height 1/1 -> everything")
+        media.add_view_string("view i:1 lang en-gb xy 0 0 width 1/1 height 1/1 flags OC tags all but [ ]-> everything")
         media.add_tag_description_string("tag i:1 lang en-gb same-as [] -> default tag")
         media.add_brush_string(homeBrush)
         for i in range(0, 90, 10):
@@ -126,7 +126,7 @@ class TestDalmatianMedia(unittest.TestCase):
     
     def test_to_page_brushstroke_list_scale(self):
         media = DalmatianMedia(DlmtHeaders().set_brush_page_ratio(Fraction("1/100")))
-        media.add_view_string("view i:1 lang en-gb xy 0 0 width 1/1 height 1/1 -> everything")
+        media.add_view_string("view i:1 lang en-gb xy 0 0 width 1/1 height 1/1 flags OC tags all but [ ] -> everything")
         media.add_tag_description_string("tag i:1 lang en-gb same-as [] -> default tag")
         media.add_brush_string(homeBrush)
         for i in range(0, 90, 10):
@@ -138,7 +138,7 @@ class TestDalmatianMedia(unittest.TestCase):
 
     def test_export_svg(self):
         media = DalmatianMedia(DlmtHeaders().set_brush_page_ratio(Fraction("1/100")))
-        media.add_view_string("view i:1 lang en-gb xy 0 0 width 1/1 height 1/1 -> everything")
+        media.add_view_string("view i:1 lang en-gb xy 0 0 width 1/1 height 1/1 flags OC tags all but [ ] -> everything")
         media.add_tag_description_string("tag i:1 lang en-gb same-as [] -> default tag")
         media.add_brush_string(homeBrush)
         for i in range(0, 90, 10):
