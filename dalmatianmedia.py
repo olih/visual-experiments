@@ -309,6 +309,8 @@ class DlmtHeaders:
         return self
 
     def set_page_coordinate_system_string(self, value: str):
+        if value != "system cartesian right-dir + up-dir -":
+            raise Exception("Page coordinate system not supported yet: "+ value)
         return self.set_page_coordinate_system(DlmtCoordinateSystem.from_string(value))
 
     def set_brush_coordinate_system(self, value: DlmtBrushCoordinateSystem):
@@ -316,6 +318,8 @@ class DlmtHeaders:
         return self
 
     def set_brush_coordinate_system_string(self, value: str):
+        if value != "system cartesian right-dir + up-dir - origin-x 1/2 origin-y 1/2":
+            raise Exception("Brush coordinate system not supported yet: " + value)
         return self.set_brush_coordinate_system(DlmtBrushCoordinateSystem.from_string(value))
 
     def set_brush_page_ratio(self, value: Fraction):
@@ -633,15 +637,13 @@ class DalmatianMedia:
 
 
     def to_page_brushstroke_list(self)-> List[PageBrushstroke]:
-        return [ PageBrushstroke(self.get_brush_by_id(bs.brushid).vpath.rotate(bs.angle).scale(bs.scale).translate(bs.xy)) for bs in self.brushstrokes]
+        return [ PageBrushstroke(self.get_brush_by_id(bs.brushid).vpath.rotate(bs.angle).scale(self.headers.brush_page_ratio).scale(bs.scale).translate(bs.xy)) for bs in self.brushstrokes]
             
 
     def to_xml_svg(self, pagePixelCoord: PagePixelCoordinate)->ElementTree:
         svg = ET.Element('svg', attrib = { "xmlns": "http://www.w3.org/2000/svg", "xmlns:xlink": "http://www.w3.org/1999/xlink", "viewBox": pagePixelCoord.to_page_view_box()})
-        for brush in self.brushes:
-            svg.append(brush_to_xml_svg(brush, pagePixelCoord))
-        for brushstroke in self.brushstrokes:
-           svg.append(brushstroke_to_xml_svg(brushstroke, pagePixelCoord))
+        for pbs in self.to_page_brushstroke_list():
+            pbs
         return ElementTree(svg)
 
     def to_xml_svg_file(self, pagePixelCoord: PagePixelCoordinate , file_or_filename):
