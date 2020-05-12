@@ -358,9 +358,15 @@ class DlmtHeaders:
         self.url_refs[(name.strip(), media_type.strip(), lang.strip())] = url.strip()
         return self
 
+    def get_url(self, name: str, media_type: str, lang: str, defaultValue = None):
+        return self.url_refs.get((name.strip(), media_type.strip(), lang.strip()), defaultValue)
+
     def set_text(self, name: str,lang: str, text: str):
         self.text_refs[(name.strip(), lang.strip())] = text.strip()
         return self
+
+    def get_text(self, name: str,lang: str, defaultValue = None):
+        return self.text_refs.get((name.strip(), lang.strip()), defaultValue)
 
     @classmethod
     def from_string_list(cls, lines: str):
@@ -424,6 +430,25 @@ class DlmtHeaders:
 
     def get_short_prefixes(self)->Set[str]:
         return set([key for key, _ in self.prefixes.items()])
+
+    def to_xml_svg(self, lang: str):
+        metadata = ET.Element('metadata', attrib = {})
+        rdfEl = ET.SubElement(metadata, 'rdf:RDF', attrib = {})
+        ccWork = ET.SubElement(rdfEl, 'cc:Work', attrib = {})
+        ET.SubElement(ccWork, 'dc:format', attrib = { }).text = "image/svg+xml"
+        ET.SubElement(ccWork, 'dc:type', attrib = { "rdf:resource": "http://purl.org/dc/dcmitype/StillImage" })
+        ET.SubElement(ccWork, 'dc:title', attrib = { }).text = self.get_text("title", "")
+        ET.SubElement(ccWork, 'dc:description', attrib = { }).text = self.get_text("description", lang, "")
+        ET.SubElement(ccWork, 'dc:source', attrib = { }).text = "source"
+        ET.SubElement(ccWork, 'dc:language', attrib = { }).text = lang
+        ET.SubElement(ccWork, 'dc:identifier', attrib = { }).text = self.id_urn
+        ET.SubElement(ccWork, 'dc:date', attrib = { }).text = "2020"
+        dcCreator = ET.SubElement(ccWork, 'dc:creator', attrib = { })
+        ccAgent = ET.SubElement(dcCreator, 'cc:Agent', attrib = { })
+        ET.SubElement(ccAgent, 'dc:title', attrib = { }).text = self.get_text("creator", lang, "")
+        ET.SubElement(ccWork, 'cc:license', attrib = { "rdf:resource": self. get_url("license-url", "html", lang, "https://creativecommons.org/licenses/by-sa/4.0/legalcode")})
+        return metadata
+
 
 
 class SvgRenderingConfig:
@@ -654,7 +679,16 @@ class DalmatianMedia:
         return newbrushstokes
 
     def to_xml_svg(self, renderConfig: SvgRenderingConfig)->ElementTree:
-        svg = ET.Element('svg', attrib = { "xmlns": "http://www.w3.org/2000/svg", "xmlns:xlink": "http://www.w3.org/1999/xlink", "viewBox": renderConfig.to_page_view_box()})
+        svg = ET.Element('svg', attrib = { 
+            "xmlns": "http://www.w3.org/2000/svg",
+            "xmlns:xlink": "http://www.w3.org/1999/xlink",
+            "xmlns:dc": "http://purl.org/dc/elements/1.1/",
+            "xmlns:cc": "http://creativecommons.org/ns#",
+            "xmlns:rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+            "xmlns:svg": "http://www.w3.org/2000/svg",
+            "viewBox": renderConfig.to_page_view_box()
+            })
+        svg.append(self.headers.to_xml_svg(lang = "en"))
         for pbs in self.page_brushstroke_list_for_view(renderConfig.view):
             svg.append(pbs.to_xml_svg(renderConfig))
         return ElementTree(svg)
