@@ -415,6 +415,8 @@ class VSegment:
             pt2 = pt2 * scalefactor
         return VSegment(action = self.action, pt = pt, pt1 = pt1, pt2 = pt2 )
 
+    def is_mostly_inside_rect(self, xy: V2d, width: Fraction, height: Fraction):
+        return self.pt.is_inside_rect(xy, width, height) if self.pt is not None else True
 
 class VPath:
     def __init__(self, segments: List[VSegment]):
@@ -482,3 +484,6 @@ class VPath:
     def scale(self, scalefactor: Fraction):
         newsegments = [segment.scale(scalefactor) for segment in self.segments]
         return VPath(newsegments)
+
+    def is_mostly_inside_rect(self, xy: V2d, width: Fraction, height: Fraction):
+        return set([ segment.is_mostly_inside_rect(xy, width, height) for segment in self.segments]) == set([True])

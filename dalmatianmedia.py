@@ -446,12 +446,12 @@ class SvgRenderingConfig:
         return as_float_string(self.brush_width)
 
 class PageBrushstroke:
-    def __init__(self, vpath: VPath):
+    def __init__(self, vpath: VPath, tags = Set[str]):
         self.vpath = vpath
-        # Adds tags
+        self.tags = tags
     
     def to_string(self):
-        return "pbs path {}".format(self.vpath.to_dalmatian_string())
+        return "pbs path {} tags {}".format(self.vpath.to_dalmatian_string(), list(self.tags))
     
     def __str__(self):
         return self.to_string()
@@ -467,7 +467,7 @@ class PageBrushstroke:
         return element
     
     def zoom_to(self, xy: V2d, width: Fraction):
-        return PageBrushstroke(self.vpath.translate(-xy).scale(Fraction(1) / width))
+        return PageBrushstroke(self.vpath.translate(-xy).scale(Fraction(1) / width), self.tags)
 
 class DalmatianMedia:
     
@@ -645,10 +645,13 @@ class DalmatianMedia:
 
 
     def to_page_brushstroke_list(self)-> List[PageBrushstroke]:
-        return [ PageBrushstroke(self.get_brush_by_id(bs.brushid).vpath.rotate(bs.angle).scale(self.headers.brush_page_ratio).scale(bs.scale).translate(bs.xy)) for bs in self.brushstrokes]
+        return [ PageBrushstroke(self.get_brush_by_id(bs.brushid).vpath.rotate(bs.angle).scale(self.headers.brush_page_ratio).scale(bs.scale).translate(bs.xy), set(bs.tags)) for bs in self.brushstrokes]
 
     def page_brushstroke_list_for_view(self, view: DlmtView) -> List[PageBrushstroke]:
-        return [pbs.zoom_to(view.xy, view.width) for pbs in self.to_page_brushstroke_list()]
+        bs4tags = [pbs for pbs in self.to_page_brushstroke_list() if view.accept_tags(pbs.tags)]
+        bs4opt = [pbs for pbs in bs4tags if pbs.vpath.is_mostly_inside_rect(view.xy, width = view.width, height = view.height)] if "O" in view.flags else bs4tags
+        newbrushstokes = [pbs.zoom_to(view.xy, view.width) for pbs in bs4opt]
+        return newbrushstokes
 
     def to_xml_svg(self, renderConfig: SvgRenderingConfig)->ElementTree:
         svg = ET.Element('svg', attrib = { "xmlns": "http://www.w3.org/2000/svg", "xmlns:xlink": "http://www.w3.org/1999/xlink", "viewBox": renderConfig.to_page_view_box()})
