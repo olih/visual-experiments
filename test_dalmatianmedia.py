@@ -183,6 +183,22 @@ class TestDalmatianMedia(unittest.TestCase):
         self.assertNotEqual(len(pblistforview), len(pblist))
         self.assertEqual(len(pblistforview), 4)
 
+    def test_to_page_brushstroke_list_for_view_tags(self):
+        viewallbut2 = DlmtView.from_string("view i:1 lang en-gb xy 0 0 width 1/1 height 1/1 flags OC tags all but [ i:2 ]-> everything")
+        viewnonebut3 = DlmtView.from_string("view i:1 lang en-gb xy 0 0 width 1/1 height 1/1 flags OC tags none but [ i:3 ]-> everything")
+        media = DalmatianMedia(DlmtHeaders().set_brush_page_ratio(Fraction("1/100")))
+        media.add_view(viewallbut2)
+        media.add_tag_description_string("tag i:1 lang en-gb same-as [] -> tag1")
+        media.add_tag_description_string("tag i:2 lang en-gb same-as [] -> tag2")
+        media.add_tag_description_string("tag i:3 lang en-gb same-as [] -> tag3")
+        media.add_brush_string(homeBrush)
+        media.add_brushstroke_string("brushstroke i:1 xy 10/100 10/100 scale 1 angle 0/1 tags [ i:1 ]")
+        media.add_brushstroke_string("brushstroke i:1 xy 20/100 10/100 scale 1 angle 0/1 tags [ i:1, i:2 ]")
+        media.add_brushstroke_string("brushstroke i:1 xy 30/100 10/100 scale 1 angle 0/1 tags [ i:2 ]")
+        media.add_brushstroke_string("brushstroke i:1 xy 40/100 10/100 scale 1 angle 0/1 tags [ i:3 ]")    
+        self.assertEqual(len(media.page_brushstroke_list_for_view(viewallbut2)), 2)
+        self.assertEqual(len(media.page_brushstroke_list_for_view(viewnonebut3)), 1)
+
     def test_export_svg(self):
         media = DalmatianMedia(DlmtHeaders().set_brush_page_ratio(Fraction("1/100")))
         media.add_view_string("view i:1 lang en-gb xy 0 0 width 1/1 height 1/1 flags OC tags all but [ ] -> everything")
