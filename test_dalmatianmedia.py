@@ -144,9 +144,34 @@ class TestDalmatianMedia(unittest.TestCase):
         self.assertEqual(pblist[0].to_string(), "pbs path [ M -1/150 8/75,L 0 1/10,L 1/150 8/75,L 1/150 7/75,L -1/150 7/75 ]")
         self.assertEqual(pblist[1].to_string(), "pbs path [ M 7/75 8/75,L 1/10 1/10,L 8/75 8/75,L 8/75 7/75,L 7/75 7/75 ]")
 
+    def test_to_page_brushstroke_list_for_view_all(self):
+        theview = DlmtView.from_string("view i:1 lang en-gb xy 0 0 width 1/1 height 1/1 flags OC tags all but [ ]-> everything")
+        media = DalmatianMedia(DlmtHeaders().set_brush_page_ratio(Fraction("1/100")))
+        media.add_view(theview)
+        media.add_tag_description_string("tag i:1 lang en-gb same-as [] -> default tag")
+        media.add_brush_string(homeBrush)
+        for i in range(0, 90, 10):
+            media.add_brushstroke_string("brushstroke i:1 xy {}/100 10/100 scale 1 angle 0/1 tags [ i:1 ]".format(i))
+        pblist = media.to_page_brushstroke_list()
+        pblistforview = media.page_brushstroke_list_for_view(theview)       
+        self.assertEqual(pblist, pblistforview)
+
+    def test_to_page_brushstroke_list_for_view_zoom(self):
+        theview = DlmtView.from_string("view i:2 lang en-gb xy 20/100 20/100 width 1/2 height 1/2 flags OC tags all but [ ] -> everything")
+        media = DalmatianMedia(DlmtHeaders().set_brush_page_ratio(Fraction("1/100")))
+        media.add_view(theview)
+        media.add_tag_description_string("tag i:1 lang en-gb same-as [] -> default tag")
+        media.add_brush_string(homeBrush)
+        for i in range(0, 90, 10):
+            media.add_brushstroke_string("brushstroke i:1 xy {}/100 10/100 scale 1 angle 0/1 tags [ i:1 ]".format(i))
+        pblist = media.to_page_brushstroke_list()
+        pblistforview = media.page_brushstroke_list_for_view(theview)
+        self.assertNotEqual(pblist, pblistforview)
+
     def test_export_svg(self):
         media = DalmatianMedia(DlmtHeaders().set_brush_page_ratio(Fraction("1/100")))
         media.add_view_string("view i:1 lang en-gb xy 0 0 width 1/1 height 1/1 flags OC tags all but [ ] -> everything")
+        media.add_view_string("view i:2 lang en-gb xy 20/100 20/100 width 1/2 height 1/2 flags OC tags all but [ ] -> everything")
         media.add_tag_description_string("tag i:1 lang en-gb same-as [] -> default tag")
         media.add_brush_string(homeBrush)
         for i in range(0, 90, 10):
@@ -159,3 +184,4 @@ class TestDalmatianMedia(unittest.TestCase):
             media.add_brushstroke_string("brushstroke i:1 xy {}/100 50/100 scale 3 angle {}/90 tags [ i:1 ]".format(i, i))
 
         media.to_xml_svg_file(media.create_page_pixel_coordinate("i:1", 100), "examples/one.svg")
+        media.to_xml_svg_file(media.create_page_pixel_coordinate("i:2", 100), "examples/one-zoom.svg")

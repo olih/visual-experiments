@@ -448,6 +448,7 @@ class SvgRenderingConfig:
 class PageBrushstroke:
     def __init__(self, vpath: VPath):
         self.vpath = vpath
+        # Adds tags
     
     def to_string(self):
         return "pbs path {}".format(self.vpath.to_dalmatian_string())
@@ -459,11 +460,14 @@ class PageBrushstroke:
         return self.to_string()
 
     def __eq__(self, other):
-        return self.vpath == self.vpath
+        return self.vpath == other.vpath
 
     def to_xml_svg(self, renderConfig: SvgRenderingConfig):
         element = ET.Element('path', attrib = { "d": self.vpath.to_svg_string(float(renderConfig.view_pixel_width), float(renderConfig.view_pixel_height) ) })
         return element
+    
+    def zoom_to(self, xy: V2d, width: Fraction):
+        return PageBrushstroke(self.vpath.translate(-xy).scale(Fraction(1) / width))
 
 class DalmatianMedia:
     
@@ -642,11 +646,13 @@ class DalmatianMedia:
 
     def to_page_brushstroke_list(self)-> List[PageBrushstroke]:
         return [ PageBrushstroke(self.get_brush_by_id(bs.brushid).vpath.rotate(bs.angle).scale(self.headers.brush_page_ratio).scale(bs.scale).translate(bs.xy)) for bs in self.brushstrokes]
-            
+
+    def page_brushstroke_list_for_view(self, view: DlmtView) -> List[PageBrushstroke]:
+        return [pbs.zoom_to(view.xy, view.width) for pbs in self.to_page_brushstroke_list()]
 
     def to_xml_svg(self, renderConfig: SvgRenderingConfig)->ElementTree:
         svg = ET.Element('svg', attrib = { "xmlns": "http://www.w3.org/2000/svg", "xmlns:xlink": "http://www.w3.org/1999/xlink", "viewBox": renderConfig.to_page_view_box()})
-        for pbs in self.to_page_brushstroke_list():
+        for pbs in self.page_brushstroke_list_for_view(renderConfig.view):
             svg.append(pbs.to_xml_svg(renderConfig))
         return ElementTree(svg)
 
