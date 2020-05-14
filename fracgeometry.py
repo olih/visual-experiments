@@ -2,7 +2,7 @@ from fractions import Fraction
 from typing import List, Tuple
 from enum import Enum, auto
 from random import sample, choice
-from math import pi, radians, cos, sin
+from math import pi, radians, cos, sin, atan, degrees
 
 def cosFract(fract):
     numerator = int(1000*cos(radians(360*fract)))
@@ -11,6 +11,10 @@ def cosFract(fract):
 def sinFract(fract):
     numerator = int(1000*sin(radians(360*fract)))
     return Fraction("{}/1000".format(numerator))
+
+def atanFract(fract):
+    angle = degrees(atan(fract)) / 360
+    return Fraction("{}/1000".format(angle))
 
 class V2d:
     def __init__(self, x: Fraction, y: Fraction):
@@ -21,6 +25,12 @@ class V2d:
     def from_string(cls, value: str):
         x, y = value.strip().split(" ")
         return cls(Fraction(x), Fraction(y))
+
+    @classmethod
+    def from_amplitude_angle(cls, amplitude: Fraction, angle: Fraction):
+        x = amplitude * cosFract(angle)
+        y = amplitude * sinFract(angle)
+        return cls(x, y)
 
     def clone(self):
         return V2d(self.x, self.y)
@@ -66,6 +76,9 @@ class V2d:
 
     def square_magnitude(self):
         return self.x**2 + self.y**2
+
+    def get_angle(self)->Fraction:
+        return atanFract(self.y / self.x)
 
     def rotate(self, angle: Fraction):
         if angle == Fraction(0):

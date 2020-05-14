@@ -10,9 +10,6 @@ from random import sample, choice, randint
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
 from breeding import ProductionGame
 
-
-import dalmatianhelper
-
 today = date.today()
 BRUSH_WIDTH=34
 
