@@ -75,50 +75,99 @@ class TortugaCycle(Generic[T]):
     def current(self)->T:
         return self.values[self.idx]
 
-class TortugaState:
-    def __init__(self, xy: V2d, previous_xy: V2d, anglecycle: TortugaCycle[Fraction], lengthcycle: TortugaCycle[Fraction], brushcycle: TortugaCycle[str], verb: TortugaAction, obj: TortugaAction, length_to_brush_scale: Fraction):
-        self.xy = xy
-        self.previous_xy = previous_xy
-        self.anglecycle = anglecycle
-        self.lengthcycle = lengthcycle
-        self.brushcycle = brushcycle
-        self.current_verb = verb
-        self.current_obj = obj
-        self.length_to_brush_scale = length_to_brush_scale
-    
-    def clone(self):
-        return TortugaState(self.xy, self.previous_xy, self.anglecycle.clone(), self.lengthcycle.clone(), self.brushcycle.clone(), verb = self.current_verb, obj = self.current_obj, length_to_brush_scale = self.length_to_brush_scale)
+class TortugaConfig:
+    def __init__(self):
+        self.chain = ""
+        self.xy = V2d.from_string("0/1 0/1")
+        self.angles = FractionList.from_string("0/4 1/4 1/2 3/4")
+        self.magnitudes = FractionList.from_string("1 2 3 4")
+        self.brushids = ["i:1"]
+        self.magnitude_to_brush_scale = FractionList(1)
 
-    def process_verb_obj(self):
-        verb = self.current_verb
-        obj = self.current_obj
+    def set_chain(self, chain: str):
+        self.chain = chain
+        return self
+
+    def set_xy(self, xy: V2d):
+        self.xy = xy
+        return self
+
+    def set_angles(self, angles: List[Fraction]):
+        self.angles = angles
+        return self
+
+    def set_angles_string(self, value: str):
+        return self.set_angles(FractionList.from_string(value))
+
+    def set_magnitudes(self, magnitudes: List[Fraction]):
+        self.magnitudes = magnitudes
+        return self
+
+    def set_magnitudes_string(self, value: str):
+        return self.set_magnitudes(FractionList.from_string(value))
+
+    def set_brush_ids(self, brushids: List[str]):
+        self.brushids = brushids
+        return self
+
+    def set_magnitude_to_brush_scale(self, value: Fraction):
+        self.magnitude_to_brush_scale = value
+        return self
+
+class TortugaState:
+    def __init__(self, config: TortugaConfig):
+        self.config = config
+        self.xy = config.xy
+        self.previous_xy = config.xy
+        self.anglecycle = TortugaCycle(config.angles, 0)
+        self.magnitudecycle = TortugaCycle(config.magnitudes, 0)
+        self.brushcycle = TortugaCycle(config.brushids, 0)
+        self.target = TortugaAction.ANGLE
+
+    def set_target(self, target: TortugaAction):
+        self.target = target
+        return self
+
+    def set_position(self, xy: V2d, previous_xy: V2d):
+        self.previous_xy = previous_xy
+        self.xy = xy
+        return self
+
+    def set_cycles(self, anglecycle: TortugaCycle[Fraction], amplitudecycle: TortugaCycle[Fraction],  brushcycle: TortugaCycle[str]):
+        self.anglecycle = anglecycle
+        self.amplitudecycle = amplitudecycle
+        self.brushcycle = brushcycle
+
+
+    def activate_verb(self, verb: TortugaAction):
+        target = self.target
         # Angle
-        if verb == TortugaAction.NEXT and obj == TortugaAction.ANGLE:
+        if verb == TortugaAction.NEXT and target == TortugaAction.ANGLE:
             return self.anglecycle.next()
-        elif verb == TortugaAction.PREVIOUS and obj == TortugaAction.ANGLE:
+        elif verb == TortugaAction.PREVIOUS and target == TortugaAction.ANGLE:
             return self.anglecycle.previous()
-        elif verb == TortugaAction.RESET and obj == TortugaAction.ANGLE:
+        elif verb == TortugaAction.RESET and target == TortugaAction.ANGLE:
             return self.anglecycle.reset()
         # Length
-        if verb == TortugaAction.NEXT and obj == TortugaAction.LENGTH:
-            return self.lengthcycle.next()
-        elif verb == TortugaAction.PREVIOUS and obj == TortugaAction.LENGTH:
-            return self.lengthcycle.previous()
-        elif verb == TortugaAction.RESET and obj == TortugaAction.LENGTH:
-            return self.lengthcycle.reset()
+        if verb == TortugaAction.NEXT and target == TortugaAction.LENGTH:
+            return self.magnitudecycle.next()
+        elif verb == TortugaAction.PREVIOUS and target == TortugaAction.LENGTH:
+            return self.magnitudecycle.previous()
+        elif verb == TortugaAction.RESET and target == TortugaAction.LENGTH:
+            return self.magnitudecycle.reset()
         # Brush
-        if verb == TortugaAction.NEXT and obj == TortugaAction.BRUSH:
+        if verb == TortugaAction.NEXT and target == TortugaAction.BRUSH:
             return self.brushcycle.next()
-        elif verb == TortugaAction.PREVIOUS and obj == TortugaAction.BRUSH:
+        elif verb == TortugaAction.PREVIOUS and target == TortugaAction.BRUSH:
             return self.brushcycle.previous()
-        elif verb == TortugaAction.RESET and obj == TortugaAction.BRUSH:
+        elif verb == TortugaAction.RESET and target == TortugaAction.BRUSH:
             return self.brushcycle.reset()
         else:
-            raise Exception("Unexpected verb {} and object {}".format(verb, obj))
-    
-    def current_angle(self):
-        return self.anglecycle.current() 
-
+            raise Exception("Unexpected verb {} and object {}".format(verb, target))
+        
+    def clone(self):
+        return TortugaState(self.config).set_position(self.xy, self.previous_xy).set_cycles(self.anglecycle, self.magnitudecycle, self.brushcycle).set_target(self.target)
+   
     def angle_previous_vector(self):
         if self.xy == self.previous_xy:
             return Fraction(0)
@@ -126,46 +175,31 @@ class TortugaState:
             delta = self.xy - self.previous_xy
             return delta.get_angle()
 
-    def current_length(self):
-        return self.lengthcycle.current() 
+    def current_angle(self):
+        return self.anglecycle.current() 
+
+    def current_magnitude(self):
+        return self.magnitudecycle.current() 
 
     def current_brush(self):
         return self.brushcycle.current()
 
-    def set_verb(self, verb: TortugaAction):
-        self.current_verb = verb
-        return self
-
-    def set_obj(self, obj: TortugaAction):
-        self.current_obj = obj
-        return self
-
-    def set_xy(self, xy: V2d):
-        self.previous_xy = self.xy
-        self.xy = xy
-        return self
-
     def create_brushstroke(self):
         angle = self.angle_previous_vector() + self.current_angle()
-        xy_delta = V2d.from_amplitude_angle(self.current_length, angle)
+        xy_delta = V2d.from_amplitude_angle(self.current_magnitude, angle)
         new_xy = self.xy + xy_delta
         self.set_xy(new_xy)
-        scale = self.current_length * self.length_to_brush_scale
+        scale = self.current_magnitude() * self.config.magnitude_to_brush_scale
         return DlmtBrushstroke(brushid = self.current_brush(), xy = new_xy, scale = scale, angle = angle, tags=[])
 
 
 
 class TortugaProducer:
-    def __init__(self, chain: str, xy: V2d,  angles: List[Fraction], lengths: List[Fraction], brushids: List[str], length_to_brush_scale: Fraction):
-        self.chain = chain
-        self.xy = xy
-        self.angles = angles
-        self.lengths = lengths
-        self.brushids = brushids
-        self.length_to_brush_scale = length_to_brush_scale
-        anyactions = [TortugaAction.from_string(c) for c in chain]
+    def __init__(self, config: TortugaConfig):
+        self.config = config
+        anyactions = [TortugaAction.from_string(c) for c in config.chain]
         self.actions = [action for action in anyactions if action != TortugaAction.IGNORE]
-        self.state = TortugaState(xy, xy, TortugaCycle(angles), TortugaCycle(lengths), TortugaCycle(brushids), verb = TortugaAction.RESTORE, obj = TortugaAction.BRUSH, length_to_brush_scale = length_to_brush_scale)
+        self.state = TortugaState(config)
         self.state_stack = deque()
 
     def save_state(self):

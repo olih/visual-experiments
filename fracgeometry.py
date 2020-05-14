@@ -214,10 +214,13 @@ class FractionList:
     def __getitem__(self, index):
         return self.values[index]
 
-    def choice(self):
+    def to_list(self)->List[Fraction]:
+        return self.values.copy()
+
+    def choice(self)->Fraction:
         return choice(self.values)
 
-    def signed_choice(self):
+    def signed_choice(self)->Fraction:
         return choice(self.values)*choice([1, -1])
 
     def signed_sample(self, count = 2, sep=" ")->str:
