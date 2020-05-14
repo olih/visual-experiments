@@ -13,7 +13,7 @@ def sinFract(fract):
     return Fraction("{}/1000".format(numerator))
 
 def atanFract(fract):
-    angle = degrees(atan(fract)) / 360
+    angle = int(degrees(atan(fract)) / 360)
     return Fraction("{}/1000".format(angle))
 
 class V2d:
