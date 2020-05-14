@@ -24,3 +24,16 @@ class TestTortugaState(unittest.TestCase):
         self.assertEqual(state.activate_verb(TortugaAction.NEXT).create_brushstroke(), "brushstroke i:1 xy 19/100 1/10 scale 6 angle 0 tags [  ]")
         self.assertEqual(state.activate_verb(TortugaAction.PREVIOUS).create_brushstroke(), "brushstroke i:1 xy 11/50 1/10 scale 9/2 angle 0 tags [  ]")
         self.assertEqual(state.activate_verb(TortugaAction.NEGATE).create_brushstroke(), "brushstroke i:1 xy 19/100 1/10 scale 9/2 angle 0 tags [  ]")
+
+    def test_angle(self):
+        state = TortugaState(refconfig.clone().set_xy_string("10/100 10/100")).set_target(TortugaAction.ANGLE)
+        self.assertEqual(state.activate_verb(TortugaAction.NEXT).create_brushstroke(), "brushstroke i:1 xy 1/10 11/100 scale 3/2 angle 1/4 tags [  ]")
+        self.assertEqual(state.activate_verb(TortugaAction.NEXT).create_brushstroke(), "brushstroke i:1 xy 9/100 11/100 scale 3/2 angle 1/2 tags [  ]")
+        self.assertEqual(state.activate_verb(TortugaAction.NEXT).create_brushstroke(), "brushstroke i:1 xy 9/100 1/10 scale 3/2 angle 3/4 tags [  ]")
+        self.assertEqual(state.activate_verb(TortugaAction.PREVIOUS).create_brushstroke(), "brushstroke i:1 xy 2/25 1/10 scale 3/2 angle 1/2 tags [  ]")
+        self.assertEqual(state.activate_verb(TortugaAction.NEGATE).create_brushstroke(), "brushstroke i:1 xy 7/100 1/10 scale 3/2 angle -1/2 tags [  ]")
+    
+    def test_angle_offset(self):
+        state = TortugaState(refconfig.clone().set_xy_string("10/100 10/100").set_brushstoke_angle_offset_string("1/5")).set_target(TortugaAction.ANGLE)
+        self.assertEqual(state.activate_verb(TortugaAction.NEXT).create_brushstroke(), "brushstroke i:1 xy 1/10 11/100 scale 3/2 angle 9/20 tags [  ]")
+        self.assertEqual(state.activate_verb(TortugaAction.NEXT).create_brushstroke(), "brushstroke i:1 xy 9/100 11/100 scale 3/2 angle 7/10 tags [  ]")

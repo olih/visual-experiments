@@ -84,14 +84,15 @@ class TortugaConfig:
         self.brushids = ["i:1"]
         self.magnitude_page_ratio = Fraction("1/100")
         self.scale_magnitude_ratio = Fraction("1/1")
+        self.brushstoke_angle_offset = Fraction(0)
 
     def __eq__(self, other):
-        thisone = (self.chain, self.xy, self.angles, self.magnitudes, self.brushids, self.magnitude_page_ratio, self.scale_magnitude_ratio )
-        otherone = (other.chain, other.xy, other.angles, other.magnitudes, other.brushids, other.magnitude_page_ratio, other.scale_magnitude_ratio )
+        thisone = (self.chain, self.xy, self.angles, self.magnitudes, self.brushids, self.magnitude_page_ratio, self.scale_magnitude_ratio, self.brushstoke_angle_offset )
+        otherone = (other.chain, other.xy, other.angles, other.magnitudes, other.brushids, other.magnitude_page_ratio, other.scale_magnitude_ratio, other.brushstoke_angle_offset )
         return thisone == otherone
 
     def clone(self):
-        return TortugaConfig().set_chain(self.chain).set_xy(self.xy).set_angles(self.angles).set_magnitudes(self.magnitudes).set_brush_ids(self.brushids).set_magnitude_page_ratio(self.magnitude_page_ratio).set_scale_magnitude_ratio(self.scale_magnitude_ratio)
+        return TortugaConfig().set_chain(self.chain).set_xy(self.xy).set_angles(self.angles).set_magnitudes(self.magnitudes).set_brush_ids(self.brushids).set_magnitude_page_ratio(self.magnitude_page_ratio).set_scale_magnitude_ratio(self.scale_magnitude_ratio).set_brushstoke_angle_offset(self.brushstoke_angle_offset)
 
     def set_chain(self, chain: str):
         self.chain = chain
@@ -135,6 +136,13 @@ class TortugaConfig:
 
     def set_scale_magnitude_ratio_string(self, value: str):
         return self.set_scale_magnitude_ratio(Fraction(value))
+
+    def set_brushstoke_angle_offset(self, value: Fraction):
+        self.brushstoke_angle_offset = value
+        return self
+    
+    def set_brushstoke_angle_offset_string(self, value: str):
+        return self.set_brushstoke_angle_offset(Fraction(value))
 
 
 class TortugaState:
@@ -219,12 +227,13 @@ class TortugaState:
         return self.brushcycle.current()
 
     def create_brushstroke(self):
-        angle = self.angle_previous_vector() + self.current_angle()
+        angle = self.angle_previous_vector() + self.sign_angle()*self.current_angle()
         xy_delta = V2d.from_amplitude_angle(self.current_magnitude()*self.config.magnitude_page_ratio*self.sign_magnitude(), angle)
         new_xy = self.xy + xy_delta
         self.set_position(new_xy, self.xy)
         scale = self.current_magnitude() * self.config.scale_magnitude_ratio
-        return DlmtBrushstroke(brushid = self.current_brush(), xy = new_xy, scale = scale, angle = angle, tags=[])
+        brush_angle = angle + self.config.brushstoke_angle_offset
+        return DlmtBrushstroke(brushid = self.current_brush(), xy = new_xy, scale = scale, angle = brush_angle, tags=[])
 
 
 

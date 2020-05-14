@@ -78,7 +78,8 @@ class V2d:
         return self.x**2 + self.y**2
 
     def get_angle(self)->Fraction:
-        return atanFract(self.y / self.x)
+        x = self.x if not self.x == 0 else Fraction(1,1000000)
+        return atanFract(self.y / x)
 
     def rotate(self, angle: Fraction):
         if angle == Fraction(0):
