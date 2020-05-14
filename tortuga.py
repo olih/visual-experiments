@@ -10,7 +10,7 @@ T = TypeVar('T')
 
 class TortugaAction(Enum):
     ANGLE = auto()
-    LENGTH = auto()
+    AMPLITUDE = auto()
     BRUSH = auto()
     POINT = auto()
     NEXT = auto()
@@ -26,7 +26,7 @@ class TortugaAction(Enum):
         if value == "A":
             return TortugaAction.ANGLE
         elif value == "L":
-            return TortugaAction.LENGTH
+            return TortugaAction.AMPLITUDE
         elif value == "B":
             return TortugaAction.BRUSH
         elif value == "P":
@@ -169,23 +169,23 @@ class TortugaState:
         elif verb == TortugaAction.NEGATE and target == TortugaAction.ANGLE:
             self.anglecycle[1].next()
         # Length
-        if verb == TortugaAction.NEXT and target == TortugaAction.LENGTH:
+        elif verb == TortugaAction.NEXT and target == TortugaAction.AMPLITUDE:
             self.magnitudecycle[0].next()
-        elif verb == TortugaAction.PREVIOUS and target == TortugaAction.LENGTH:
+        elif verb == TortugaAction.PREVIOUS and target == TortugaAction.AMPLITUDE:
             self.magnitudecycle[0].previous()
-        elif verb == TortugaAction.RESET and target == TortugaAction.LENGTH:
+        elif verb == TortugaAction.RESET and target == TortugaAction.AMPLITUDE:
             self.magnitudecycle[0].reset()
-        elif verb == TortugaAction.NEGATE and target == TortugaAction.LENGTH:
+        elif verb == TortugaAction.NEGATE and target == TortugaAction.AMPLITUDE:
             self.magnitudecycle[1].reset()
         # Brush
-        if verb == TortugaAction.NEXT and target == TortugaAction.BRUSH:
+        elif verb == TortugaAction.NEXT and target == TortugaAction.BRUSH:
             self.brushcycle.next()
         elif verb == TortugaAction.PREVIOUS and target == TortugaAction.BRUSH:
             self.brushcycle.previous()
         elif verb == TortugaAction.RESET and target == TortugaAction.BRUSH:
             self.brushcycle.reset()
         else:
-            raise Exception("Unexpected verb {} and object {}".format(verb, target))
+            raise Exception("Unexpected verb {} and target {}".format(verb, target))
         return self
         
     def clone(self):
