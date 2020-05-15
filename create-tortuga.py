@@ -38,29 +38,6 @@ parser.add_argument("-p", "--publish", help="publish the preserved stencils", de
 
 args = parser.parse_args()
 
-def createStencilId():
-    counterFilename = '{}/stencil/stencils-count.txt'.format(localDir)
-    with open(counterFilename, 'r') as file:
-        data = file.read().replace('\n', '')
-        counter = int(data)+1
-        with open(counterFilename, 'w') as wfile:
-            wfile.write(str(counter))
-            return stencilsHashids.encode(counter)
-
-def getFilename(filename):
-    return os.path.basename(filename)
-
-def getIdFromFilename(filename):
-    filename = getFilename(filename)
-    id = filename.replace('eval-','').replace('.svg','')
-    return int(id)
-
-def asTagInfo(line):
-    if not "\t" in line:
-        return { "tags": []}
-    filename, tagCSV =  line.split("\t")
-    return {"id": getIdFromFilename(filename), "tags": tagCSV }
-
 def extractIdWithTags():
     stream = os.popen("tag -l {}/eval-*".format(evalDir))
     lines = stream.readlines()

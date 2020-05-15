@@ -55,6 +55,9 @@ class TagInfo:
     def __eq__(self, other):
         return self.id == other.id and self.tags == other.tags
 
+    def has_tags(self):
+        return len(self.tags) > 0
+
     @classmethod
     def from_shell_string(cls, line: str, ext: str = ".svg", prefix: str = "eval-"):
         filename, tagCSV =  line.split("\t")
@@ -62,11 +65,14 @@ class TagInfo:
         tags = set(strip_string_array(tagCSV))
         return cls(id, tags)
 
-    @classmethod
-    def from_shell_string_list(cls, lines: List[str], ext: str = ".svg", prefix: str = "eval-"):
+    @staticmethod
+    def from_shell_string_list(lines: List[str], ext: str = ".svg", prefix: str = "eval-"):
         return [TagInfo.from_shell_string(line, ext, prefix) for line in lines if "\t" in line]
+    
+    @staticmethod
+    def list_to_dict(tags):
+        return { tag.id:tag for tag in tags }
      
-
 class ExperimentFS:
     def __init__(self, name: str, plural_name: str):
         self.local_dir = os.environ['OLI_LOCAL_DIR']
@@ -94,3 +100,9 @@ class ExperimentFS:
                 wfile.write(str(counter))
                 return self.hashids.encode(counter)
     
+    def extract_file_id_with_tags(self):
+        stream = os.popen("tag -l {}/eval-*".format(self.get_directory(TypicalDir.EVALUATION)))
+        lines = stream.readlines()
+        tagInfoLines = [asTagInfo(line.strip()) for line in lines ]
+        withTags = { tagInfo["id"]: tagInfo["tags"] for tagInfo in  tagInfoLines if len(tagInfo["tags"])>0 }
+        return withTags

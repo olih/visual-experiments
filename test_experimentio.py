@@ -16,3 +16,9 @@ class TestTagInfo(unittest.TestCase):
         self.assertEqual(len(tagInfos), 3)
         self.assertEqual(tagInfos[0], TagInfo(1, set([])))
         self.assertEqual(tagInfos[1], TagInfo(2, set(["blue", "yellow"])))
+
+    def test_list_to_dict(self):
+        blueTag = TagInfo(1, set(["blue"]))
+        redGreenTag = TagInfo(2, set(["red","green"]))
+        tagInfos = [blueTag, redGreenTag]
+        self.assertEqual(TagInfo.list_to_dict(tagInfos), { 1: blueTag, 2: redGreenTag })
