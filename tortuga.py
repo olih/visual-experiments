@@ -245,10 +245,32 @@ class TortugaProducer:
         self.state = TortugaState(config)
         self.state_stack = deque()
 
-    def save_state(self):
+    def _save_state(self):
         self.state_stack.append(self.state.clone())
 
-    def restore_state(self):
+    def _restore_state(self):
         if len(self.state_stack) > 0:
             self.state = self.state_stack.pop()
+    
+    def _reset_state(self):
+        self.state_stack = deque()
+
+    def produce(self)->List[DlmtBrushstroke]:
+        results = []
+        for action in self.actions:
+            if action in [TortugaAction.ANGLE, TortugaAction.AMPLITUDE, TortugaAction.BRUSH]:
+                self.state.set_target(action)
+            elif action in [TortugaAction.NEGATE, TortugaAction.NEXT, TortugaAction.PREVIOUS, TortugaAction.RESET]:
+                self.state.activate_verb(action)
+            elif action == TortugaAction.POINT:
+                brushstoke = self.state.create_brushstroke()
+                results.append(brushstoke)
+            elif action == TortugaAction.SAVE:
+                self._save_state()
+            elif action == TortugaAction.RESTORE:
+                self._restore_state()
+
+        return results
+
+
     
