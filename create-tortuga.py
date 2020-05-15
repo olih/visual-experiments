@@ -9,27 +9,14 @@ from datetime import date
 from random import sample, choice, randint
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
 from breeding import ProductionGame
+from experimentio import ExperimentFS, TypicalDir
+from tortuga import TortugaConfig, TortugaProducer
+from dalmatianmedia import DlmtView, DlmtTagDescription, DlmtBrush, DlmtBrushstroke, DlmtCoordinateSystem, DlmtBrushCoordinateSystem, DlmtHeaders, DalmatianMedia, SvgRenderingConfig
 
 today = date.today()
-BRUSH_WIDTH=34
 
-localDir = os.environ['OLI_LOCAL_DIR']
-
-stencilBaseURL = "https://olih.github.io/stencil/"
-authorURL = "https://olih.github.io/stencil/profile.html"
-
-
-def loadConfAsJson():
-    with open('{}/stencil/conf.json'.format(localDir), 'r') as jsonfile:
-        return json.load(jsonfile)
-
-jsonConf = loadConfAsJson()
-
-evalDir = jsonConf["stencils"]["evaluation-directory"]
-brushDir = jsonConf["stencils"]["brush-directory"]
-publishingDir = jsonConf["stencils"]["publishing-directory"]
-
-stencilsHashids = Hashids(salt=jsonConf["stencils"]["salt"], min_length=jsonConf["stencils"]["id-length"])
+xpfs = ExperimentFS("stencil", "stencils")
+xpfs.load()
 
 parser = argparse.ArgumentParser(description = 'Create a tortuga illustration')
 parser.add_argument("-f", "--file", help="the file containing the experiments.", required = True)
@@ -38,104 +25,20 @@ parser.add_argument("-p", "--publish", help="publish the preserved stencils", de
 
 args = parser.parse_args()
 
-def extractIdWithTags():
-    stream = os.popen("tag -l {}/eval-*".format(evalDir))
-    lines = stream.readlines()
-    tagInfoLines = [asTagInfo(line.strip()) for line in lines ]
-    withTags = { tagInfo["id"]: tagInfo["tags"] for tagInfo in  tagInfoLines if len(tagInfo["tags"])>0 }
-    return withTags
-
-def messup_stake(stake: V2dList):
-    if randint(1, 7) is 1:
-        return stake
-    newstake = stake.clone()
-    if randint(1, 4) is 1:
-        newstake = newstake.reverse()
-    if randint(1, 10) is 1:
-        newstake = newstake.mirror()
-
-    length = len(stake)
-    endslice = randint(4, length)
-    inc = randint(1, 4)
-    newstake = V2dList(newstake[:endslice:inc])
-    
-    if len(newstake)<5:
-        return messup_stake(stake)
-    else:
-        return newstake
-
-def addHidToSpecimen(specimen):
-    if not "hid" in specimen:
-        specimen["hid"] = createStencilId()
-    return specimen
-
-def publishableSpecimen(specimen):
-    hid = specimen["hid"]
-    name = "stencil-{}".format(hid)
-    stencil = specimen["stencil"]
-    summary = specimen["summary"]
-    return {
-            "content-url json en": "{}{}.json".format(stencilBaseURL, name),
-            "name": name,
-            "@type": "ImageObject",
-            "title en": "Stencil {}".format(name),
-            "description en": summary,
-            "author-url html en": authorURL,
-            "author en": "Olivier Huin",
-            "copyright-year": today.strftime("%Y"),
-            "license en": "Attribution-ShareAlike 4.0 International",
-            "license-url html en": "https://creativecommons.org/licenses/by-sa/4.0/legalcode",
-            "attribution-name en" : "Olivier Huin",
-            "homepage-url markdown en:": "https://github.com/olih/stencil/blob/master/README.md",
-            "stencil": stencil,
-            "brush-ratio": "1/1",
-            "brush-coordinate-system": "system cartesian right-dir + up-dir - origin-x 1/2 origin-y 1/2"
-    }
-
-def lightPublishableSpecimen(specimen):
-    hid = specimen["hid"]
-    name = "brush-{}".format(hid)
-    stencil = specimen["stencil"]
-    return {
-            "content-url json en": "{}{}.json".format(stencilBaseURL, name),
-            "name": name,
-            "title en": "Stencil {}".format(name),
-            "copyright-year": today.strftime("%Y"),
-            "stencil": stencil,
-            "brush-ratio": "1/1",
-            "brush-coordinate-system": "system cartesian right-dir + up-dir - origin-x 1/2 origin-y 1/2"
-    }
-def savePublishableSpecimen(name, specimenData):
-        with open('{}/{}.json'.format(publishingDir, name), 'w') as outfile:  
-            json.dump(specimenData, outfile, indent=2)
-
-def publishSpecimens(specimens):
-    for specimen in specimens:
-        if not "hid" in specimen:
-            continue
-        publishable = publishableSpecimen(specimen)
-        savePublishableSpecimen(publishable["name"], publishable)
-
 class Experimenting:
     def __init__(self, name):
         self.name = name
         self.content = {}
 
     def load(self):
-        with open('{}/{}.json'.format(evalDir, self.name), 'r') as jsonfile:
+        with open('{}/{}.json'.format(xpfs.get_directory(TypicalDir.EVALUATION), self.name), 'r') as jsonfile:
             self.content = json.load(jsonfile)
             self.pool = self.content["mutations"]["pool"]
-            self.fractionList= FractionList.from_string(self.pool["fractions"])
             self.init = self.content["mutations"]["init"]
-            self.variables = self.content["mutations"]["variables"]
             return self.content   
-    
-    def saveSpecimenSvg(self, name, specimenData):
-        with open('{}/{}.svg'.format(evalDir, name), 'w') as file:  
-            file.write(specimenData)
-    
+        
     def deleteSpecimenSvg(self):
-        oldSvgFiles = glob.glob('{}/eval-*.svg'.format(evalDir))
+        oldSvgFiles = glob.glob('{}/eval-*.svg'.format(xpfs.get_directory(TypicalDir.EVALUATION)))
         for filePath in oldSvgFiles:
             try:
                 os.remove(filePath)
@@ -144,7 +47,7 @@ class Experimenting:
 
 
     def save(self):
-        with open('{}/{}.json'.format(evalDir, self.name), 'w') as outfile:
+        with open('{}/{}.json'.format(xpfs.get_directory(TypicalDir.EVALUATION), self.name), 'w') as outfile:
                 json.dump(self.content, outfile, indent=2)
     
     def incId(self):
@@ -154,47 +57,57 @@ class Experimenting:
         return counter
     
     def createSpecimen(self):
-        stake = messup_stake(V2dList.from_dalmatian_string(choice(self.pool["stakes"]), sep=","))
-        spaghetti = randint(1, 2) is 1
-        fxWeight = FractionList.from_string(self.pool["fx-weights"]).choice()
-        deltas = V2dList.from_dalmatian_list(self.fractionList.signed_sample_list(len(stake), 2))
-        tweaks = self.fractionList.signed_sample_list(len(stake), 5)
-        points = stake + (deltas*fxWeight)
-        product = ProductionGame(chainlength = len(points) -1)
+        # Create L-System
+        product = ProductionGame(chainlength = randint(30, 100))
         product.set_constants("ABLPZ-<>[]").set_vars("IJK")
         product.init_with_random_rules(levels = 2, keyrules = self.pool["rules"])
         product.produce()
         product_obj = product.to_obj()
-        brush = toStencil(product.core_chain(), points, fxWeight, tweaks, spaghetti)
-        frequency_info = ", ".join(["{}:{}".format(k,v) for k, v in brush.action_frequency().items()])
+        
+        # Convert chain to brushstokes
+        tortugaconfig = TortugaConfig().set_magnitude_page_ratio_string("1/100").set_scale_magnitude_ratio_string("1/1")
+        angles = FractionList.from_string(self.pool["angles"]).signed_sample_list(self.init["angles"])
+        magnitudes = FractionList.from_string(self.pool["magnitudes"]).signed_sample_list(self.init["magnitudes"])
+        tortugaconfig.set_angles_string(angles)
+        tortugaconfig.set_magnitudes_string(magnitudes)
+        tortugaconfig.set_brush_ids(self.init["brushids"].split())
+        tortugaconfig.set_chain(product.chain)
+        brushstokes = TortugaProducer(tortugaconfig).produce()
+        
+        # Create stencil aka DalmatianMedia
+        stencil = DalmatianMedia(DlmtHeaders().set_brush_page_ratio_string("1/100"))
+        stencil.add_view_string("view i:1 lang en xy 0 0 width 1 height 1 flags O tags all but [ ] -> everything")
+        stencil.add_tag_description_string("tag i:1 lang en same-as [] -> default tag")
+        for brush in self.init["brushes"]:
+            stencil.add_brush_string(brush)
+        stencil.set_brushstrokes(brushstokes)
         ruleInfo = ", ".join([r["s"] + "->" + r["r"] for r in product_obj["rules"]])
-        summary = "Brush based on a stake of {} points, a weight of {} and the following rules {} starting with {} resulting in frequency {}".format(len(stake), fxWeight, ruleInfo , product_obj["start"], frequency_info)
+        summary = "Stencil based on the rules {} starting with {}".format(ruleInfo , product_obj["start"])
         return {    
                 "id": self.incId(),  
-                "fx-weight": str(fxWeight),
-                "stake": stake.to_dalmatian_list(),
-                "spaghetti": spaghetti,
-                "deltas": deltas.to_dalmatian_list(),
-                "tweaks": tweaks,
-                "points": points.to_dalmatian_list(),
                 "product": product_obj,
-                "brush": brush.to_dalmatian_string(),
-                "brush-svg": brush.to_svg_string(BRUSH_WIDTH),
-                "brush-cartesian": brush.to_core_cartesian_string(BRUSH_WIDTH),
+                "angles": angles,
+                "magnitudes": magnitudes,
+                "stencil": stencil.to_obj(),
                 "summary": summary,
                 "tags": ""
         }
+    
     def applyTags(self):
         specimens = self.content['specimens']
-        idWithTags = extractIdWithTags()
+        idWithTags = xpfs.search_eval_file_id_tags(".svg")
         for specimen in specimens:
             specimenId = specimen["id"]
-            if specimenId in idWithTags:
-                specimen["tags"] = idWithTags[specimenId]
-                print('Saved', specimen["summary"])
+            if not specimenId in idWithTags:
+                continue
+            filetags = idWithTags[specimenId]
+            if len(filetags.tags) == 0:
+                continue
+            specimen["tags"] = " ".join(list(filetags.tags))
+            print('Saved', specimen["summary"])
         bestspecimens = [specimen for specimen in specimens if len(specimen["tags"])> 0 ]
         if "yes" in args.publish.lower():
-            bestspecimens = [addHidToSpecimen(specimen) for specimen in self.content['specimens'] if "preserve" in specimen["tags"] ]
+            bestspecimens = [xpfs.ensure_publishing_id(specimen) for specimen in self.content['specimens'] if "preserve" in specimen["tags"] ]
         print("Total saved {}".format(len(bestspecimens)))
         self.content['specimens'] = bestspecimens
             
@@ -213,9 +126,9 @@ class Experimenting:
         for specimen in specimens:
             if len(specimen["tags"])>0:
                 continue
-            brushSvg = specimen["brush-svg"]
-            filename = "eval-{}".format(specimen["id"])
-            self.saveSpecimenSvg(filename, brushSvg)
+            stencil = DalmatianMedia.from_obj(specimen["stencil"])
+            filename = "{}/eval-{}.svg".format(xpfs.get_directory(TypicalDir.EVALUATION), specimen["id"])
+            stencil.to_xml_svg_file(stencil.create_page_pixel_coordinate("i:1", 100), filename)
             print('New', specimen["summary"])
     
     def saveEverything(self):
@@ -223,5 +136,4 @@ class Experimenting:
         self.save()
 
     def publish(self):
-        print("Publishing to {}".format(publishingDir))
-        publishSpecimens(self.content['specimens'])
+        print("Publishing to {}".format(xpfs.get_directory(TypicalDir.PUBLISHING)))

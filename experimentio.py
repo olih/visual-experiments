@@ -91,6 +91,10 @@ class ExperimentFS:
         self.hashids = Hashids(salt=self.config[self.plural_name]["salt"], min_length=self.config[self.plural_name]["id-length"])
         return self
 
+    def load(self):
+        self._load_config()
+        self._load_hasher()
+
     def create_publishing_id(self)->str:
         counterFilename = '{}/{}/{}-count.txt'.format(self.local_dir, self.name, self.plural_name)
         with open(counterFilename, 'r') as file:
@@ -100,9 +104,11 @@ class ExperimentFS:
                 wfile.write(str(counter))
                 return self.hashids.encode(counter)
     
-    def extract_file_id_with_tags(self):
-        stream = os.popen("tag -l {}/eval-*".format(self.get_directory(TypicalDir.EVALUATION)))
-        lines = stream.readlines()
-        tagInfoLines = [asTagInfo(line.strip()) for line in lines ]
-        withTags = { tagInfo["id"]: tagInfo["tags"] for tagInfo in  tagInfoLines if len(tagInfo["tags"])>0 }
-        return withTags
+    def search_eval_file_id_tags(self, ext: str = ".svg", prefix: str = "eval-"):
+        stream = os.popen("tag -l {}/{}*".format(self.get_directory(TypicalDir.EVALUATION), prefix))
+        return TagInfo.list_to_dict(TagInfo.from_shell_string_list(stream.readlines(), ext, prefix))
+
+    def ensure_publishing_id(self, item):
+        if not "hid" in item:
+            item["hid"] = self.create_publishing_id()
+        return item

@@ -345,7 +345,10 @@ class DlmtHeaders:
     def set_brush_page_ratio(self, value: Fraction):
         self.brush_page_ratio = value
         return self
-    
+
+    def set_brush_page_ratio_string(self, value: str):
+        return self.set_brush_page_ratio(Fraction(value))
+
     def set_prefixes(self, prefixes: Dict[str, str]):
         self.prefixes = prefixes
         return self
