@@ -488,7 +488,7 @@ class PageBrushstroke:
         return self.to_string()
 
     def __eq__(self, other):
-        return self.vpath == other.vpath
+        return self.vpath == other.vpath and self.tags == other.tags
 
     def to_xml_svg(self, renderConfig: SvgRenderingConfig):
         element = ET.Element('path', attrib = { "d": self.vpath.to_svg_string(float(renderConfig.view_pixel_width), float(renderConfig.view_pixel_height) ) })
@@ -680,6 +680,9 @@ class DalmatianMedia:
         bs4opt = [pbs for pbs in bs4tags if pbs.vpath.is_mostly_inside_rect(view.xy, width = view.width, height = view.height)] if "O" in view.flags else bs4tags
         newbrushstokes = [pbs.zoom_to(view.xy, view.width) for pbs in bs4opt]
         return newbrushstokes
+
+    def page_brushstroke_list_for_view_string(self, view: str) -> List[PageBrushstroke]:
+        return self.page_brushstroke_list_for_view(DlmtView.from_string(view))
 
     def to_xml_svg(self, renderConfig: SvgRenderingConfig)->ElementTree:
         svg = ET.Element('svg', attrib = { 

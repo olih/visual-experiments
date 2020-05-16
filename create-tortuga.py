@@ -33,6 +33,11 @@ class XpInitConf:
         self.magnitudes:int = content["magnitudes"]
         self.brushids: List[str] = content["brushids"]
         self.brushes: List[str] = content["brushes"]
+        self.xy: V2d = V2d.from_string(content["xy"])
+        self.magnitude_page_ratio: Fraction = Fraction(content["magnitude-page-ratio"]) # 1/100
+        self.brush_page_ratio: Fraction = Fraction(content["brush-page-ratio"]) # 1/100 better to keep consistent across stencils
+        self.scale_magnitude_ratio: Fraction = Fraction(content["scale-magnitude-ratio"]) # 1
+        self.brushstoke_angle_offset: Fraction = Fraction(content["brushstoke-angle-offset"]) # 0
 
 class XpPoolConf:
     def __init__(self, content):
@@ -49,7 +54,7 @@ class Experimenting:
     def load(self):
         with open('{}/{}.json'.format(xpfs.get_directory(TypicalDir.EVALUATION), self.name), 'r') as jsonfile:
             self.content = json.load(jsonfile)
-            self.pool = XpPoolConf(["mutations"]["pool"])
+            self.pool = XpPoolConf(self.content["mutations"]["pool"])
             self.init = XpInitConf(self.content["mutations"]["init"])
             return self.content   
         
@@ -74,16 +79,19 @@ class Experimenting:
     
     def createSpecimen(self):
         # Create L-System
-        product = ProductionGame(chainlength = randint(30, 100))
+        product = ProductionGame(chainlength = randint(30, 700))
         product.set_constants("ABLPZ-<>[]").set_vars("IJK")
-        product.init_with_random_rules(levels = 2, keyrules = self.pool.rules)
+        product.init_with_random_rules(levels = 4, keyrules = self.pool.rules)
         product.produce()
         product_obj = product.to_obj()
         
         # Convert chain to brushstokes
-        tortugaconfig = TortugaConfig().set_magnitude_page_ratio_string("1/100").set_scale_magnitude_ratio_string("1/1")
+        tortugaconfig = TortugaConfig().set_magnitude_page_ratio(self.init.magnitude_page_ratio)
+        tortugaconfig.set_scale_magnitude_ratio_string(self.init.scale_magnitude_ratio)
+        tortugaconfig.set_brushstoke_angle_offset(self.init.brushstoke_angle_offset)
+        tortugaconfig.set_xy(self.init.xy)
         angles = self.pool.angles.sample_as_string(self.init.angles)
-        magnitudes = self.pool.magnitudes.sample_as_string(self.init)
+        magnitudes = self.pool.magnitudes.sample_as_string(self.init.magnitudes)
         tortugaconfig.set_angles_string(angles)
         tortugaconfig.set_magnitudes_string(magnitudes)
         tortugaconfig.set_brush_ids(self.init.brushids)
@@ -91,14 +99,17 @@ class Experimenting:
         brushstokes = TortugaProducer(tortugaconfig).produce()
         
         # Create stencil aka DalmatianMedia
-        stencil = DalmatianMedia(DlmtHeaders().set_brush_page_ratio_string("1/100"))
-        stencil.add_view_string("view i:1 lang en xy 0 0 width 1 height 1 flags O tags all but [ ] -> everything")
+        stencil = DalmatianMedia(DlmtHeaders().set_brush_page_ratio(self.init.brush_page_ratio))
+        stencil.add_view_string("view i:1 lang en xy 0 0 width 1 height 1 flags o tags all but [ ] -> everything")
         stencil.add_tag_description_string("tag i:1 lang en same-as [] -> default tag")
         for brush in self.init.brushes:
             stencil.add_brush_string(brush)
         stencil.set_brushstrokes(brushstokes)
+        allbr = stencil.page_brushstroke_list_for_view_string("view i:1 lang en xy 0 0 width 1 height 1 flags o tags all but [ ] -> everything")
+        fitbr = stencil.page_brushstroke_list_for_view_string("view i:1 lang en xy 0 0 width 1 height 1 flags O tags all but [ ] -> everything")
+        fitness = Fraction(len(fitbr), len(allbr))
         ruleInfo = ", ".join([r["s"] + "->" + r["r"] for r in product_obj["rules"]])
-        summary = "Stencil based on the rules {} starting with {}".format(ruleInfo , product_obj["start"])
+        summary = "Stencil based on {} angles, {} magnitudes and on the rules {} starting with {} resulting in {} brushstokes with a fitness of {}".format(len(angles), len(magnitudes), ruleInfo , product_obj["start"], len(brushstokes), fitness)
         return {    
                 "id": self.incId(),  
                 "product": product_obj,
@@ -145,7 +156,7 @@ class Experimenting:
             stencil = DalmatianMedia.from_obj(specimen["stencil"])
             filename = "{}/eval-{}.svg".format(xpfs.get_directory(TypicalDir.EVALUATION), specimen["id"])
             stencil.to_xml_svg_file(stencil.create_page_pixel_coordinate("i:1", 100), filename)
-            print('New', specimen["summary"])
+            print("New: {} : {}".format(specimen["id"], specimen["summary"]))
     
     def saveEverything(self):
         self.saveSvg()
@@ -153,3 +164,8 @@ class Experimenting:
 
     def publish(self):
         print("Publishing to {}".format(xpfs.get_directory(TypicalDir.PUBLISHING)))
+
+experimenting = Experimenting(args.file)
+experimenting.load()
+experimenting.start()
+experimenting.saveEverything()

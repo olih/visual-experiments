@@ -225,7 +225,7 @@ class FractionList:
         return sample(self.values, listcount)
     
     def sample_as_string(self, listcount: int, sep=" ")->str:
-        return sep.join(self.sample(listcount))
+        return sep.join([str(i) for i in self.sample(listcount)])
 
     def signed_choice(self)->Fraction:
         return choice(self.values)*choice([1, -1])

@@ -74,18 +74,18 @@ class TagInfo:
         return { tag.id:tag for tag in tags }
      
 class ExperimentFS:
-    def __init__(self, name: str, plural_name: str):
-        self.local_dir = os.environ['OLI_LOCAL_DIR']
+    def __init__(self, name: str, plural_name: str, local_dir: str = os.environ['OLI_LOCAL_DIR']):
+        self.local_dir = local_dir
         self.name = name
         self.plural_name = plural_name
     
     def _load_config(self):
-        with open('{}/{}/conf.json'.format(self.name, self.local_dir), 'r') as jsonfile:
+        with open('{}/{}/conf.json'.format(self.local_dir, self.name), 'r') as jsonfile:
             self.config = json.load(jsonfile)
             return self
 
     def get_directory(self, dirtype: TypicalDir)->str:
-        return self.config[self.name][TypicalDir.to_string_key(dirtype)]
+        return self.config[self.plural_name][TypicalDir.to_string_key(dirtype)]
 
     def _load_hasher(self):
         self.hashids = Hashids(salt=self.config[self.plural_name]["salt"], min_length=self.config[self.plural_name]["id-length"])
