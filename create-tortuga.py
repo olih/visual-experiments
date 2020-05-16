@@ -7,6 +7,7 @@ import json
 import glob
 from datetime import date
 from random import sample, choice, randint
+from typing import List, Tuple, Dict, Set
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
 from breeding import ProductionGame
 from experimentio import ExperimentFS, TypicalDir
@@ -25,6 +26,21 @@ parser.add_argument("-p", "--publish", help="publish the preserved stencils", de
 
 args = parser.parse_args()
 
+class XpInitConf:
+    def __init__(self, content):
+        self.population: int = content["population"]
+        self.angles: int = content["angles"]
+        self.magnitudes:int = content["magnitudes"]
+        self.brushids: List[str] = content["brushids"]
+        self.brushes: List[str] = content["brushes"]
+
+class XpPoolConf:
+    def __init__(self, content):
+        self.angles: FractionList = FractionList.from_string(content["angles"])
+        self.magnitudes: FractionList = FractionList.from_string(content["magnitudes"])
+        self.rules: List[str] = content["rules"]
+
+
 class Experimenting:
     def __init__(self, name):
         self.name = name
@@ -33,8 +49,8 @@ class Experimenting:
     def load(self):
         with open('{}/{}.json'.format(xpfs.get_directory(TypicalDir.EVALUATION), self.name), 'r') as jsonfile:
             self.content = json.load(jsonfile)
-            self.pool = self.content["mutations"]["pool"]
-            self.init = self.content["mutations"]["init"]
+            self.pool = XpPoolConf(["mutations"]["pool"])
+            self.init = XpInitConf(self.content["mutations"]["init"])
             return self.content   
         
     def deleteSpecimenSvg(self):
@@ -60,17 +76,17 @@ class Experimenting:
         # Create L-System
         product = ProductionGame(chainlength = randint(30, 100))
         product.set_constants("ABLPZ-<>[]").set_vars("IJK")
-        product.init_with_random_rules(levels = 2, keyrules = self.pool["rules"])
+        product.init_with_random_rules(levels = 2, keyrules = self.pool.rules)
         product.produce()
         product_obj = product.to_obj()
         
         # Convert chain to brushstokes
         tortugaconfig = TortugaConfig().set_magnitude_page_ratio_string("1/100").set_scale_magnitude_ratio_string("1/1")
-        angles = FractionList.from_string(self.pool["angles"]).signed_sample_list(self.init["angles"])
-        magnitudes = FractionList.from_string(self.pool["magnitudes"]).signed_sample_list(self.init["magnitudes"])
+        angles = self.pool.angles.sample_as_string(self.init.angles)
+        magnitudes = self.pool.magnitudes.sample_as_string(self.init)
         tortugaconfig.set_angles_string(angles)
         tortugaconfig.set_magnitudes_string(magnitudes)
-        tortugaconfig.set_brush_ids(self.init["brushids"].split())
+        tortugaconfig.set_brush_ids(self.init.brushids)
         tortugaconfig.set_chain(product.chain)
         brushstokes = TortugaProducer(tortugaconfig).produce()
         
@@ -78,7 +94,7 @@ class Experimenting:
         stencil = DalmatianMedia(DlmtHeaders().set_brush_page_ratio_string("1/100"))
         stencil.add_view_string("view i:1 lang en xy 0 0 width 1 height 1 flags O tags all but [ ] -> everything")
         stencil.add_tag_description_string("tag i:1 lang en same-as [] -> default tag")
-        for brush in self.init["brushes"]:
+        for brush in self.init.brushes:
             stencil.add_brush_string(brush)
         stencil.set_brushstrokes(brushstokes)
         ruleInfo = ", ".join([r["s"] + "->" + r["r"] for r in product_obj["rules"]])
@@ -112,7 +128,7 @@ class Experimenting:
         self.content['specimens'] = bestspecimens
             
     def createNewPopulation(self):
-        population = self.init["population"]
+        population = self.init.population
         newspecimens = [ self.createSpecimen() for _ in range(population) ]
         self.content['specimens'] = self.content['specimens'] + newspecimens
     
