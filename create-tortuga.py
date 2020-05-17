@@ -109,7 +109,7 @@ class Experimenting:
         fitbr = stencil.page_brushstroke_list_for_view_string("view i:1 lang en xy 0 0 width 1 height 1 flags O tags all but [ ] -> everything")
         fitness = Fraction(len(fitbr), len(allbr))
         ruleInfo = ", ".join([r["s"] + "->" + r["r"] for r in product_obj["rules"]])
-        summary = "Stencil based on {} angles, {} magnitudes and on the rules {} starting with {} resulting in {} brushstokes with a fitness of {}".format(len(angles), len(magnitudes), ruleInfo , product_obj["start"], len(brushstokes), fitness)
+        summary = "Stencil based on [ {} ] angles, [ {} ] magnitudes and the rules {} starting with {} resulting in {} brushstokes with a fitness of {:.2%}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness))
         return {    
                 "id": self.incId(),  
                 "product": product_obj,
