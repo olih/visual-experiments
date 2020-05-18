@@ -222,7 +222,7 @@ class FractionList:
         return choice(self.values)
 
     def sample(self, listcount: int)->List[Fraction]:
-        return sample(self.values, listcount)
+        return sorted(sample(self.values, listcount))
     
     def sample_as_string(self, listcount: int, sep=" ")->str:
         return sep.join([str(i) for i in self.sample(listcount)])

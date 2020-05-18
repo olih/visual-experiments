@@ -13,6 +13,7 @@ from breeding import ProductionGame
 from experimentio import ExperimentFS, TypicalDir
 from tortuga import TortugaConfig, TortugaProducer
 from dalmatianmedia import DlmtView, DlmtTagDescription, DlmtBrush, DlmtBrushstroke, DlmtCoordinateSystem, DlmtBrushCoordinateSystem, DlmtHeaders, DalmatianMedia, SvgRenderingConfig
+from statistics import mean
 
 today = date.today()
 
@@ -44,6 +45,26 @@ class XpPoolConf:
         self.angles: FractionList = FractionList.from_string(content["angles"])
         self.magnitudes: FractionList = FractionList.from_string(content["magnitudes"])
         self.rules: List[str] = content["rules"]
+
+class BrushstrokesStats:
+    def __init__(self, brushstrokes: List[DlmtBrushstroke]):
+        self.brushstrokes = brushstrokes
+    
+    def get_ys(self)->List[Fraction]:
+        return [b.xy.y for b in self.brushstrokes]
+    
+    def get_normalised_ys(self)->List[Fraction]:
+        ys = self.get_ys()
+        amplitude = ys[-1] - ys[0]
+        return [y - amplitude for y in ys]
+
+    def get_line_deviation(self, nb = 3):
+        ys = self.get_normalised_ys()
+        amplitude = ys[-1] - ys[0]
+        ax = (ys[-1] - ys[0]) / len(ys)
+        interval = len(ys) // (nb + 1)
+        deviations = [abs(ys[i*interval]-i*interval*ax)/abs(i*interval*ax) for i in range(1, nb + 1)]
+        return mean(deviations)
 
 
 class Experimenting:
@@ -97,7 +118,7 @@ class Experimenting:
         tortugaconfig.set_brush_ids(self.init.brushids)
         tortugaconfig.set_chain(product.chain)
         brushstokes = TortugaProducer(tortugaconfig).produce()
-        
+        bstats = BrushstrokesStats(brushstokes)
         # Create stencil aka DalmatianMedia
         stencil = DalmatianMedia(DlmtHeaders().set_brush_page_ratio(self.init.brush_page_ratio))
         stencil.add_view_string("view i:1 lang en xy 0 0 width 1 height 1 flags o tags all but [ ] -> everything")
@@ -109,7 +130,7 @@ class Experimenting:
         fitbr = stencil.page_brushstroke_list_for_view_string("view i:1 lang en xy 0 0 width 1 height 1 flags O tags all but [ ] -> everything")
         fitness = Fraction(len(fitbr), len(allbr))
         ruleInfo = ", ".join([r["s"] + "->" + r["r"] for r in product_obj["rules"]])
-        summary = "Stencil based on [ {} ] angles, [ {} ] magnitudes and the rules {} starting with {} resulting in {} brushstokes with a fitness of {:.2%}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness))
+        summary = "Stencil based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a fitness of {:.2%} and deviation {:.2%}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), float(bstats.get_line_deviation()))
         return {    
                 "id": self.incId(),  
                 "product": product_obj,
