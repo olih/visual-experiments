@@ -13,6 +13,7 @@ class TortugaAction(Enum):
     AMPLITUDE = auto()
     BRUSH = auto()
     POINT = auto()
+    TAG = auto()
     NEXT = auto()
     PREVIOUS = auto()
     RESET = auto()
@@ -29,6 +30,8 @@ class TortugaAction(Enum):
             return TortugaAction.AMPLITUDE
         elif value == "B":
             return TortugaAction.BRUSH
+        elif value == "T":
+            return TortugaAction.TAG
         elif value == "P":
             return TortugaAction.POINT
         elif value == ">":
@@ -82,17 +85,28 @@ class TortugaConfig:
         self.angles = FractionList.from_string("0/4 1/4 1/2 3/4")
         self.magnitudes = FractionList.from_string("1 2 3 4")
         self.brushids = ["i:1"]
+        self.tags = ["i:1"]
         self.magnitude_page_ratio = Fraction("1/100")
         self.scale_magnitude_ratio = Fraction("1/1")
         self.brushstoke_angle_offset = Fraction(0)
 
     def __eq__(self, other):
-        thisone = (self.chain, self.xy, self.angles, self.magnitudes, self.brushids, self.magnitude_page_ratio, self.scale_magnitude_ratio, self.brushstoke_angle_offset )
-        otherone = (other.chain, other.xy, other.angles, other.magnitudes, other.brushids, other.magnitude_page_ratio, other.scale_magnitude_ratio, other.brushstoke_angle_offset )
+        thisone = (self.chain, self.xy, self.angles, self.magnitudes, self.tags, self.brushids, self.magnitude_page_ratio, self.scale_magnitude_ratio, self.brushstoke_angle_offset )
+        otherone = (other.chain, other.xy, other.angles, other.magnitudes,self.tags, other.brushids, other.magnitude_page_ratio, other.scale_magnitude_ratio, other.brushstoke_angle_offset )
         return thisone == otherone
 
     def clone(self):
-        return TortugaConfig().set_chain(self.chain).set_xy(self.xy).set_angles(self.angles).set_magnitudes(self.magnitudes).set_brush_ids(self.brushids).set_magnitude_page_ratio(self.magnitude_page_ratio).set_scale_magnitude_ratio(self.scale_magnitude_ratio).set_brushstoke_angle_offset(self.brushstoke_angle_offset)
+         cfg = TortugaConfig()
+         cfg.set_chain(self.chain)
+         cfg.set_xy(self.xy)
+         cfg.set_angles(self.angles)
+         cfg.set_magnitudes(self.magnitudes)
+         cfg.set_brush_ids(self.brushids)
+         cfg.set_tags(self.tags)
+         cfg.set_magnitude_page_ratio(self.magnitude_page_ratio)
+         cfg.set_scale_magnitude_ratio(self.scale_magnitude_ratio)
+         cfg.set_brushstoke_angle_offset(self.brushstoke_angle_offset)
+         return cfg
 
     def set_chain(self, chain: str):
         self.chain = chain
@@ -121,6 +135,10 @@ class TortugaConfig:
 
     def set_brush_ids(self, brushids: List[str]):
         self.brushids = brushids
+        return self
+
+    def set_tags(self, tags: List[str]):
+        self.tags = tags
         return self
 
     def set_magnitude_page_ratio(self, value: Fraction):
@@ -153,6 +171,7 @@ class TortugaState:
         self.anglecycle = (TortugaCycle(config.angles, 0), TortugaCycle([1, -1]))
         self.magnitudecycle = (TortugaCycle(config.magnitudes, 0), TortugaCycle([1, -1]))
         self.brushcycle = TortugaCycle(config.brushids, 0)
+        self.tagcycle = TortugaCycle(config.tags, 0)
         self.target = TortugaAction.ANGLE
 
     def set_target(self, target: TortugaAction):
@@ -164,10 +183,11 @@ class TortugaState:
         self.xy = xy
         return self
 
-    def set_cycles(self, anglecycle: (TortugaCycle[Fraction], TortugaCycle[int]), amplitudecycle: (TortugaCycle[Fraction],  TortugaCycle[int]),  brushcycle: TortugaCycle[str]):
+    def set_cycles(self, anglecycle: (TortugaCycle[Fraction], TortugaCycle[int]), amplitudecycle: (TortugaCycle[Fraction],  TortugaCycle[int]),  brushcycle: TortugaCycle[str], tagcycle: TortugaCycle[str]):
         self.anglecycle = anglecycle
         self.amplitudecycle = amplitudecycle
         self.brushcycle = brushcycle
+        self.tagcycle = tagcycle
         return self
 
     def activate_verb(self, verb: TortugaAction):
@@ -197,12 +217,19 @@ class TortugaState:
             self.brushcycle.previous()
         elif verb == TortugaAction.RESET and target == TortugaAction.BRUSH:
             self.brushcycle.reset()
+        # Tag
+        elif verb == TortugaAction.NEXT and target == TortugaAction.TAG:
+            self.tagcycle.next()
+        elif verb == TortugaAction.PREVIOUS and target == TortugaAction.TAG:
+            self.tagcycle.previous()
+        elif verb == TortugaAction.RESET and target == TortugaAction.TAG:
+            self.tagcycle.reset()
         else:
             raise Exception("Unexpected verb {} and target {}".format(verb, target))
         return self
         
     def clone(self):
-        return TortugaState(self.config).set_position(self.xy, self.previous_xy).set_cycles(self.anglecycle, self.magnitudecycle, self.brushcycle).set_target(self.target)
+        return TortugaState(self.config).set_position(self.xy, self.previous_xy).set_cycles(self.anglecycle, self.magnitudecycle, self.brushcycle, self.tagcycle).set_target(self.target)
    
     def angle_previous_vector(self):
         if self.xy == self.previous_xy:
@@ -226,6 +253,9 @@ class TortugaState:
     def current_brush(self):
         return self.brushcycle.current()
 
+    def current_tag(self):
+        return self.tagcycle.current()
+
     def create_brushstroke(self):
         angle = self.angle_previous_vector() + self.sign_angle()*self.current_angle()
         xy_delta = V2d.from_amplitude_angle(self.current_magnitude()*self.config.magnitude_page_ratio*self.sign_magnitude(), angle)
@@ -233,7 +263,8 @@ class TortugaState:
         self.set_position(new_xy, self.xy)
         scale = self.current_magnitude() * self.config.scale_magnitude_ratio
         brush_angle = angle + self.config.brushstoke_angle_offset
-        return DlmtBrushstroke(brushid = self.current_brush(), xy = new_xy, scale = scale, angle = brush_angle, tags=[])
+        tags = [] if self.current_tag() == "" else [self.current_tag()]
+        return DlmtBrushstroke(brushid = self.current_brush(), xy = new_xy, scale = scale, angle = brush_angle, tags= tags)
 
 
 
