@@ -42,7 +42,7 @@ def chooseVariableCombi(vars: str, levels: int):
         return choice([two, three, four, five])
     raise Exception("levels {} are not supported".format(levels))
 
-def createRuleValue(vars: str, levels: int, keyrules: List[str]):
+def createRuleValue(vars: str, levels: int, keyrules: List[str])->str:
     rv = choice(keyrules) + chooseVariableCombi(vars, levels)
     vr = chooseVariableCombi(vars, levels) + choice(keyrules)
     return choice([rv, vr])
@@ -67,6 +67,14 @@ class ProductionGame:
 
     def set_start(self, start: str):
         self.start = start
+        return self
+
+    def set_rules(self, rules: List[ProductionRule]):
+        self.rules = rules
+        return self
+
+    def set_start_and_rules(self, start_and_rules: (str,  List[ProductionRule])):
+        self.start(start_and_rules[0]).set_rules(start_and_rules[1])
         return self
 
     def init_with_random_rules(self, levels: int, keyrules: List[str]):
