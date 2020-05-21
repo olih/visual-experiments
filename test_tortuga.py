@@ -97,10 +97,22 @@ class TestTortugaRuleMaker(unittest.TestCase):
         maker=TortugaRuleMaker()
         maker.set_vars("IJ")
         maker.set_actions_ranges("L 1 3;A 1 3;P 1 4")
+        maker.set_supported_targets("L < >;A < > Z")
+        made = maker.make()
+        self.assertGreaterEqual(len(made[0]), 7 )
+        self.assertGreaterEqual(len(made[1][0]["r"]), 7)
+        self.assertGreaterEqual(len(made[1][1]["r"]), 7)
+
+    def test_make_branch(self):
+        maker=TortugaRuleMaker()
+        maker.set_vars("IJ")
+        maker.set_actions_ranges("L 1 3;A 1 3;P 1 4;[ 1 3")
         maker.set_supported_targets("L < >;A < >")
         made = maker.make()
+        print(made)
         self.assertGreaterEqual(len(made[0]), 8 )
+        self.assertTrue("[" in made[0])
+        self.assertTrue("]" in made[0])
         self.assertGreaterEqual(len(made[1][0]["r"]), 8)
         self.assertGreaterEqual(len(made[1][1]["r"]), 8)
-
 

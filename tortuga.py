@@ -403,6 +403,14 @@ class TortugaRuleMaker:
         self.actions_ranges = { aa.target:aa for aa in [TortugaActionRange.from_string(a) for a in value.split(";")]}
         return self
 
+    def _branchify(self, parts: List[str]):
+        length = len(parts)
+        closing = randint(3, length-1)
+        opening = randint(0, closing-3)
+        parts.insert(opening, "[")
+        parts.insert(closing, "]")
+        return parts
+
     def make_one(self, vars: List[str])->str:
        parts = vars.copy()
        if TortugaAction.ANGLE in self.actions_ranges:
@@ -414,6 +422,9 @@ class TortugaRuleMaker:
        if TortugaAction.POINT in self.actions_ranges:
         parts = parts + ["P" for _ in range(self.actions_ranges[TortugaAction.POINT].choice())]
        shuffle(parts)
+       if TortugaAction.SAVE in self.actions_ranges:
+           for _ in range(self.actions_ranges[TortugaAction.SAVE].choice()):
+            parts = self._branchify(parts)
        return "".join(parts)
        
 
