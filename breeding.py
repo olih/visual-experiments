@@ -78,7 +78,8 @@ class ProductionGame:
 
     def set_start_and_rules(self, start_and_rules: (str,  List)):
         '''Sets a tuple with a tuple with the start and rules as obj (not ProductionRule)'''
-        self.start(start_and_rules[0]).set_rules_as_objs(start_and_rules[1])
+        self.set_start(start_and_rules[0])
+        self.set_rules_as_objs(start_and_rules[1])
         return self
 
     def init_with_random_rules(self, levels: int, keyrules: List[str]):

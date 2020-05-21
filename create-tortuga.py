@@ -11,7 +11,7 @@ from typing import List, Tuple, Dict, Set
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
 from breeding import ProductionGame
 from experimentio import ExperimentFS, TypicalDir
-from tortuga import TortugaConfig, TortugaProducer
+from tortuga import TortugaConfig, TortugaProducer, TortugaRuleMaker
 from dalmatianmedia import DlmtView, DlmtTagDescription, DlmtBrush, DlmtBrushstroke, DlmtCoordinateSystem, DlmtBrushCoordinateSystem, DlmtHeaders, DalmatianMedia, SvgRenderingConfig
 from statistics import mean
 
@@ -39,6 +39,9 @@ class XpInitConf:
         self.brush_page_ratio: Fraction = Fraction(content["brush-page-ratio"]) # 1/100 better to keep consistent across stencils
         self.scale_magnitude_ratio: Fraction = Fraction(content["scale-magnitude-ratio"]) # 1
         self.brushstoke_angle_offset: Fraction = Fraction(content["brushstoke-angle-offset"]) # 0
+        self.vars: str = content["vars"] # IJ
+        self.supported_targets: str = content["supported-targets"]
+        self.actions_ranges: str = content["actions-ranges"]
 
 class XpPoolConf:
     def __init__(self, content):
@@ -101,8 +104,11 @@ class Experimenting:
     def createSpecimen(self):
         # Create L-System
         product = ProductionGame(chainlength = randint(30, 700))
-        product.set_constants("ABLPZ-<>[]").set_vars("IJK")
-        product.init_with_random_rules(levels = 4, keyrules = self.pool.rules)
+        product.set_constants("ABLPZ-<>[]").set_vars(self.init.vars)
+        ruleMaker = TortugaRuleMaker().set_vars(self.init.vars)
+        ruleMaker.set_supported_targets(self.init.supported_targets)
+        ruleMaker.set_actions_ranges(self.init.actions_ranges)
+        product.set_start_and_rules(ruleMaker.make())
         product.produce()
         product_obj = product.to_obj()
         
