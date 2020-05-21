@@ -42,6 +42,7 @@ class XpInitConf:
         self.vars: str = content["vars"] # IJ
         self.supported_targets: str = content["supported-targets"]
         self.actions_ranges: str = content["actions-ranges"]
+        self.max_chain_length: int = content["max-chain-length"]
 
 class XpPoolConf:
     def __init__(self, content):
@@ -66,6 +67,7 @@ class BrushstrokesStats:
         amplitude = ys[-1] - ys[0]
         ax = (ys[-1] - ys[0]) / len(ys)
         interval = len(ys) // (nb + 1)
+        # Possible division by zero
         deviations = [abs(ys[i*interval]-i*interval*ax)/abs(i*interval*ax) for i in range(1, nb + 1)]
         return mean(deviations)
 
@@ -103,7 +105,7 @@ class Experimenting:
     
     def createSpecimen(self):
         # Create L-System
-        product = ProductionGame(chainlength = randint(30, 700))
+        product = ProductionGame(chainlength = randint(100, self.init.max_chain_length))
         product.set_constants("ABLPZ-<>[]").set_vars(self.init.vars)
         ruleMaker = TortugaRuleMaker().set_vars(self.init.vars)
         ruleMaker.set_supported_targets(self.init.supported_targets)
