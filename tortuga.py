@@ -2,6 +2,7 @@ from fractions import Fraction
 from typing import List, Tuple, Dict, Set, TypeVar, Generic
 from enum import Enum, auto
 from collections import deque
+from random import sample, choice, randint
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
 from dalmatianmedia import DlmtBrushstroke
 
@@ -10,7 +11,7 @@ T = TypeVar('T')
 
 class TortugaAction(Enum):
     ANGLE = auto()
-    AMPLITUDE = auto()
+    MAGNITUDE = auto()
     BRUSH = auto()
     POINT = auto()
     TAG = auto()
@@ -27,7 +28,7 @@ class TortugaAction(Enum):
         if value == "A":
             return TortugaAction.ANGLE
         elif value == "L":
-            return TortugaAction.AMPLITUDE
+            return TortugaAction.MAGNITUDE
         elif value == "B":
             return TortugaAction.BRUSH
         elif value == "T":
@@ -45,9 +46,36 @@ class TortugaAction(Enum):
         elif value == "]":
             return TortugaAction.RESTORE
         elif value == "-":
-            return TortugaAction.NEXT
+            return TortugaAction.NEGATE
         else:
             return TortugaAction.IGNORE
+
+    @classmethod
+    def to_string(cls, value):
+        if value == TortugaAction.ANGLE:
+            return "A"
+        elif value == TortugaAction.MAGNITUDE:
+            return "L"
+        elif value == TortugaAction.BRUSH:
+            return "B"
+        elif value == TortugaAction.TAG:
+            return "T"
+        elif value == TortugaAction.POINT:
+            return "P"
+        elif value == TortugaAction.NEXT:
+            return ">"
+        elif value == TortugaAction.PREVIOUS:
+            return "<"
+        elif value == TortugaAction.RESET:
+            return "Z"
+        elif value == TortugaAction.SAVE:
+            return "["
+        elif value == TortugaAction.RESTORE:
+            return "]"
+        elif value == TortugaAction.NEGATE:
+            return "-"
+        else:
+            return ""
 
 class TortugaCycle(Generic[T]):
     def __init__(self, values: List[T], idx: int = 0):
@@ -202,13 +230,13 @@ class TortugaState:
         elif verb == TortugaAction.NEGATE and target == TortugaAction.ANGLE:
             self.anglecycle[1].next()
         # Length
-        elif verb == TortugaAction.NEXT and target == TortugaAction.AMPLITUDE:
+        elif verb == TortugaAction.NEXT and target == TortugaAction.MAGNITUDE:
             self.magnitudecycle[0].next()
-        elif verb == TortugaAction.PREVIOUS and target == TortugaAction.AMPLITUDE:
+        elif verb == TortugaAction.PREVIOUS and target == TortugaAction.MAGNITUDE:
             self.magnitudecycle[0].previous()
-        elif verb == TortugaAction.RESET and target == TortugaAction.AMPLITUDE:
+        elif verb == TortugaAction.RESET and target == TortugaAction.MAGNITUDE:
             self.magnitudecycle[0].reset()
-        elif verb == TortugaAction.NEGATE and target == TortugaAction.AMPLITUDE:
+        elif verb == TortugaAction.NEGATE and target == TortugaAction.MAGNITUDE:
             self.magnitudecycle[1].next()
         # Brush
         elif verb == TortugaAction.NEXT and target == TortugaAction.BRUSH:
@@ -289,7 +317,7 @@ class TortugaProducer:
     def produce(self)->List[DlmtBrushstroke]:
         results = []
         for action in self.actions:
-            if action in [TortugaAction.ANGLE, TortugaAction.AMPLITUDE, TortugaAction.BRUSH]:
+            if action in [TortugaAction.ANGLE, TortugaAction.MAGNITUDE, TortugaAction.BRUSH]:
                 self.state.set_target(action)
             elif action in [TortugaAction.NEGATE, TortugaAction.NEXT, TortugaAction.PREVIOUS, TortugaAction.RESET]:
                 self.state.activate_verb(action)
@@ -302,6 +330,50 @@ class TortugaProducer:
                 self._restore_state()
 
         return results
+
+class TortugaTargetRand:
+    def __init__(self):
+        self.target = TortugaAction.IGNORE
+        self.verbs = [TortugaAction.IGNORE]
+
+    def set_target(self, target: TortugaAction):
+        self.target = target
+        return self
+
+    def set_verbs(self, verbs: List[TortugaAction]):
+        self.verbs = verbs
+        return self
+
+    @classmethod
+    def from_string(cls, value: str):
+        target, other = value.split(":",1)
+        verbs = [TortugaAction.from_string(term) for term in other.split(" ") if term in "<>Z-" ]
+        rule = cls()
+        rule.set_target(TortugaAction.from_string(target))
+        rule.set_verbs(verbs)
+        return rule
+
+    def choice(self)->str:
+       return  "".join([ TortugaAction.to_string(p) for p in [self.target, choice(self.verbs)] ])
+
+        
+
+class TortugaRuleMaker:
+    def __init__(self):
+        self.variables_list = ["I"]
+        self.supported_targets = {
+            "L": [">", "<"]
+        }
+    
+    def set_vars(self, variables: str):
+        self.variables_list = [char for char in variables]
+        return self
+
+    def set_supported(self, supported: str):
+        supported.split(" ")
+
+    def make(self)->(str, List):
+        return ("", [{}])
 
 
     

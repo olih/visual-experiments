@@ -1,7 +1,7 @@
 import unittest
 from fractions import Fraction
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
-from tortuga import TortugaConfig, TortugaState, TortugaAction, TortugaProducer
+from tortuga import TortugaConfig, TortugaState, TortugaAction, TortugaProducer, TortugaRuleMaker, TortugaTargetRand
 
 refconfig = TortugaConfig()
 refconfig.set_angles_string("0/1 1/4 1/2 3/4").set_magnitudes_string("1 2 3 4 5")
@@ -9,6 +9,15 @@ refconfig.set_brush_ids(["i:1", "i:2", "i:3"])
 refconfig.set_tags(["", "i:1", "i:2"])
 refconfig.set_magnitude_page_ratio_string("1/100").set_scale_magnitude_ratio_string("3/2")
 refconfig.set_chain("Z")
+
+class TestTortugaAction(unittest.TestCase):
+    def test(self):
+        self.assertEqual(TortugaAction.from_string(TortugaAction.to_string(TortugaAction.ANGLE)), TortugaAction.ANGLE)
+        self.assertEqual(TortugaAction.from_string(TortugaAction.to_string(TortugaAction.MAGNITUDE)), TortugaAction.MAGNITUDE)
+        self.assertEqual(TortugaAction.from_string(TortugaAction.to_string(TortugaAction.BRUSH)), TortugaAction.BRUSH)
+        self.assertEqual(TortugaAction.from_string(TortugaAction.to_string(TortugaAction.TAG)), TortugaAction.TAG)
+        self.assertEqual(TortugaAction.from_string(TortugaAction.to_string(TortugaAction.NEXT)), TortugaAction.NEXT)
+        self.assertEqual(TortugaAction.from_string(TortugaAction.to_string(TortugaAction.PREVIOUS)), TortugaAction.PREVIOUS)
 
 class TestTortugaState(unittest.TestCase):
     def test_clone_config(self):
@@ -31,7 +40,7 @@ class TestTortugaState(unittest.TestCase):
         self.assertEqual(state.activate_verb(TortugaAction.PREVIOUS).create_brushstroke(), "brushstroke i:1 xy 3/20 1/10 scale 3/2 angle 0 tags [ i:2 ]")
 
     def test_amplitude(self):
-        state = TortugaState(refconfig.clone().set_xy_string("10/100 10/100")).set_target(TortugaAction.AMPLITUDE)
+        state = TortugaState(refconfig.clone().set_xy_string("10/100 10/100")).set_target(TortugaAction.MAGNITUDE)
         self.assertEqual(state.activate_verb(TortugaAction.NEXT).create_brushstroke(), "brushstroke i:1 xy 3/25 1/10 scale 3 angle 0 tags [  ]")
         self.assertEqual(state.activate_verb(TortugaAction.NEXT).create_brushstroke(), "brushstroke i:1 xy 3/20 1/10 scale 9/2 angle 0 tags [  ]")
         self.assertEqual(state.activate_verb(TortugaAction.NEXT).create_brushstroke(), "brushstroke i:1 xy 19/100 1/10 scale 6 angle 0 tags [  ]")
@@ -72,3 +81,9 @@ class TestTortugaProducer(unittest.TestCase):
         config = refconfig.clone().set_xy_string("10/100 10/100").set_chain("PAB>P<APL>P")
         producer = TortugaProducer(config)
         self.assertEqual(len(producer.produce()), 4)
+
+class TestTortugaTargetRand(unittest.TestCase):
+    def test_choice(self):
+        self.assertEqual(TortugaTargetRand.from_string("L:<").choice(), "L<")
+        self.assertIn(TortugaTargetRand.from_string("B:< >").choice(), ["B<", "B>"])
+        self.assertIn(TortugaTargetRand.from_string("A:< > Z -").choice(), ["A<", "A>", "AZ", "A-"])
