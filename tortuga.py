@@ -2,7 +2,7 @@ from fractions import Fraction
 from typing import List, Tuple, Dict, Set, TypeVar, Generic
 from enum import Enum, auto
 from collections import deque
-from random import sample, choice, randint
+from random import sample, choice, randint, shuffle
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
 from dalmatianmedia import DlmtBrushstroke
 
@@ -346,7 +346,7 @@ class TortugaTargetRand:
 
     @classmethod
     def from_string(cls, value: str):
-        target, other = value.split(":",1)
+        target, other = value.split(" ",1)
         verbs = [TortugaAction.from_string(term) for term in other.split(" ") if term in "<>Z-" ]
         rule = cls()
         rule.set_target(TortugaAction.from_string(target))
@@ -357,23 +357,68 @@ class TortugaTargetRand:
        return  "".join([ TortugaAction.to_string(p) for p in [self.target, choice(self.verbs)] ])
 
         
+class TortugaActionRange:
+    def __init__(self):
+        self.target = TortugaAction.IGNORE
+        self.min = 1
+        self.max = 2
+    
+    def set_target(self, target: TortugaAction):
+        self.target = target
+        return self
+
+    def set_min_max(self, min, max):
+        self.min = min
+        self.max = max
+        return self
+    
+    @classmethod
+    def from_string(cls, value: str):
+        target, other = value.split(" ",1)
+        minimum, maximum = other.split(" ")
+        actionRange = cls()
+        actionRange.set_target(TortugaAction.from_string(target))
+        actionRange.set_min_max(int(minimum), int(maximum))
+        return actionRange
+
+    def choice(self)->int:
+        return randint(self.min, self.max)
+
 
 class TortugaRuleMaker:
     def __init__(self):
-        self.variables_list = ["I"]
-        self.supported_targets = {
-            "L": [">", "<"]
-        }
+        self.supported_targets = []
+        self.actions_ranges = {}
+        self.variables_list = {}
     
     def set_vars(self, variables: str):
         self.variables_list = [char for char in variables]
         return self
 
-    def set_supported(self, supported: str):
-        supported.split(" ")
+    def set_supported_targets(self, supported: str):
+        self.supported_targets = { tt.target:tt for tt in [TortugaTargetRand.from_string(t) for t in supported.split(";")]}
+        return self
+
+    def set_actions_ranges(self, value: str):
+        self.actions_ranges = { aa.target:aa for aa in [TortugaActionRange.from_string(a) for a in value.split(";")]}
+        return self
+
+    def make_one(self, vars: List[str])->str:
+       parts = vars.copy()
+       if TortugaAction.ANGLE in self.actions_ranges:
+        parts = parts + [self.supported_targets[TortugaAction.ANGLE].choice() for _ in range(self.actions_ranges[TortugaAction.ANGLE].choice())]
+       if TortugaAction.MAGNITUDE in self.actions_ranges:
+        parts = parts + [self.supported_targets[TortugaAction.MAGNITUDE].choice() for _ in range(self.actions_ranges[TortugaAction.MAGNITUDE].choice())]
+       if TortugaAction.BRUSH in self.actions_ranges:
+        parts = parts + [self.supported_targets[TortugaAction.BRUSH].choice() for _ in range(self.actions_ranges[TortugaAction.BRUSH].choice())]
+       if TortugaAction.POINT in self.actions_ranges:
+        parts = parts + ["P" for _ in range(self.actions_ranges[TortugaAction.POINT].choice())]
+       shuffle(parts)
+       return "".join(parts)
+       
 
     def make(self)->(str, List):
-        return ("", [{}])
+        return (self.make_one([self.variables_list[0]]), [{"s": v, "r": self.make_one([choice(self.variables_list), choice(self.variables_list)]) } for v in self.variables_list])
 
 
     

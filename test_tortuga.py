@@ -1,7 +1,7 @@
 import unittest
 from fractions import Fraction
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
-from tortuga import TortugaConfig, TortugaState, TortugaAction, TortugaProducer, TortugaRuleMaker, TortugaTargetRand
+from tortuga import TortugaConfig, TortugaState, TortugaAction, TortugaProducer, TortugaRuleMaker, TortugaTargetRand, TortugaActionRange
 
 refconfig = TortugaConfig()
 refconfig.set_angles_string("0/1 1/4 1/2 3/4").set_magnitudes_string("1 2 3 4 5")
@@ -84,6 +84,23 @@ class TestTortugaProducer(unittest.TestCase):
 
 class TestTortugaTargetRand(unittest.TestCase):
     def test_choice(self):
-        self.assertEqual(TortugaTargetRand.from_string("L:<").choice(), "L<")
-        self.assertIn(TortugaTargetRand.from_string("B:< >").choice(), ["B<", "B>"])
-        self.assertIn(TortugaTargetRand.from_string("A:< > Z -").choice(), ["A<", "A>", "AZ", "A-"])
+        self.assertEqual(TortugaTargetRand.from_string("L <").choice(), "L<")
+        self.assertIn(TortugaTargetRand.from_string("B < >").choice(), ["B<", "B>"])
+        self.assertIn(TortugaTargetRand.from_string("A < > Z -").choice(), ["A<", "A>", "AZ", "A-"])
+
+class TestTortugaActionRange(unittest.TestCase):
+    def test_choice(self):
+        self.assertIn(TortugaActionRange.from_string("B 1 3").choice(), [1, 2, 3])
+
+class TestTortugaRuleMaker(unittest.TestCase):
+    def test_make_no_branch(self):
+        maker=TortugaRuleMaker()
+        maker.set_vars("IJ")
+        maker.set_actions_ranges("L 1 3;A 1 3;P 1 4")
+        maker.set_supported_targets("L < >;A < >")
+        made = maker.make()
+        self.assertGreaterEqual(len(made[0]), 8 )
+        self.assertGreaterEqual(len(made[1][0]["r"]), 8)
+        self.assertGreaterEqual(len(made[1][1]["r"]), 8)
+
+
