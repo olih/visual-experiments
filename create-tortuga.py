@@ -13,7 +13,6 @@ from breeding import ProductionGame
 from experimentio import ExperimentFS, TypicalDir
 from tortuga import TortugaConfig, TortugaProducer, TortugaRuleMaker
 from dalmatianmedia import DlmtView, DlmtTagDescription, DlmtBrush, DlmtBrushstroke, DlmtCoordinateSystem, DlmtBrushCoordinateSystem, DlmtHeaders, DalmatianMedia, SvgRenderingConfig
-from statistics import mean
 
 today = date.today()
 
@@ -44,6 +43,7 @@ class XpInitConf:
         self.actions_ranges: str = content["actions-ranges"]
         self.max_chain_length: int = content["max-chain-length"]
         self.specimen_attempts: int = content["specimen-attempts"]
+        self.min_median_range: V2d = V2d.from_string(content["min-median-range"])
 
 class XpPoolConf:
     def __init__(self, content):
@@ -118,11 +118,20 @@ class Experimenting:
         fitness = Fraction(len(fitbr), len(allbr))
         ruleInfo = ", ".join([r["s"] + "->" + r["r"] for r in product_obj["rules"]])
         correlation = bstats.get_correlation()
+        medianpoint = bstats.get_median_range(8)
         if correlation > 0.9 or correlation < -0.9:
+            print("C", end="")
             return None
         if float(fitness) < 0.8:
+            print("F", end="")
             return None
-        summary = "Stencil based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a fitness of {:.2%} and deviation {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation)
+        if medianpoint.x < self.init.min_median_range.x:
+            print("X", end="")
+            return None
+        if medianpoint.y < self.init.min_median_range.y:
+            print("Y", end="")
+            return None
+        summary = "Stencil based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a fitness of {:.2%}, correlation of {} and a median range of {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation, medianpoint.to_float_string())
         return {    
                 "id": self.incId(),  
                 "product": product_obj,
@@ -137,6 +146,7 @@ class Experimenting:
         specimen = self.createSpecimen()
         for _ in range(attempts):
             specimen = self.createSpecimen()
+            print(".", end="")
             if specimen is None:
                 continue
             break

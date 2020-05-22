@@ -199,6 +199,15 @@ class V2dList:
         yy = [int(v.y*1000000) for v in self.values] 
         r = corrcoef(xx, yy)
         return r[0, 1]
+    
+    def get_median_range(self, n: int)->V2d:
+        idx = len(self.values) // n
+        xx: List[Fraction] = sorted([v.x for v in self.values])
+        yy: List[Fraction] = sorted([v.y for v in self.values])
+        width = xx[-idx] - xx[idx]
+        height = yy[-idx] - yy[idx]
+        return V2d(width, height)
+
 
 class FractionList:
     def __init__(self, values: List[Fraction] ):
