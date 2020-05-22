@@ -6,6 +6,7 @@ from hashids import Hashids
 import json
 import glob
 from datetime import date
+from time import sleep
 from random import sample, choice, randint
 from typing import List, Tuple, Dict, Set
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
@@ -146,9 +147,11 @@ class Experimenting:
         specimen = self.createSpecimen()
         for _ in range(attempts):
             specimen = self.createSpecimen()
-            print(".", end="")
+            print(".", end="", flush=True)
+            sleep(0.1) # otherwise overheating
             if specimen is None:
                 continue
+            print("*", end="")
             break
         return specimen 
     
@@ -173,7 +176,8 @@ class Experimenting:
     def createNewPopulation(self):
         population = self.init.population
         newspecimens = [ self.createBetterSpecimen(self.init.specimen_attempts) for _ in range(population) ]
-        self.content['specimens'] = self.content['specimens'] + newspecimens
+        validspecimens = [s for s in newspecimens if s is not None]
+        self.content['specimens'] = self.content['specimens'] + validspecimens
     
     def start(self):
         self.applyTags()
