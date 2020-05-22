@@ -3,6 +3,7 @@ from typing import List, Tuple
 from enum import Enum, auto
 from random import sample, choice
 from math import pi, radians, cos, sin, atan, degrees
+from numpy import corrcoef
 
 def cosFract(fract):
     numerator = int(1000*cos(radians(360*fract)))
@@ -193,6 +194,12 @@ class V2dList:
         cloned.reverse()
         return V2dList(self.values.copy()+cloned)
 
+    def get_correlation(self):
+        xx = [int(v.x*1000000) for v in self.values]
+        yy = [int(v.y*1000000) for v in self.values] 
+        r = corrcoef(xx, yy)
+        return r[0, 1]
+
 class FractionList:
     def __init__(self, values: List[Fraction] ):
          self.values = values
@@ -235,7 +242,6 @@ class FractionList:
     
     def signed_sample_list(self, listcount = 3, count = 2, sep=" ")->List[str]:
         return [self.signed_sample(count, sep) for _ in range(listcount) ]
-       
     @classmethod
     def from_string(cls, strfracts: str, sep=" "):
         return cls([Fraction(frac) for frac in strfracts.split(sep)])
