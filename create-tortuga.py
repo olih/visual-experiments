@@ -43,6 +43,7 @@ class XpInitConf:
         self.supported_targets: str = content["supported-targets"]
         self.actions_ranges: str = content["actions-ranges"]
         self.max_chain_length: int = content["max-chain-length"]
+        self.specimen_attempts: int = content["specimen-attempts"]
 
 class XpPoolConf:
     def __init__(self, content):
@@ -116,7 +117,12 @@ class Experimenting:
         fitbr = stencil.page_brushstroke_list_for_view_string("view i:1 lang en xy 0 0 width 1 height 1 flags O tags all but [ ] -> everything")
         fitness = Fraction(len(fitbr), len(allbr))
         ruleInfo = ", ".join([r["s"] + "->" + r["r"] for r in product_obj["rules"]])
-        summary = "Stencil based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a fitness of {:.2%} and deviation {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), bstats.get_correlation())
+        correlation = bstats.get_correlation()
+        if correlation > 0.9 or correlation < -0.9:
+            return None
+        if float(fitness) < 0.8:
+            return None
+        summary = "Stencil based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a fitness of {:.2%} and deviation {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation)
         return {    
                 "id": self.incId(),  
                 "product": product_obj,
@@ -126,6 +132,15 @@ class Experimenting:
                 "summary": summary,
                 "tags": ""
         }
+
+    def createBetterSpecimen(self, attempts: int):
+        specimen = self.createSpecimen()
+        for _ in range(attempts):
+            specimen = self.createSpecimen()
+            if specimen is None:
+                continue
+            break
+        return specimen 
     
     def applyTags(self):
         specimens = self.content['specimens']
@@ -147,7 +162,7 @@ class Experimenting:
             
     def createNewPopulation(self):
         population = self.init.population
-        newspecimens = [ self.createSpecimen() for _ in range(population) ]
+        newspecimens = [ self.createBetterSpecimen(self.init.specimen_attempts) for _ in range(population) ]
         self.content['specimens'] = self.content['specimens'] + newspecimens
     
     def start(self):
