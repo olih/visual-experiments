@@ -109,7 +109,6 @@ class TestTortugaRuleMaker(unittest.TestCase):
         maker.set_actions_ranges("L 1 3;A 1 3;P 1 4;[ 1 3")
         maker.set_supported_targets("L < >;A < >")
         made = maker.make()
-        print(made)
         self.assertGreaterEqual(len(made[0]), 8 )
         self.assertTrue("[" in made[0])
         self.assertTrue("]" in made[0])

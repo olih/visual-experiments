@@ -25,6 +25,7 @@ parser = argparse.ArgumentParser(description = 'Create a tortuga illustration')
 parser.add_argument("-f", "--file", help="the file containing the experiments.", required = True)
 parser.add_argument("-b", "--brushes", help="the collection of brushes", required = True)
 parser.add_argument("-p", "--publish", help="publish the preserved stencils", default = "No")
+parser.add_argument("-c", "--crossover", help="publish the preserved stencils", default = "No")
 
 args = parser.parse_args()
 

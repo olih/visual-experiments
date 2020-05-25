@@ -6,6 +6,9 @@ class ProductionRule:
         self.search = search
         self.replace = repl
     
+    def __eq__(self, other):
+        return self.search == other.search and self.replace == other.replace
+
     def __str__(self):
         return "{}:{}".format(self.search, self.replace)
     
@@ -54,6 +57,20 @@ class ProductionGame:
         self.iterations = 0
         self.chain = ""
         self.chainlength = chainlength
+
+    def __eq__(self, other):
+        thisone = (self.variables, self.constants, self.start, self.rules)
+        otherone = (other.variables, other.constants, other.start, other.rules)
+        return thisone == otherone
+
+    def to_string(self):
+        return "vars {} const {} start {} rules {}".format(self.variables, self.constants, self.start, self.rules)
+
+    def __str__(self):
+        return self.to_string()
+    
+    def __repr__(self):
+        return self.to_string()
 
     def set_vars(self, variables: str):
         self.variables = variables
@@ -120,3 +137,17 @@ class ProductionGame:
             "chain": self.chain,
             "core-chain": "".join(self.core_chain())
         }
+    @classmethod
+    def from_obj(cls, content, chainlength = None):
+        constants = content["constants"]
+        variables = content["variables"]
+        rules = content["rules"]
+        start = content["start"]
+        length = chainlength if chainlength else len(content["chain"])
+        product = cls(length)
+        product.set_vars(variables)
+        product.set_constants(constants)
+        product.set_start(start)
+        product.set_rules_as_objs(rules)
+        return product
+
