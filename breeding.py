@@ -50,6 +50,20 @@ def createRuleValue(vars: str, levels: int, keyrules: List[str])->str:
     vr = chooseVariableCombi(vars, levels) + choice(keyrules)
     return choice([rv, vr])
 
+def merge_string(str1: str, str2: str)->str:
+    s1 = set([c for c in str1])
+    s2 = set([c for c in str2])
+    s = sorted(list(s1.union(s2)))
+    return "".join(s)
+
+def crossover_string(str1: str, str2: str)->str:
+    cut1 = len(str1) //4
+    cut2 = len(str2) //4
+    center = str1[cut1:-cut1]
+    left = str2[:cut2]
+    right = str2[-cut2:]
+    return left + center + right
+
 class ProductionGame:
     def __init__(self, chainlength = 50):
         self.rules = []
@@ -143,11 +157,31 @@ class ProductionGame:
         variables = content["variables"]
         rules = content["rules"]
         start = content["start"]
-        length = chainlength if chainlength else len(content["chain"])
+        length = chainlength if chainlength else len(content.get("chain", ""))
         product = cls(length)
         product.set_vars(variables)
         product.set_constants(constants)
         product.set_start(start)
         product.set_rules_as_objs(rules)
         return product
+
+    @classmethod
+    def from_crossover(cls, content1, content2, chainlength = None):
+        constants = merge_string(content1["constants"], content2["constants"])
+        variables = merge_string(content1["variables"], content2["variables"])
+        start = crossover_string(content1["start"], content2["start"])
+        length = chainlength if chainlength else max(len(content1.get("chain", "")), len(content2.get("chain", "")))
+        rules1_dict = {r["s"]: r["r"] for r in content1["rules"]}
+        rules2_dict = {r["s"]: r["r"] for r in content2["rules"]}
+        rules = [{"s": r["s"], "r": crossover_string(r["r"], rules2_dict[r["s"]]) if r["s"] in rules2_dict  else r["r"] } for r in content1["rules"]]
+        for key, value in rules2_dict.items():
+            if key not in rules1_dict:
+               rules.append({ "s": key, "r": value }) 
+        product = cls(length)
+        product.set_vars(variables)
+        product.set_constants(constants)
+        product.set_start(start)
+        product.set_rules_as_objs(rules)
+        return product
+
 

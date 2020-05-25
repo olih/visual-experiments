@@ -23,14 +23,59 @@ class TestProductionGame(unittest.TestCase):
 
 
     def test_breeding(self):
-        product1 = ProductionGame(chainlength = 60)
-        product1.set_constants("LQC").set_vars("IJK")
-        product1.init_with_random_rules(levels = 2, keyrules = ["L", "QQ", "C"])
-        product1.produce()
+        obj1 = {
+            "constants": "ABC",
+            "variables": "IJ",
+            "start": "AIAI",
+            "rules": [
+                {
+                    "s": "I",
+                    "r": "BCJJ"
+                },
+                {
+                    "s": "J",
+                    "r": "ABII"
+                }
+            ]
 
-        product2 = ProductionGame(chainlength = 60)
-        product2.set_constants("LQC").set_vars("IJK")
-        product2.init_with_random_rules(levels = 2, keyrules = ["LL", "Q", "CC"])
+        }
+        obj2 = {
+            "constants": "AD",
+            "variables": "JK",
+            "start": "DJJD",
+            "rules": [
+                {
+                    "s": "J",
+                    "r": "AJJA"
+                },
+                {
+                    "s": "K",
+                    "r": "DKDK"
+                }
+            ]
+        }
+
+        product = ProductionGame.from_crossover(obj1, obj2, 30)
+        product.produce()
+        expected_rules = [
+                {
+                    "s": "I",
+                    "r": "BCJJ"
+                },
+                {
+                    "s": "J",
+                    "r": "ABIA"
+                },
+                {
+                    "s": "K",
+                    "r": "DKDK"
+                }
+            ]
+        self.assertEqual(product.to_obj()["constants"], "ABCD")
+        self.assertEqual(product.to_obj()["variables"], "IJK")
+        self.assertEqual(product.to_obj()["start"], "DIAD")
+        self.assertEqual(product.to_obj()["rules"], expected_rules)
+        
 
 
  
