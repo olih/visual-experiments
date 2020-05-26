@@ -212,7 +212,7 @@ class Experimenting:
         for _ in range(attempts):
             specimen = self.createSpecimen()
             print(".", end="", flush=True)
-            sleep(0.1) # otherwise overheating
+            sleep(0.2) # otherwise overheating
             if specimen is None:
                 continue
             print("*", end="")
@@ -237,32 +237,64 @@ class Experimenting:
         print("Total saved {}".format(len(bestspecimens)))
         self.content['specimens'] = bestspecimens
             
-    def createNewPopulation(self):
+    def create_new_population(self):
         population = self.init.population
         newspecimens = [ self.createBetterSpecimen(self.init.specimen_attempts) for _ in range(population) ]
         validspecimens = [s for s in newspecimens if s is not None]
         self.content['specimens'] = self.content['specimens'] + validspecimens
-    
-    def crossoverPopulation(self):
-        population = self.init.population
-        newspecimens = [ self.createBetterSpecimen(self.init.specimen_attempts) for _ in range(population) ]
+
+    def _next_batch_crossover(self, size: int, initial: List[Tuple] = []):
+        if "crossover-couples" not in self.content["general"]:
+            self.content["general"]["crossover-couples"] = initial
+        remaining_couples = self.content["general"]["crossover-couples"]
+        selected = []
+        if len(remaining_couples) <= size:
+            selected = remaining_couples
+            self.content["general"]["crossover-couples"] = []
+        else:
+            selected = remaining_couples[0:size]
+            self.content["general"]["crossover-couples"] = remaining_couples[size:]
+        return selected
+
+    def _identify_crossover_couples(self)->List[Tuple]:
+        ids = [ specimen["id"] for specimen in self.content['specimens'] if "breed" in specimen["tags"]]
+        couples = list(set([(i, j) for i in ids for j in ids]))
+        return couples
+
+    def _find_specimen_by_id(self, specimen_id: int):
+        specimens = [ specimen for specimen in self.content['specimens'] if specimen["id"] == specimen_id]
+        return specimens[0] if len(specimens) == 1 else None
+
+    def crossover_population(self):
+        all_couples = self._identify_crossover_couples()
+        selected_couples = self._next_batch_crossover(self.init.population, all_couples)
+        print("Crossover couples left: {}".format(len(self.content["general"]["crossover-couples"])))
+        newspecimens = [self.crossover_specimens(self._find_specimen_by_id(couple[0]), self._find_specimen_by_id(couple[1])) for couple in selected_couples]
         validspecimens = [s for s in newspecimens if s is not None]
         self.content['specimens'] = self.content['specimens'] + validspecimens
     
     def start(self):
         self.applyTags()
-        self.createNewPopulation()
+        if "yes" in args.crossover.lower():
+            self.crossover_population()
+        else:
+            self.create_new_population()
 
     def saveSvg(self):
+        started_svg = time()
         self.deleteSpecimenSvg()
         specimens = self.content['specimens']
+        svg_count = 1
         for specimen in specimens:
             if len(specimen["tags"])>0:
                 continue
+            svg_count = svg_count + 1
             stencil = DalmatianMedia.from_obj(specimen["stencil"])
             filename = "{}/eval-{}.svg".format(xpfs.get_directory(TypicalDir.EVALUATION), specimen["id"])
             stencil.to_xml_svg_file(stencil.create_page_pixel_coordinate("i:1", 100), filename)
             print("New: {} : {}".format(specimen["id"], specimen["summary"]))
+        finished_svg = time()
+        print("Saving to svg took {} seconds thus {} second per specimen".format(finished_svg-started_svg, (finished_svg-started_svg)/svg_count))
     
     def saveEverything(self):
         self.saveSvg()
