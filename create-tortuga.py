@@ -25,7 +25,8 @@ parser = argparse.ArgumentParser(description = 'Create a tortuga illustration')
 parser.add_argument("-f", "--file", help="the file containing the experiments.", required = True)
 parser.add_argument("-b", "--brushes", help="the collection of brushes", required = True)
 parser.add_argument("-p", "--publish", help="publish the preserved stencils", default = "No")
-parser.add_argument("-c", "--crossover", help="publish the preserved stencils", default = "No")
+parser.add_argument("-c", "--crossover", help="crossover the breed stencils", default = "No")
+parser.add_argument("-m", "--mutation", help="mutate all stencils", default = "No")
 
 args = parser.parse_args()
 
@@ -60,6 +61,11 @@ def crossover_fractions(fractions1: str, fractions2: str)->str:
     cut1 = len(fl1) // 2
     cut2 = len(fl2) // 2
     return str(FractionList(fl1.values[0:cut1] + fl2.values[cut2:]))
+
+def mutate_fraction(fractions1: str, fracpool: FractionList)->str:
+    fl1 = FractionList.from_string(fractions1)
+    fracts = sorted(fl1.sample(len(fl1)-1)+[fracpool.choice()])
+    return str(FractionList(fracts))
 
 class Experimenting:
     def __init__(self, name):
@@ -218,7 +224,74 @@ class Experimenting:
             print("*", end="")
             break
         return specimen 
-    
+
+    def mutation_specimen(self, specimen):
+        # Create L-System
+        product = ProductionGame.from_obj(specimen["product"])
+        product.produce()
+        product_obj = product.to_obj()
+        
+        # Convert chain to brushstokes
+        tortugaconfig = TortugaConfig().set_magnitude_page_ratio(self.init.magnitude_page_ratio)
+        tortugaconfig.set_scale_magnitude_ratio_string(self.init.scale_magnitude_ratio)
+        tortugaconfig.set_brushstoke_angle_offset(self.init.brushstoke_angle_offset)
+        tortugaconfig.set_xy(self.init.xy)
+        angles =  mutate_fraction(specimen["angles"], self.pool.angles)
+        magnitudes = mutate_fraction(specimen["magnitudes"], self.pool.magnitudes)
+        tortugaconfig.set_angles_string(angles)
+        tortugaconfig.set_magnitudes_string(magnitudes)
+        tortugaconfig.set_brush_ids(self.init.brushids)
+        tortugaconfig.set_chain(product.chain)
+        brushstokes = TortugaProducer(tortugaconfig).produce()
+        bstats = V2dList([bs.xy for bs in brushstokes])
+        # Create stencil aka DalmatianMedia
+        stencil = DalmatianMedia(DlmtHeaders().set_brush_page_ratio(self.init.brush_page_ratio))
+        stencil.add_view_string("view i:1 lang en xy 0 0 width 1 height 1 flags o tags all but [ ] -> everything")
+        stencil.add_tag_description_string("tag i:1 lang en same-as [] -> default tag")
+        for brush in self.init.brushes:
+            stencil.add_brush_string(brush)
+        stencil.set_brushstrokes(brushstokes)
+        allbr = stencil.page_brushstroke_list_for_view_string("view i:1 lang en xy 0 0 width 1 height 1 flags o tags all but [ ] -> everything")
+        fitbr = stencil.page_brushstroke_list_for_view_string("view i:1 lang en xy 0 0 width 1 height 1 flags O tags all but [ ] -> everything")
+        fitness = Fraction(len(fitbr), len(allbr))
+        ruleInfo = ", ".join([r["s"] + "->" + r["r"] for r in product_obj["rules"]])
+        correlation = bstats.get_correlation()
+        medianpoint = bstats.get_median_range(8)
+        if correlation > 0.9 or correlation < -0.9:
+            print("C", end="")
+            return None
+        if float(fitness) < 0.8:
+            print("F", end="")
+            return None
+        if medianpoint.x < self.init.min_median_range.x:
+            print("X", end="")
+            return None
+        if medianpoint.y < self.init.min_median_range.y:
+            print("Y", end="")
+            return None
+        summary = "Stencil based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a fitness of {:.2%}, correlation of {} and a median range of {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation, medianpoint.to_float_string())
+        return {    
+                "id": self.incId(),  
+                "product": product_obj,
+                "angles": angles,
+                "magnitudes": magnitudes,
+                "stencil": stencil.to_obj(),
+                "summary": summary,
+                "tags": ""
+        }
+
+    def create_better_mutant_specimen(self, refspecimen, attempts: int):
+        specimen = self.mutation_specimen(refspecimen)
+        for _ in range(attempts):
+            specimen = self.mutation_specimen(refspecimen)
+            print(".", end="", flush=True)
+            sleep(0.4) # otherwise overheating, in addition let's keep it under 2000 mutations
+            if specimen is None:
+                continue
+            print("*", end="")
+            break
+        return specimen 
+
     def applyTags(self):
         specimens = self.content['specimens']
         idWithTags = xpfs.search_eval_file_id_tags(".svg")
@@ -265,6 +338,9 @@ class Experimenting:
         specimens = [ specimen for specimen in self.content['specimens'] if specimen["id"] == specimen_id]
         return specimens[0] if len(specimens) == 1 else None
 
+    def _specimens_to_dict(self):
+        return { specimen["id"]: specimen for specimen in self.content['specimens'] }
+
     def crossover_population(self):
         all_couples = self._identify_crossover_couples()
         selected_couples = self._next_batch_crossover(self.init.population, all_couples)
@@ -273,11 +349,26 @@ class Experimenting:
         validspecimens = [s for s in newspecimens if s is not None]
         self.content['specimens'] = self.content['specimens'] + validspecimens
     
+    def _identify_mutation_candidates(self)->List[int]:
+        return [ specimen["id"] for specimen in self.content['specimens'] if len(specimen["tags"]) > 0]
+
+    def mutate_population(self):
+        by_id = self._specimens_to_dict()
+        candids = self._identify_mutation_candidates()
+        newspecimens = [ self.create_better_mutant_specimen(by_id[candid], 7) for candid in candids ]
+        validspecimens = [s for s in newspecimens if s is not None]
+        self.content['specimens'] = self.content['specimens'] + validspecimens
+
     def start(self):
         self.applyTags()
         if "yes" in args.crossover.lower():
+            print("Attempting crossover")
             self.crossover_population()
+        if "yes" in args.mutation.lower():
+            print("Attempting mutation")
+            self.mutate_population()
         else:
+            print("Creating new population")
             self.create_new_population()
 
     def saveSvg(self):
