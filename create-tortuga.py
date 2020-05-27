@@ -7,7 +7,7 @@ import json
 import glob
 from datetime import date
 from time import sleep, time
-from random import sample, choice, randint
+from random import sample, choice, randint, shuffle
 from typing import List, Tuple, Dict, Set
 from fracgeometry import V2d, V2dList, VSegment, VPath, FractionList
 from breeding import ProductionGame
@@ -23,7 +23,7 @@ xpfs.load()
 
 parser = argparse.ArgumentParser(description = 'Create a tortuga illustration')
 parser.add_argument("-f", "--file", help="the file containing the experiments.", required = True)
-parser.add_argument("-b", "--brushes", help="the collection of brushes", required = True)
+parser.add_argument("-b", "--brushes", help="the collection of brushes", required = False)
 parser.add_argument("-p", "--publish", help="publish the preserved stencils", default = "No")
 parser.add_argument("-c", "--crossover", help="crossover the breed stencils", default = "No")
 parser.add_argument("-m", "--mutation", help="mutate all stencils", default = "No")
@@ -55,6 +55,22 @@ class XpPoolConf:
         self.magnitudes: FractionList = FractionList.from_string(content["magnitudes"])
         self.rules: List[str] = content["rules"]
 
+class BrushDispenser:
+    def __init__(self, brushes: List[str]):
+        self.brushes = brushes
+        self.dispenser = []
+
+    @classmethod
+    def from_brush_collection(cls, content):
+        brushes = ["ext-id brushes:{} path {}".format(br["name"].strip(), br["brush"]) for br in content["brushes"]]
+        return cls(brushes)
+
+    def get_random_brush(self)-> str:
+        if len(self.dispenser) == 0:
+            self.dispenser = self.brushes.copy()
+            shuffle(self.dispenser)
+        return self.dispenser.pop()
+
 def crossover_fractions(fractions1: str, fractions2: str)->str:
     fl1 = FractionList.from_string(fractions1)
     fl2 = FractionList.from_string(fractions2)
@@ -78,7 +94,7 @@ class Experimenting:
             self.pool = XpPoolConf(self.content["mutations"]["pool"])
             self.init = XpInitConf(self.content["mutations"]["init"])
             return self.content   
-        
+
     def deleteSpecimenSvg(self):
         oldSvgFiles = glob.glob('{}/eval-*.svg'.format(xpfs.get_directory(TypicalDir.EVALUATION)))
         for filePath in oldSvgFiles:
@@ -147,7 +163,7 @@ class Experimenting:
         if medianpoint.y < self.init.min_median_range.y:
             print("Y", end="")
             return None
-        summary = "Stencil based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a fitness of {:.2%}, correlation of {} and a median range of {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation, medianpoint.to_float_string())
+        summary = "Stencil based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a visibility of {:.2%}, correlation of {} and a median range of {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation, medianpoint.to_float_string())
         return {    
                 "id": self.incId(),  
                 "product": product_obj,
@@ -202,7 +218,7 @@ class Experimenting:
         if medianpoint.y < self.init.min_median_range.y:
             print("Y", end="")
             return None
-        summary = "Stencil based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a fitness of {:.2%}, correlation of {} and a median range of {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation, medianpoint.to_float_string())
+        summary = "Stencil based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a visibility of {:.2%}, correlation of {} and a median range of {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation, medianpoint.to_float_string())
         return {    
                 "id": self.incId(),  
                 "product": product_obj,
@@ -269,7 +285,7 @@ class Experimenting:
         if medianpoint.y < self.init.min_median_range.y:
             print("Y", end="")
             return None
-        summary = "Stencil based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a fitness of {:.2%}, correlation of {} and a median range of {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation, medianpoint.to_float_string())
+        summary = "Stencil based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a visibility of {:.2%}, correlation of {} and a median range of {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation, medianpoint.to_float_string())
         return {    
                 "id": self.incId(),  
                 "product": product_obj,
@@ -359,14 +375,30 @@ class Experimenting:
         validspecimens = [s for s in newspecimens if s is not None]
         self.content['specimens'] = self.content['specimens'] + validspecimens
 
+    def _load_brushes_collection(self):
+        with open('{}/{}.json'.format(xpfs.get_directory(TypicalDir.BRUSH), args.brushes), 'r') as jsonfile:
+            content = json.load(jsonfile)
+            dispenser = BrushDispenser.from_brush_collection(content)
+            return dispenser
+
+    def mutate_population_with_brushes(self):
+        dispenser = self._load_brushes_collection()
+        for specimen in self.content['specimens']:
+            if "preserve" in specimen["tags"] or len(specimen["tags"]) == 0:
+                continue
+            specimen["stencil"]["brushes"] = ["brush {} {}".format(brushid, dispenser.get_random_brush()) for brushid in self.init.brushids]
+
     def start(self):
         self.applyTags()
         if "yes" in args.crossover.lower():
             print("Attempting crossover")
             self.crossover_population()
-        if "yes" in args.mutation.lower():
+        elif "yes" in args.mutation.lower():
             print("Attempting mutation")
             self.mutate_population()
+        elif args.brushes:
+            print("Attempting mutating population with brushes")
+            self.mutate_population_with_brushes()
         else:
             print("Creating new population")
             self.create_new_population()
@@ -378,7 +410,10 @@ class Experimenting:
         svg_count = 1
         for specimen in specimens:
             if len(specimen["tags"])>0:
-                continue
+                if not args.brushes:
+                    continue
+                if args.brushes and "preserve" in specimen["tags"]:
+                    continue
             svg_count = svg_count + 1
             stencil = DalmatianMedia.from_obj(specimen["stencil"])
             filename = "{}/eval-{}.svg".format(xpfs.get_directory(TypicalDir.EVALUATION), specimen["id"])
