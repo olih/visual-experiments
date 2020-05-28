@@ -296,6 +296,10 @@ class Experimenting:
                 "tags": ""
         }
 
+    def publishable_specimen(self, specimen)->DalmatianMedia:
+        stencil = DalmatianMedia.from_obj(specimen["stencil"])
+        return stencil
+
     def create_better_mutant_specimen(self, refspecimen, attempts: int):
         specimen = self.mutation_specimen(refspecimen)
         for _ in range(attempts):
@@ -387,6 +391,29 @@ class Experimenting:
             if "preserve" in specimen["tags"] or len(specimen["tags"]) == 0:
                 continue
             specimen["stencil"]["brushes"] = ["brush {} {}".format(brushid, dispenser.get_random_brush()) for brushid in self.init.brushids]
+    
+    def prepublish(self):
+        if not "yes" in args.publish.lower():
+            return       
+        same_specimens = [specimen for specimen in self.content['specimens'] if not "preserve" in specimen["tags"]]
+        preserved_specimens = [xpfs.ensure_publishing_id(specimen) for specimen in self.content['specimens'] if "preserve" in specimen["tags"]]
+        self.content['specimens'] = same_specimens + preserved_specimens
+            
+    def publish(self):
+        if not "yes" in args.publish.lower():
+            return
+        print("Attempting publishing")
+        publish_count = 0
+        for specimen in self.content['specimens']:
+            if not "preserve" in specimen["tags"]:
+                continue
+            publish_count = publish_count + 1
+            if publish_count >= 5:
+                break
+            stencil = self.publishable_specimen(specimen)
+            with open('{}/stencil-{}.dlmt'.format(xpfs.get_directory(TypicalDir.PUBLISHING), specimen["hid"]), 'w') as outfile:
+                outfile.write(stencil.to_string())
+        print("Published {} stencils to {}".format(publish_count, xpfs.get_directory(TypicalDir.PUBLISHING)))
 
     def start(self):
         self.apply_tags()
@@ -399,6 +426,8 @@ class Experimenting:
         elif args.brushes:
             print("Attempting mutating population with brushes")
             self.mutate_population_with_brushes()
+        elif "yes" in args.publish.lower():
+            self.prepublish()
         else:
             print("Creating new population")
             self.create_new_population()
@@ -426,13 +455,11 @@ class Experimenting:
         self.save_svg()
         self.save()
 
-    def publish(self):
-        print("Publishing to {}".format(xpfs.get_directory(TypicalDir.PUBLISHING)))
-
 experimenting = Experimenting(args.file)
 experimenting.load()
 experimenting.start()
 experimenting.save_everything()
+experimenting.publish()
 os.system('say Ready')
 finished = time()
 print("Took {} seconds thus {} second per specimen".format(finished-started, (finished-started)/experimenting.init.population))
