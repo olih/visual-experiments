@@ -297,8 +297,26 @@ class Experimenting:
         }
 
     def publishable_specimen(self, specimen)->DalmatianMedia:
-        stencil = DalmatianMedia.from_obj(specimen["stencil"])
-        return stencil
+        name = "stencil-{}".format(specimen["hid"])
+        stencil = specimen["stencil"].copy()
+        headers = DlmtHeaders()
+        headers.set_brush_page_ratio(self.init.brush_page_ratio)
+        headers.set_id_urn("olivierhuin/{}/{}".format(self.name, name))
+        headers.set_prefixes({"brushes": "https://olih.github.io/brush/"})
+        headers.set_text("license", "en", "Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)")
+        headers.set_text("title", "en", "Evolutionary {}".format(name))             
+        headers.set_text("attribution-name", "en", "Olivier Huin")
+        headers.set_text("brushes-attribution-name", "en", "Olivier Huin")
+        headers.set_url("license-url", "html", "en", "https://creativecommons.org/licenses/by-sa/4.0/legalcode")
+        headers.set_url("brushes-license-url", "html", "en", "https://creativecommons.org/licenses/by/4.0/legalcode")
+        headers.set_text("description", "en", specimen["summary"])             
+
+        stencil["headers"] = headers.to_string_list()
+        media = DalmatianMedia.from_obj(stencil)
+        if media.check_references() != []:
+            print(media.check_references())
+            raise Exception("Invalid format for stencil {}".format(specimen["id"]))
+        return media
 
     def create_better_mutant_specimen(self, refspecimen, attempts: int):
         specimen = self.mutation_specimen(refspecimen)
