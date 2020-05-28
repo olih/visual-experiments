@@ -95,7 +95,7 @@ class Experimenting:
             self.init = XpInitConf(self.content["mutations"]["init"])
             return self.content   
 
-    def deleteSpecimenSvg(self):
+    def delete_specimen_svg(self):
         oldSvgFiles = glob.glob('{}/eval-*.svg'.format(xpfs.get_directory(TypicalDir.EVALUATION)))
         for filePath in oldSvgFiles:
             try:
@@ -108,13 +108,13 @@ class Experimenting:
         with open('{}/{}.json'.format(xpfs.get_directory(TypicalDir.EVALUATION), self.name), 'w') as outfile:
                 json.dump(self.content, outfile, indent=2)
     
-    def incId(self):
+    def inc_id(self):
         counter = self.content["general"]["counter"]
         counter = counter + 1
         self.content["general"]["counter"] = counter
         return counter
     
-    def createSpecimen(self):
+    def create_specimen(self):
         # Create L-System
         product = ProductionGame(chainlength = randint(100, self.init.max_chain_length))
         product.set_constants("ABLPZ-<>[]").set_vars(self.init.vars)
@@ -165,7 +165,7 @@ class Experimenting:
             return None
         summary = "Stencil based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a visibility of {:.2%}, correlation of {} and a median range of {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation, medianpoint.to_float_string())
         return {    
-                "id": self.incId(),  
+                "id": self.inc_id(),  
                 "product": product_obj,
                 "angles": angles,
                 "magnitudes": magnitudes,
@@ -220,7 +220,7 @@ class Experimenting:
             return None
         summary = "Stencil based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a visibility of {:.2%}, correlation of {} and a median range of {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation, medianpoint.to_float_string())
         return {    
-                "id": self.incId(),  
+                "id": self.inc_id(),  
                 "product": product_obj,
                 "angles": angles,
                 "magnitudes": magnitudes,
@@ -229,10 +229,10 @@ class Experimenting:
                 "tags": ""
         }
 
-    def createBetterSpecimen(self, attempts: int):
-        specimen = self.createSpecimen()
+    def create_better_specimen(self, attempts: int):
+        specimen = self.create_specimen()
         for _ in range(attempts):
-            specimen = self.createSpecimen()
+            specimen = self.create_specimen()
             print(".", end="", flush=True)
             sleep(0.2) # otherwise overheating
             if specimen is None:
@@ -287,7 +287,7 @@ class Experimenting:
             return None
         summary = "Stencil based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a visibility of {:.2%}, correlation of {} and a median range of {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation, medianpoint.to_float_string())
         return {    
-                "id": self.incId(),  
+                "id": self.inc_id(),  
                 "product": product_obj,
                 "angles": angles,
                 "magnitudes": magnitudes,
@@ -308,7 +308,7 @@ class Experimenting:
             break
         return specimen 
 
-    def applyTags(self):
+    def apply_tags(self):
         specimens = self.content['specimens']
         idWithTags = xpfs.search_eval_file_id_tags(".svg")
         for specimen in specimens:
@@ -328,7 +328,7 @@ class Experimenting:
             
     def create_new_population(self):
         population = self.init.population
-        newspecimens = [ self.createBetterSpecimen(self.init.specimen_attempts) for _ in range(population) ]
+        newspecimens = [ self.create_better_specimen(self.init.specimen_attempts) for _ in range(population) ]
         validspecimens = [s for s in newspecimens if s is not None]
         self.content['specimens'] = self.content['specimens'] + validspecimens
 
@@ -389,7 +389,7 @@ class Experimenting:
             specimen["stencil"]["brushes"] = ["brush {} {}".format(brushid, dispenser.get_random_brush()) for brushid in self.init.brushids]
 
     def start(self):
-        self.applyTags()
+        self.apply_tags()
         if "yes" in args.crossover.lower():
             print("Attempting crossover")
             self.crossover_population()
@@ -403,9 +403,9 @@ class Experimenting:
             print("Creating new population")
             self.create_new_population()
 
-    def saveSvg(self):
+    def save_svg(self):
         started_svg = time()
-        self.deleteSpecimenSvg()
+        self.delete_specimen_svg()
         specimens = self.content['specimens']
         svg_count = 1
         for specimen in specimens:
@@ -422,8 +422,8 @@ class Experimenting:
         finished_svg = time()
         print("Saving to svg took {} seconds thus {} second per specimen".format(finished_svg-started_svg, (finished_svg-started_svg)/svg_count))
     
-    def saveEverything(self):
-        self.saveSvg()
+    def save_everything(self):
+        self.save_svg()
         self.save()
 
     def publish(self):
@@ -432,7 +432,7 @@ class Experimenting:
 experimenting = Experimenting(args.file)
 experimenting.load()
 experimenting.start()
-experimenting.saveEverything()
+experimenting.save_everything()
 os.system('say Ready')
 finished = time()
 print("Took {} seconds thus {} second per specimen".format(finished-started, (finished-started)/experimenting.init.population))
