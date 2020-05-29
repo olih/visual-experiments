@@ -33,3 +33,17 @@ class TestDlmtCollection(unittest.TestCase):
     def test_remove_keywords(self):
         newcollect = collec_alpha_delta.clone().remove_keywords("alpha", set(["moon"]))
         self.assertEqual(newcollect.get_item_by_name("alpha"), DlmtCollectionItem("alpha", set(["jupiter"])))
+
+    def test_add_keywords_for_all(self):
+        newcollect = collec_alpha_delta.clone().add_keywords_for_all(set(["moon"]))
+        self.assertTrue(newcollect.get_item_by_name("alpha").has_keyword("moon"))
+        self.assertTrue(newcollect.get_item_by_name("bravo").has_keyword("moon"))
+        self.assertTrue(newcollect.get_item_by_name("charlie").has_keyword("moon"))
+
+    def test_remove_keywords_for_all(self):
+        newcollect = collec_alpha_delta.clone().remove_keywords_for_all(set(["moon"]))
+        print(newcollect.to_obj())
+        self.assertFalse(newcollect.get_item_by_name("alpha").has_keyword("moon"))
+        self.assertFalse(newcollect.get_item_by_name("bravo").has_keyword("moon"))
+        self.assertFalse(newcollect.get_item_by_name("charlie").has_keyword("moon"))
+        self.assertFalse(newcollect.get_item_by_name("delta").has_keyword("moon"))

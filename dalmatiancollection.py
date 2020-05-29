@@ -37,6 +37,11 @@ class DlmtCollectionItem:
     def has_keywords(self):
         return len(self.keywords) > 0
 
+    def has_keyword(self, keyword: str)->bool:
+        return keyword in self.keywords
+
+    #TODO positive and neg match for keywords
+
     @classmethod
     def from_obj(cls, content):
         keywords = strip_string_array(content["keywords"])
@@ -98,6 +103,18 @@ class DlmtCollection:
         self.set_keywords(name, keywords.difference(rmkeywords))
         return self
 
+    def add_keywords_for_all(self, addkeywords: Set[str]):
+        for name in self.items_dict.keys():
+            self.add_keywords(name, addkeywords)
+        return self
+
+    def remove_keywords_for_all(self, rmkeywords: Set[str]):
+        for name in self.items_dict.keys():
+            self.remove_keywords(name, rmkeywords)
+        return self
+
+    #TODO positive and neg match for keywords
+    
     @classmethod
     def from_obj(cls, arrcontent):
         items = [DlmtCollectionItem.from_obj(i) for i in arrcontent]
