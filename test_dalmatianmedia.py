@@ -68,6 +68,8 @@ class TestDlmtHeaders(unittest.TestCase):
         headers.set_text("title", "fr", "Titre en francais")
         headers.set_url("license-url", "html", "en", "https://creativecommons.org/licenses/by-sa/4.0/legalcode")
         headers.set_url("brushes-license-url", "json", "en", "https://creativecommons.org/licenses/by/4.0/legalcode")
+        headers.set_id_urn("company/project/123")
+        headers.set_copyright_year(2020)
         self.assertEqual(DlmtHeaders.from_string_list(headers.to_string_list()), headers)
 
 class TestSvgRenderingConfig(unittest.TestCase):

@@ -319,9 +319,19 @@ class DlmtHeaders:
         self.require_sections  = {i: "0.5" for i in ["header", "views", "tag-descriptions", "brushes", "brushstrokes"]}
         self.url_refs = { }
         self.text_refs = { }
+        self.copyright_year = 3000
+        self.is_family_friendly = True
 
     def set_id_urn(self, value: str):
         self.id_urn = value
+        return self
+
+    def set_copyright_year(self, year: int):
+        self.copyright_year = year
+        return self
+
+    def set_is_family_friendly(self, value: bool):
+        self.is_family_friendly = value
         return self
 
     def set_page_coordinate_system(self, value: DlmtCoordinateSystem):
@@ -386,18 +396,22 @@ class DlmtHeaders:
                 result.set_brush_page_ratio(Fraction(value))
             elif key == "id-urn":
                 result.set_id_urn(value)
+            elif key == "copyright-year":
+                result.set_copyright_year(int(value))
+            elif key == "is-family-friendly":
+                result.set_is_family_friendly(True if value.lower() == "yes" else False)
             elif key == "prefixes":
                 result.set_prefixes(parse_dlmt_dict(value))
             elif key == "require-sections":
                 result.set_require_sections(parse_dlmt_dict(value))
             elif key.count(" ") == 1:
                 name, lang = key.split()
-                if name in ["license", "attribution-name", "brushes-license", "brushes-attribution-name", "title", "description"]:
+                if name in ["license", "attribution-name", "author", "brushes-license", "brushes-attribution-name", "title", "description", "alternative-title"]:
                     result.set_text(name, lang, value)
             elif key.count(" ") == 2:
                 name, media_type, lang = key.split()
                 supported_media = ["html", "json", "rdf", "markdown", "nt", "ttl", "json-ld", "csv"]
-                if name in ["license-url", "attribution-url", "brushes-license-url", "brushes-attribution-url", "metadata-url", "homepage-url"] and media_type in supported_media:
+                if name in ["license-url", "attribution-url", "author-url", "brushes-license-url", "brushes-attribution-url", "metadata-url", "homepage-url", "repository-url", "thumbnail-url"] and media_type in supported_media:
                     result.set_url(name, media_type, lang, value)
             else:
                 raise Exception("Header key [{}] is not supported".format(key))
@@ -415,6 +429,8 @@ class DlmtHeaders:
             results.append("{} {}: {}".format(keydata[0], keydata[1], value))
         for keydata, value in self.url_refs.items():
             results.append("{} {} {}: {}".format(keydata[0], keydata[1], keydata[2], value))
+        results.append("copyright-year: {}".format(self.copyright_year))
+        results.append("is-family-friendly: {}".format("yes" if self.is_family_friendly else "no"))
         return results
 
     def to_string(self)->str:
@@ -427,8 +443,8 @@ class DlmtHeaders:
         return self.to_string()
     
     def __eq__(self, other):
-        thisone = (self.id_urn, self.brush_page_ratio, self.page_coordinate_system, self.brush_coordinate_system, self.prefixes, self.require_sections, self.url_refs, self.text_refs)
-        otherone = (other.id_urn, other.brush_page_ratio, other.page_coordinate_system, other.brush_coordinate_system, other.prefixes, other.require_sections, other.url_refs, other.text_refs)
+        thisone = (self.id_urn, self.copyright_year, self.brush_page_ratio, self.page_coordinate_system, self.brush_coordinate_system, self.prefixes, self.require_sections, self.url_refs, self.text_refs, self.is_family_friendly)
+        otherone = (other.id_urn, other.copyright_year, other.brush_page_ratio, other.page_coordinate_system, other.brush_coordinate_system, other.prefixes, other.require_sections, other.url_refs, other.text_refs, other.is_family_friendly)
         return thisone == otherone
 
     def get_short_prefixes(self)->Set[str]:
@@ -445,7 +461,7 @@ class DlmtHeaders:
         ET.SubElement(ccWork, 'dc:source', attrib = { }).text = "source"
         ET.SubElement(ccWork, 'dc:language', attrib = { }).text = lang
         ET.SubElement(ccWork, 'dc:identifier', attrib = { }).text = self.id_urn
-        ET.SubElement(ccWork, 'dc:date', attrib = { }).text = "2020"
+        ET.SubElement(ccWork, 'dc:date', attrib = { }).text = str(self.copyright_year)
         dcCreator = ET.SubElement(ccWork, 'dc:creator', attrib = { })
         ccAgent = ET.SubElement(dcCreator, 'cc:Agent', attrib = { })
         ET.SubElement(ccAgent, 'dc:title', attrib = { }).text = self.get_text("creator", lang, "")
