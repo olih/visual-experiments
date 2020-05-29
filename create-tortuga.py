@@ -141,7 +141,7 @@ class Experimenting:
         # Create stencil aka DalmatianMedia
         stencil = DalmatianMedia(DlmtHeaders().set_brush_page_ratio(self.init.brush_page_ratio))
         stencil.add_view_string("view i:1 lang en xy 0 0 width 1 height 1 flags o tags all but [ ] -> everything")
-        stencil.add_tag_description_string("tag i:1 lang en same-as [] -> default tag")
+        stencil.add_tag_description_string("tag i:1 lang en same-as [] -> default")
         for brush in self.init.brushes:
             stencil.add_brush_string(brush)
         stencil.set_brushstrokes(brushstokes)
@@ -163,7 +163,7 @@ class Experimenting:
         if medianpoint.y < self.init.min_median_range.y:
             print("Y", end="")
             return None
-        summary = "Stencil based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a visibility of {:.2%}, correlation of {} and a median range of {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation, medianpoint.to_float_string())
+        summary = "Stencil manually selected from carefully crafted generations using a Lindenmayer system approach based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a visibility of {:.2%}, correlation of {} and a median range of {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation, medianpoint.to_float_string())
         return {    
                 "id": self.inc_id(),  
                 "product": product_obj,
@@ -196,7 +196,7 @@ class Experimenting:
         # Create stencil aka DalmatianMedia
         stencil = DalmatianMedia(DlmtHeaders().set_brush_page_ratio(self.init.brush_page_ratio))
         stencil.add_view_string("view i:1 lang en xy 0 0 width 1 height 1 flags o tags all but [ ] -> everything")
-        stencil.add_tag_description_string("tag i:1 lang en same-as [] -> default tag")
+        stencil.add_tag_description_string("tag i:1 lang en same-as [] -> default")
         for brush in self.init.brushes:
             stencil.add_brush_string(brush)
         stencil.set_brushstrokes(brushstokes)
@@ -218,7 +218,7 @@ class Experimenting:
         if medianpoint.y < self.init.min_median_range.y:
             print("Y", end="")
             return None
-        summary = "Stencil based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a visibility of {:.2%}, correlation of {} and a median range of {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation, medianpoint.to_float_string())
+        summary = "Stencil manually selected from carefully crafted generations using a Lindenmayer system approach based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a visibility of {:.2%}, correlation of {} and a median range of {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation, medianpoint.to_float_string())
         return {    
                 "id": self.inc_id(),  
                 "product": product_obj,
@@ -263,7 +263,7 @@ class Experimenting:
         # Create stencil aka DalmatianMedia
         stencil = DalmatianMedia(DlmtHeaders().set_brush_page_ratio(self.init.brush_page_ratio))
         stencil.add_view_string("view i:1 lang en xy 0 0 width 1 height 1 flags o tags all but [ ] -> everything")
-        stencil.add_tag_description_string("tag i:1 lang en same-as [] -> default tag")
+        stencil.add_tag_description_string("tag i:1 lang en same-as [] -> default")
         for brush in self.init.brushes:
             stencil.add_brush_string(brush)
         stencil.set_brushstrokes(brushstokes)
@@ -285,7 +285,7 @@ class Experimenting:
         if medianpoint.y < self.init.min_median_range.y:
             print("Y", end="")
             return None
-        summary = "Stencil based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a visibility of {:.2%}, correlation of {} and a median range of {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation, medianpoint.to_float_string())
+        summary = "Stencil manually selected from carefully crafted generations using a Lindenmayer system approach based on angles [ {} ], magnitudes [ {} ] and the rules {} starting with {} resulting in {} brushstokes with a visibility of {:.2%}, correlation of {} and a median range of {}".format(angles, magnitudes, ruleInfo , product_obj["start"], len(brushstokes), float(fitness), correlation, medianpoint.to_float_string())
         return {    
                 "id": self.inc_id(),  
                 "product": product_obj,
@@ -302,8 +302,8 @@ class Experimenting:
         headers = DlmtHeaders()
         headers.set_brush_page_ratio(self.init.brush_page_ratio)
         headers.set_id_urn("olivierhuin/{}/{}".format(self.name, name))
-        headers.set_prefixes({"brushes": "https://olih.github.io/brush/"})
-        headers.set_text("title", "en", "Evolutionary {}".format(name))             
+        headers.set_prefixes({"brushes": "https://olih.github.io/brush/", "stencils": "https://olih.github.io/stencil/"})
+        headers.set_text("title", "en", "Evolved {}".format(name))             
         headers.set_text("license", "en", "Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)")
         headers.set_text("attribution-name", "en", "Olivier Huin")
         headers.set_text("brushes-attribution-name", "en", "Olivier Huin")
@@ -433,8 +433,6 @@ class Experimenting:
             if not "preserve" in specimen["tags"]:
                 continue
             publish_count = publish_count + 1
-            if publish_count >= 5:
-                break
             stencil = self.publishable_specimen(specimen)
             with open('{}/stencil-{}.dlmt'.format(xpfs.get_directory(TypicalDir.PUBLISHING), specimen["hid"]), 'w') as outfile:
                 outfile.write(stencil.to_string())

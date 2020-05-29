@@ -317,6 +317,7 @@ class DlmtHeaders:
         self.brush_coordinate_system = DlmtBrushCoordinateSystem.from_string("system cartesian right-dir + up-dir - origin-x 1/2 origin-y 1/2")
         self.prefixes = { "github": "https://github.com/" }
         self.require_sections  = {i: "0.5" for i in ["header", "views", "tag-descriptions", "brushes", "brushstrokes"]}
+        self.has_parts = []
         self.url_refs = { }
         self.text_refs = { }
         self.copyright_year = 3000
@@ -362,7 +363,11 @@ class DlmtHeaders:
     def set_prefixes(self, prefixes: Dict[str, str]):
         self.prefixes = prefixes
         return self
-    
+
+    def set_has_parts(self, has_parts: List[str]):
+        self.has_parts = has_parts
+        return self
+
     def set_require_sections(self, sections: Dict[str, str]):
         self.require_sections = sections
         return self
@@ -404,6 +409,8 @@ class DlmtHeaders:
                 result.set_prefixes(parse_dlmt_dict(value))
             elif key == "require-sections":
                 result.set_require_sections(parse_dlmt_dict(value))
+            elif key == "has-parts":
+                result.set_has_parts(parse_dlmt_array(value))
             elif key.count(" ") == 1:
                 name, lang = key.split()
                 if name in ["license", "attribution-name", "author", "brushes-license", "brushes-attribution-name", "title", "description", "alternative-title"]:
@@ -431,6 +438,7 @@ class DlmtHeaders:
             results.append("{} {} {}: {}".format(keydata[0], keydata[1], keydata[2], value))
         results.append("copyright-year: {}".format(self.copyright_year))
         results.append("is-family-friendly: {}".format("yes" if self.is_family_friendly else "no"))
+        results.append("has-parts: {}".format(to_dlmt_array(self.has_parts)))
         return results
 
     def to_string(self)->str:
@@ -443,8 +451,8 @@ class DlmtHeaders:
         return self.to_string()
     
     def __eq__(self, other):
-        thisone = (self.id_urn, self.copyright_year, self.brush_page_ratio, self.page_coordinate_system, self.brush_coordinate_system, self.prefixes, self.require_sections, self.url_refs, self.text_refs, self.is_family_friendly)
-        otherone = (other.id_urn, other.copyright_year, other.brush_page_ratio, other.page_coordinate_system, other.brush_coordinate_system, other.prefixes, other.require_sections, other.url_refs, other.text_refs, other.is_family_friendly)
+        thisone = (self.id_urn, self.copyright_year, self.brush_page_ratio, self.page_coordinate_system, self.brush_coordinate_system, self.prefixes, self.require_sections, self.url_refs, self.text_refs, self.is_family_friendly, self.has_parts)
+        otherone = (other.id_urn, other.copyright_year, other.brush_page_ratio, other.page_coordinate_system, other.brush_coordinate_system, other.prefixes, other.require_sections, other.url_refs, other.text_refs, other.is_family_friendly, other.has_parts)
         return thisone == otherone
 
     def get_short_prefixes(self)->Set[str]:
