@@ -92,6 +92,32 @@ class V2d:
     def is_inside_rect(self, xy, width: Fraction, height: Fraction):
         return self.x >= xy.x and self.x <= xy.x + width and self.y >= xy.y and self.y <= xy.y + height
 
+class V2dRect:
+    def __init__(self, xy: V2d, width: Fraction, height: Fraction):
+        self.xy = xy
+        self.width = width
+        self.height = height
+    
+    def to_string(self):
+        return "xy {} width {} height {}".format(self.xy, self.width, self.height)
+
+    def __str__(self):
+        return self.to_string()
+    
+    def __repr__(self):
+        return self.to_string()
+
+    def __eq__(self, other):
+        thisone = (self.xy, self.width, self.height)
+        otherone = (other.xy, other.width, other.height)
+        return thisone == otherone
+
+    @classmethod
+    def from_opposite_points(cls, leftbottom: V2d, righttop):
+        width = righttop.x - leftbottom.x
+        height = righttop.y - leftbottom.y
+        return cls(leftbottom, width, height)
+
 class V2dList:
     
     def __init__(self, values: List[V2d] ):
@@ -207,6 +233,11 @@ class V2dList:
         width = xx[-idx] - xx[idx]
         height = yy[-idx] - yy[idx]
         return V2d(width, height)
+
+    def get_containing_rect(self)-> V2dRect:
+        xx: List[Fraction] = sorted([v.x for v in self.values])
+        yy: List[Fraction] = sorted([v.y for v in self.values])
+        return V2dRect.from_opposite_points(V2d(xx[0], yy[0]), V2d(xx[-1], yy[-1]))
 
 
 class FractionList:

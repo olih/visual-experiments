@@ -112,6 +112,9 @@ class TestV2dList(unittest.TestCase):
         self.assertEqual(listCDE.reverse(),V2dList([ptE, ptD, ptC]))
         self.assertEqual(listCDE.mirror(), V2dList([ptC, ptD, ptE, ptE, ptD, ptC]))
 
+    def test_get_containing_rect(self):
+        self.assertEqual(listCDE.get_containing_rect().to_string(), "xy -1/13 -1/9 width 20/91 height 41/45" )
+
 class TestVSegment(unittest.TestCase):
 
     def test_to_dalmatian_string(self):

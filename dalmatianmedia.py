@@ -679,6 +679,9 @@ class DalmatianMedia:
     def get_undeclared_tag_ids(self)->Set[str]:
         return self.get_used_tag_ids().difference(self.get_tag_ids())
 
+    def get_brushstokes_points(self)-> V2dList:
+       return V2dList([bs.xy for bs in self.brushstrokes]) 
+
     def check_references(self):
         missing_prefixes = self.get_undeclared_short_prefixes()
         missing_brushids = self.get_undeclared_brush_ids()
