@@ -413,12 +413,12 @@ class DlmtHeaders:
                 result.set_has_parts(parse_dlmt_array(value))
             elif key.count(" ") == 1:
                 name, lang = key.split()
-                if name in ["license", "attribution-name", "author", "brushes-license", "brushes-attribution-name", "title", "description", "alternative-title"]:
+                if name in ["license", "attribution-name", "author", "brushes-license", "brushes-attribution-name", "name" ,"title", "description", "alternative-title"]:
                     result.set_text(name, lang, value)
             elif key.count(" ") == 2:
                 name, media_type, lang = key.split()
-                supported_media = ["html", "json", "rdf", "markdown", "nt", "ttl", "json-ld", "csv"]
-                if name in ["license-url", "attribution-url", "author-url", "brushes-license-url", "brushes-attribution-url", "metadata-url", "homepage-url", "repository-url", "thumbnail-url"] and media_type in supported_media:
+                supported_media = ["html", "json", "rdf", "markdown", "nt", "ttl", "json-ld", "csv", "dlmt"]
+                if name in ["license-url", "attribution-url", "author-url", "brushes-license-url", "brushes-attribution-url", "metadata-url", "homepage-url", "repository-url", "thumbnail-url", "content-url"] and media_type in supported_media:
                     result.set_url(name, media_type, lang, value)
             else:
                 raise Exception("Header key [{}] is not supported".format(key))
