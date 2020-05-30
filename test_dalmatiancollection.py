@@ -9,10 +9,10 @@ fox = DlmtCollectionItem("fox", set(["mercury"]))
 golf = DlmtCollectionItem("golf", set(["pluto"]))
 hotel = DlmtCollectionItem("hotel", set(["pluto"]))
 
-collec_alpha_delta = DlmtCollection([alpha, bravo, charlie, delta])
-collec_fox_golf = DlmtCollection([fox, golf])
-collec_golf_hotel = DlmtCollection([golf, hotel])
-collec_all = DlmtCollection([alpha, bravo, charlie, delta, golf, hotel])
+collec_alpha_delta = DlmtCollection().set_items([alpha, bravo, charlie, delta])
+collec_fox_golf = DlmtCollection().set_items([fox, golf])
+collec_golf_hotel = DlmtCollection().set_items([golf, hotel])
+collec_all = DlmtCollection().set_items([alpha, bravo, charlie, delta, golf, hotel])
 
 class TestDlmtCollection(unittest.TestCase):
 
@@ -23,7 +23,7 @@ class TestDlmtCollection(unittest.TestCase):
     def test_remove(self):
        actual = collec_alpha_delta.clone().remove_item_by_name("bravo")
        self.assertEqual(len(actual), 3)
-       self.assertEqual(actual, DlmtCollection([alpha, charlie, delta]))
+       self.assertEqual(actual, DlmtCollection().set_items([alpha, charlie, delta]))
     
     def test_convert(self):
         self.assertEqual(DlmtCollection.from_obj(collec_alpha_delta.to_obj()), collec_alpha_delta)

@@ -1,6 +1,7 @@
 from typing import List, Tuple, Dict, Set
 import json
 import glob
+import os
 
 def strip_string_array(rawlines: str)->List[str]:
     return [line.strip() for line in rawlines.split(",") if line.strip() != ""]
@@ -54,12 +55,20 @@ class DlmtCollectionItem:
     def to_obj(self):
         return { "name": self.name, "keywords": join_set(self.keywords)}
 
+    @classmethod
+    def from_shell_string(cls, line: str):
+        filename, tagCSV =  line.split("\t")
+        name, _ = os.path.basename(filename).split(".", 1)
+        keywords = set(strip_string_array(tagCSV))
+        return cls(name, keywords)
+
+
 noItem = DlmtCollectionItem("", [])
 
 class DlmtCollection:
-    def __init__(self, items: List[DlmtCollectionItem]):
-        self.items = [i.clone() for i in items]
-        self.items_dict = {i.name:i for i in self.items}
+    def __init__(self):
+        self.items = []
+        self.items_dict = {}
     
     def to_string(self):
         return ";".join(sorted([item.to_string() for item in self.items]))
@@ -81,10 +90,10 @@ class DlmtCollection:
 
     def __add__(self, b):
         newitems = self.items + b.items
-        return DlmtCollection(newitems)
+        return DlmtCollection().set_items(newitems)
 
     def clone(self):
-        return DlmtCollection(self.items)
+        return DlmtCollection().set_items(self.items)
 
     def add_item(self, item: DlmtCollectionItem):
         self.items.append(item)
@@ -151,13 +160,12 @@ class DlmtCollection:
     def split(self, keywords: Set[str])->Tuple:
         a = self.find_matching_items(keywords)
         b = self.find_not_matching_items(keywords)
-        return (DlmtCollection(a), DlmtCollection(b))
+        return (DlmtCollection().set_items(a), DlmtCollection().set_items(b))
 
     @classmethod
     def from_obj(cls, arrcontent):
         items = [DlmtCollectionItem.from_obj(i) for i in arrcontent]
-        return cls(items)
+        return cls().set_items(items)
 
     def to_obj(self):
         return [ i.to_obj() for i in self.items ]
-
