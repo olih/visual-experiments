@@ -11,6 +11,8 @@ hotel = DlmtCollectionItem("hotel", set(["pluto"]))
 
 collec_alpha_delta = DlmtCollection([alpha, bravo, charlie, delta])
 collec_fox_golf = DlmtCollection([fox, golf])
+collec_golf_hotel = DlmtCollection([golf, hotel])
+collec_all = DlmtCollection([alpha, bravo, charlie, delta, golf, hotel])
 
 class TestDlmtCollection(unittest.TestCase):
 
@@ -57,3 +59,7 @@ class TestDlmtCollection(unittest.TestCase):
         self.assertEqual(collec_alpha_delta.find_not_matching_names(set(["moon"])), ["bravo", "delta"] )
         self.assertEqual(collec_alpha_delta.find_matching_names(set(["saturn"])), ["delta"])
         self.assertEqual(collec_alpha_delta.find_matching_names(set(["other"])), [] )
+
+    def test_merge_and_split(self):
+        self.assertEqual(collec_alpha_delta+collec_golf_hotel, collec_all)
+        self.assertEqual(collec_all.split(set(["pluto"])), (collec_golf_hotel, collec_alpha_delta))

@@ -8,13 +8,16 @@ def strip_string_array(rawlines: str)->List[str]:
 def join_set(values: Set[str])->str:
     return ",".join(list(values))
 
+def to_dlmt_array(items: Set[str], sep=",")->str:
+    return "[ {} ]".format(sep.join(list(items)))
+
 class DlmtCollectionItem:
     def __init__(self, name: str, keywords: Set[str]):
         self.name = name
         self.keywords = keywords
    
     def to_string(self):
-        return "{} keywords {}".format(self.name, self.keywords)
+        return "name {} keywords {}".format(self.name, to_dlmt_array(self.keywords))
 
     def __str__(self):
         return self.to_string()
@@ -57,9 +60,18 @@ class DlmtCollection:
     def __init__(self, items: List[DlmtCollectionItem]):
         self.items = [i.clone() for i in items]
         self.items_dict = {i.name:i for i in self.items}
+    
+    def to_string(self):
+        return ";".join(sorted([item.to_string() for item in self.items]))
+
+    def __str__(self):
+        return self.to_string()
+    
+    def __repr__(self):
+        return self.to_string()
 
     def __eq__(self, other):
-        return self.items == other.items and self.items_dict == other.items_dict
+        return self.to_string() == other.to_string()
     
     def length(self):
         return len(self.items)
@@ -135,6 +147,11 @@ class DlmtCollection:
 
     def find_not_matching_names(self, keywords: Set[str])->List[DlmtCollectionItem]:
         return [ item.name for item in self.find_not_matching_items(keywords)]
+
+    def split(self, keywords: Set[str])->Tuple:
+        a = self.find_matching_items(keywords)
+        b = self.find_not_matching_items(keywords)
+        return (DlmtCollection(a), DlmtCollection(b))
 
     @classmethod
     def from_obj(cls, arrcontent):
