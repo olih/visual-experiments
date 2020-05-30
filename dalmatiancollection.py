@@ -40,7 +40,8 @@ class DlmtCollectionItem:
     def has_keyword(self, keyword: str)->bool:
         return keyword in self.keywords
 
-    #TODO positive and neg match for keywords
+    def match_keywords(self, keywords: Set[str]):
+        return keywords.issubset(self.keywords)
 
     @classmethod
     def from_obj(cls, content):
@@ -57,11 +58,18 @@ class DlmtCollection:
         self.items = [i.clone() for i in items]
         self.items_dict = {i.name:i for i in self.items}
 
-    def __len__(self):
-        return len(self.items)
-
     def __eq__(self, other):
         return self.items == other.items and self.items_dict == other.items_dict
+    
+    def length(self):
+        return len(self.items)
+    
+    def __len__(self):
+        return self.length()
+
+    def __add__(self, b):
+        newitems = self.items + b.items
+        return DlmtCollection(newitems)
 
     def clone(self):
         return DlmtCollection(self.items)
@@ -116,7 +124,17 @@ class DlmtCollection:
             self.remove_keywords(item.name, rmkeywords)
         return self
 
-    #TODO positive and neg match for keywords
+    def find_matching_items(self, keywords: Set[str])->List[DlmtCollectionItem]:
+        return [ item for item in self.items if item.match_keywords(keywords)]
+
+    def find_not_matching_items(self, keywords: Set[str])->List[DlmtCollectionItem]:
+        return [ item for item in self.items if not item.match_keywords(keywords)]
+    
+    def find_matching_names(self, keywords: Set[str])->List[DlmtCollectionItem]:
+        return [ item.name for item in self.find_matching_items(keywords)]
+
+    def find_not_matching_names(self, keywords: Set[str])->List[DlmtCollectionItem]:
+        return [ item.name for item in self.find_not_matching_items(keywords)]
 
     @classmethod
     def from_obj(cls, arrcontent):

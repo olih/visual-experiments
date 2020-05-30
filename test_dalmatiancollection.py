@@ -51,3 +51,9 @@ class TestDlmtCollection(unittest.TestCase):
         self.assertFalse(newcollect.get_item_by_name("bravo").has_keyword("moon"))
         self.assertFalse(newcollect.get_item_by_name("charlie").has_keyword("moon"))
         self.assertFalse(newcollect.get_item_by_name("delta").has_keyword("moon"))
+
+    def test_find_matching(self):
+        self.assertEqual(collec_alpha_delta.find_matching_names(set(["moon"])), ["alpha", "charlie"] )
+        self.assertEqual(collec_alpha_delta.find_not_matching_names(set(["moon"])), ["bravo", "delta"] )
+        self.assertEqual(collec_alpha_delta.find_matching_names(set(["saturn"])), ["delta"])
+        self.assertEqual(collec_alpha_delta.find_matching_names(set(["other"])), [] )
