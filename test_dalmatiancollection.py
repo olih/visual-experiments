@@ -63,3 +63,11 @@ class TestDlmtCollection(unittest.TestCase):
     def test_merge_and_split(self):
         self.assertEqual(collec_alpha_delta+collec_golf_hotel, collec_all)
         self.assertEqual(collec_all.split(set(["pluto"])), (collec_golf_hotel, collec_alpha_delta))
+    
+    def test_merge_from_shell_string_list(self):
+        newcollect = collec_alpha_delta.clone().merge_from_shell_string_list(["charlie.dlmt\tmars"])
+        self.assertEqual(newcollect.get_item_by_name("charlie").keywords, set(["mars", "moon"]))
+ 
+    def test_replace_from_shell_string_list(self):
+        newcollect = collec_alpha_delta.clone().replace_from_shell_string_list(["charlie.dlmt\tmars"])
+        self.assertEqual(newcollect.get_item_by_name("charlie").keywords, set(["mars"]))

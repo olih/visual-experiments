@@ -47,6 +47,13 @@ class DlmtCollectionItem:
     def match_keywords(self, keywords: Set[str]):
         return keywords.issubset(self.keywords)
 
+    def merge(self, other):
+        if self.name != other.name:
+            raise Exception("Cannot merge distinct names {} and {}".format(self.name, other.name))
+        keywords = self.keywords.union(other.keywords)
+        self.keywords = keywords
+        return self
+
     @classmethod
     def from_obj(cls, content):
         keywords = strip_string_array(content["keywords"])
@@ -119,6 +126,13 @@ class DlmtCollection:
         self.add_item(item.clone())
         return self
 
+    def merge_item(self, item: DlmtCollectionItem):
+        if not item.name in self.items_dict:
+            self.set_item(item)
+        else:
+            self.set_item(self.items_dict[item.name].merge(item))
+        return self
+
     def set_keywords(self, name: str,  keywords: Set[str]):
        return self.set_item(DlmtCollectionItem(name, keywords))
 
@@ -169,3 +183,14 @@ class DlmtCollection:
 
     def to_obj(self):
         return [ i.to_obj() for i in self.items ]
+
+    def merge_from_shell_string_list(self, lines: List[str]):
+        for line in lines:
+            self.merge_item(DlmtCollectionItem.from_shell_string(line))
+        return self
+
+    def replace_from_shell_string_list(self, lines: List[str]):
+        for line in lines:
+            self.set_item(DlmtCollectionItem.from_shell_string(line))
+        return self
+    
