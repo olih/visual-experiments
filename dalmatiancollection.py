@@ -99,22 +99,25 @@ class DlmtCollection:
         return self
 
     def remove_keywords(self, name: str, rmkeywords: Set[str]):
-        keywords = self.get_item_by_name(name).keywords
-        self.set_keywords(name, keywords.difference(rmkeywords))
+        keywords = self.get_item_by_name(name).keywords.copy()
+        for kw in rmkeywords:
+            if kw in keywords:
+                keywords.remove(kw)
+        self.set_keywords(name, keywords)
         return self
 
     def add_keywords_for_all(self, addkeywords: Set[str]):
-        for name in self.items_dict.keys():
-            self.add_keywords(name, addkeywords)
+        for item in self.items:
+            self.add_keywords(item.name, addkeywords)
         return self
 
     def remove_keywords_for_all(self, rmkeywords: Set[str]):
-        for name in self.items_dict.keys():
-            self.remove_keywords(name, rmkeywords)
+        for item in self.items:
+            self.remove_keywords(item.name, rmkeywords)
         return self
 
     #TODO positive and neg match for keywords
-    
+
     @classmethod
     def from_obj(cls, arrcontent):
         items = [DlmtCollectionItem.from_obj(i) for i in arrcontent]
