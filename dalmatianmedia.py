@@ -698,6 +698,8 @@ class DalmatianMedia:
     def create_page_pixel_coordinate(self, viewid: str, view_pixel_width: int)->SvgRenderingConfig:
         return SvgRenderingConfig(self.headers, self.views_dict[viewid], view_pixel_width)
 
+    def create_page_pixel_coordinate_with_view(self, view_pixel_width: int, view: DlmtView)->SvgRenderingConfig:
+        return SvgRenderingConfig(self.headers, view, view_pixel_width)
 
     def to_page_brushstroke_list(self)-> List[PageBrushstroke]:
         return [ PageBrushstroke(self.get_brush_by_id(bs.brushid).vpath.rotate(bs.angle).scale(self.headers.brush_page_ratio).scale(bs.scale).translate(bs.xy), set(bs.tags)) for bs in self.brushstrokes]
