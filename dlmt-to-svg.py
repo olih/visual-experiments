@@ -48,6 +48,7 @@ def write_media(media: DalmatianMedia):
 for filename in dlmtfiles:
     media = read_dlmt_file(filename)
     write_media(media)
+    print(".", end="", flush=True)
 
 finished = time()
 print("Took {} seconds thus {} second per specimen".format(finished-started, (finished-started)/len(dlmtfiles)))
