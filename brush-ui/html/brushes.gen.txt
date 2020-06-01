@@ -1,0 +1,13 @@
+Section i:1 section:settings
+Range range:mutation 1
+Range range:crossover 3
+Range range:population 2
+--------
+Section i:1 section:monochrome
+BrushStroke i:1 P 0/1 0/1 S 1/20 R 0/12
+
+--------
+Section i:1 section:brushes
+Brush i:1 _ _ [ M -1/3 1/3, l 2/3 0/1, l 0/1 2/3, l -2/3 0/1 ]
+Brush i:2 _ _ [ M 1/3 1/3, l 1/3 0/1, l 0/1 1/3 ]
+Brush i:3 _ _ [ c 0/600 -26/600 -21/600 -48/600 -48/600 -48/600 ]
