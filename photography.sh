@@ -5,7 +5,7 @@ PHOTO_DIR=`jq -r '.folders.directory' "$OLI_LOCAL_DIR/photography/conf.json"`
 echo $PHOTO_DIR
 if [[ ! -d "$PHOTO_DIR" ]]
 then
-    echo "$DIRECTORY with images does exists on the filesystem."
+    echo "$PHOTO_DIR with images does not exists on the filesystem."
     exit 1
 fi
 
